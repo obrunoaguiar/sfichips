@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Desempenho</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .card h3 {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .card .subvalue {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .card.highlight {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+        }
+        
+        .card.highlight .value,
+        .card.highlight .subvalue {
+            color: white;
+        }
+        
+        .card.matrix {
+            border-top: 5px solid #2ecc71;
+        }
+        
+        .card.dealers {
+            border-top: 5px solid #e74c3c;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-box h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background-color: #f5f7f9;
+        }
+        
+        .positive {
+            color: #27ae60;
+        }
+        
+        .negative {
+            color: #e74c3c;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            margin: 30px 0 20px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .matrix-bg {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        .dealers-bg {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .comparison-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .comparison-box.matrix {
+            border-top: 5px solid #2ecc71;
+        }
+        
+        .comparison-box.dealers {
+            border-top: 5px solid #e74c3c;
+        }
+        
+        .comparison-box h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .comparison-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .comparison-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .comparison-item h3 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .comparison-item .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 1200px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-data {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Dashboard de Desempenho de Marketing</h1>
+            <p>Análise de leads, CPL e desempenho por canal</p>
+        </header>
+        
+        <div class="summary-cards">
+            <div class="card highlight">
+                <h3>TOTAL DE LEADS</h3>
+                <div class="value">703</div>
+                <div class="subvalue">Período: 01/09/2025 - 11/09/2025</div>
+            </div>
+            <div class="card">
+                <h3>CUSTO POR LEAD (CPL)</h3>
+                <div class="value">R$ 5,09</div>
+                <div class="subvalue">Média ponderada</div>
+            </div>
+            <div class="card">
+                <h3>ORÇAMENTO TOTAL</h3>
+                <div class="value">R$ 3.579,26</div>
+                <div class="subvalue">Investimento total</div>
+            </div>
+            <div class="card">
+                <h3>TAXA DE CONVERSÃO</h3>
+                <div class="value">56,61%</div>
+                <div class="subvalue">Leads para clientes</div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Comparativo Matriz vs Dealers</h2>
+        <div class="comparison-container">
+            <div class="comparison-box matrix">
+                <h2>MATRIZ</h2>
+                <div class="comparison-data">
+                    <div class="comparison-item matrix-bg">
+                        <h3>Total de Leads</h3>
+                        <div class="value">284</div>
+                        <div class="subvalue">40,4% do total</div>
+                    </div>
+                    <div class="comparison-item matrix-bg">
+                        <h3>Orçamento</h3>
+                        <div class="value">R$ 1.378,34</div>
+                        <div class="subvalue">38,5% do total</div>
+                    </div>
+                    <div class="comparison-item matrix-bg">
+                        <h3>Aspirados</h3>
+                        <div class="value">179</div>
+                        <div class="subvalue">63,0% dos leads</div>
+                    </div>
+                    <div class="comparison-item matrix-bg">
+                        <h3>Turbo</h3>
+                        <div class="value">105</div>
+                        <div class="subvalue">37,0% dos leads</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-box dealers">
+                <h2>DEALERS</h2>
+                <div class="comparison-data">
+                    <div class="comparison-item dealers-bg">
+                        <h3>Total de Leads</h3>
+                        <div class="value">398</div>
+                        <div class="subvalue">56,6% do total</div>
+                    </div>
+                    <div class="comparison-item dealers-bg">
+                        <h3>Orçamento</h3>
+                        <div class="value">R$ 1.926,62</div>
+                        <div class="subvalue">53,8% do total</div>
+                    </div>
+                    <div class="comparison-item dealers-bg">
+                        <h3>Aspirados</h3>
+                        <div class="value">259</div>
+                        <div class="subvalue">65,1% dos leads</div>
+                    </div>
+                    <div class="comparison-item dealers-bg">
+                        <h3>Turbo</h3>
+                        <div class="value">139</div>
+                        <div class="subvalue">34,9% dos leads</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Desempenho por Data</h2>
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Total Leads</th>
+                        <th>CPL</th>
+                        <th>Orçamento Total</th>
+                        <th colspan="3">Matriz</th>
+                        <th colspan="3">Dealers</th>
+                        <th>Taxa Conversão</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Aspirado</th>
+                        <th>Turbo</th>
+                        <th>Total</th>
+                        <th>Aspirado</th>
+                        <th>Turbo</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>01/09/2025</td>
+                        <td>48</td>
+                        <td>R$ 6,58</td>
+                        <td>R$ 315,67</td>
+                        <td>14</td>
+                        <td>6</td>
+                        <td>20</td>
+                        <td>18</td>
+                        <td>6</td>
+                        <td>24</td>
+                        <td class="positive">41,67%</td>
+                    </tr>
+                    <tr>
+                        <td>02/09/2025</td>
+                        <td>91</td>
+                        <td>R$ 3,61</td>
+                        <td>R$ 328,66</td>
+                        <td>23</td>
+                        <td>6</td>
+                        <td>29</td>
+                        <td>38</td>
+                        <td>20</td>
+                        <td>58</td>
+                        <td class="positive">63,74%</td>
+                    </tr>
+                    <tr>
+                        <td>03/09/2025</td>
+                        <td>78</td>
+                        <td>R$ 4,31</td>
+                        <td>R$ 336,25</td>
+                        <td>17</td>
+                        <td>6</td>
+                        <td>23</td>
+                        <td>34</td>
+                        <td>16</td>
+                        <td>50</td>
+                        <td class="positive">64,10%</td>
+                    </tr>
+                    <tr>
+                        <td>04/09/2025</td>
+                        <td>49</td>
+                        <td>R$ 9,37</td>
+                        <td>R$ 458,97</td>
+                        <td>12</td>
+                        <td>6</td>
+                        <td>18</td>
+                        <td>18</td>
+                        <td>9</td>
+                        <td>27</td>
+                        <td class="positive">55,10%</td>
+                    </tr>
+                    <tr>
+                        <td>05/09/2025</td>
+                        <td>67</td>
+                        <td>R$ 3,48</td>
+                        <td>R$ 232,94</td>
+                        <td>17</td>
+                        <td>9</td>
+                        <td>26</td>
+                        <td>24</td>
+                        <td>13</td>
+                        <td>37</td>
+                        <td class="positive">55,22%</td>
+                    </tr>
+                    <tr>
+                        <td>06/09/2025</td>
+                        <td>26</td>
+                        <td>R$ 10,45</td>
+                        <td>R$ 271,82</td>
+                        <td>7</td>
+                        <td>4</td>
+                        <td>11</td>
+                        <td>8</td>
+                        <td>4</td>
+                        <td>12</td>
+                        <td class="negative">46,15%</td>
+                    </tr>
+                    <tr>
+                        <td>07/09/2025</td>
+                        <td>102</td>
+                        <td>R$ 5,76</td>
+                        <td>R$ 587,28</td>
+                        <td>18</td>
+                        <td>20</td>
+                        <td>38</td>
+                        <td>34</td>
+                        <td>24</td>
+                        <td>58</td>
+                        <td class="positive">56,86%</td>
+                    </tr>
+                    <tr>
+                        <td>08/09/2025</td>
+                        <td>50</td>
+                        <td>R$ 3,92</td>
+                        <td>R$ 196,12</td>
+                        <td>4</td>
+                        <td>4</td>
+                        <td>8</td>
+                        <td>16</td>
+                        <td>5</td>
+                        <td>21</td>
+                        <td class="positive">42,00%</td>
+                    </tr>
+                    <tr>
+                        <td>09/09/2025</td>
+                        <td>75</td>
+                        <td>R$ 5,47</td>
+                        <td>R$ 410,51</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td class="negative">1,33%</td>
+                    </tr>
+                    <tr>
+                        <td>10/09/2025</td>
+                        <td>92</td>
+                        <td>R$ 3,78</td>
+                        <td>R$ 347,36</td>
+                        <td>58</td>
+                        <td>41</td>
+                        <td>99</td>
+                        <td>63</td>
+                        <td>35</td>
+                        <td>98</td>
+                        <td class="positive">107,61%</td>
+                    </tr>
+                    <tr>
+                        <td>11/09/2025</td>
+                        <td>25</td>
+                        <td>R$ 3,75</td>
+                        <td>R$ 93,68</td>
+                        <td>9</td>
+                        <td>3</td>
+                        <td>12</td>
+                        <td>6</td>
+                        <td>6</td>
+                        <td>12</td>
+                        <td class="positive">48,00%</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #f8f9fa; font-weight: bold;">
+                        <td>TOTAL</td>
+                        <td>703</td>
+                        <td>R$ 5,09</td>
+                        <td>R$ 3.579,26</td>
+                        <td>179</td>
+                        <td>105</td>
+                        <td>284</td>
+                        <td>259</td>
+                        <td>139</td>
+                        <td>398</td>
+                        <td class="positive">56,61%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <h2 class="section-title">Visualizações Gráficas</h2>
+        <div class="charts-container">
+            <div class="chart-box">
+                <h2>Evolução de Leads ao Longo do Tempo</h2>
+                <canvas id="leadsChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Distribuição entre Matriz e Dealers</h2>
+                <canvas id="channelChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="charts-container">
+            <div class="chart-box">
+                <h2>Comparativo de Orçamento</h2>
+                <canvas id="budgetChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Eficiência por Canal (Leads por Real Investido)</h2>
+                <canvas id="efficiencyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados para os gráficos
+        const dates = ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09', '07/09', '08/09', '09/09', '10/09', '11/09'];
+        const totalLeads = [48, 91, 78, 49, 67, 26, 102, 50, 75, 92, 25];
+        const matrizTotal = [20, 29, 23, 18, 26, 11, 38, 8, 0, 99, 12];
+        const dealersTotal = [24, 58, 50, 27, 37, 12, 58, 21, 1, 98, 12];
+        
+        // Gráfico de evolução de leads
+        const leadsCtx = document.getElementById('leadsChart').getContext('2d');
+        new Chart(leadsCtx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Total de Leads',
+                        data: totalLeads,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Leads Matriz',
+                        data: matrizTotal,
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Leads Dealers',
+                        data: dealersTotal,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evolução de Leads por Dia'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de distribuição entre canais
+        const channelCtx = document.getElementById('channelChart').getContext('2d');
+        new Chart(channelCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Matriz', 'Dealers'],
+                datasets: [{
+                    data: [284, 398],
+                    backgroundColor: [
+                        '#2ecc71',
+                        '#e74c3c'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Gráfico comparativo de orçamento
+        const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+        new Chart(budgetCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Matriz', 'Dealers'],
+                datasets: [{
+                    label: 'Orçamento (R$)',
+                    data: [1378.34, 1926.62],
+                    backgroundColor: [
+                        '#2ecc71',
+                        '#e74c3c'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Valor em Reais'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de eficiência
+        const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+        new Chart(efficiencyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Matriz', 'Dealers'],
+                datasets: [{
+                    label: 'Leads por R$100 investidos',
+                    data: [20.6, 20.7], // Calculado com base nos dados fornecidos
+                    backgroundColor: [
+                        'rgba(46, 204, 113, 0.7)',
+                        'rgba(231, 76, 60, 0.7)'
+                    ],
+                    borderColor: [
+                        '#2ecc71',
+                        '#e74c3c'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Leads por R$100'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
