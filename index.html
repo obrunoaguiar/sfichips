@@ -211,8 +211,16 @@
             background-color: rgba(231, 76, 60, 0.1);
         }
         
+        .chart-comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
         @media (max-width: 1200px) {
-            .comparison-container {
+            .comparison-container,
+            .chart-comparison-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -319,6 +327,29 @@
                         <div class="subvalue">33,6% dos leads</div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Gráficos Comparativos - Matriz vs Dealers</h2>
+        <div class="chart-comparison-container">
+            <div class="chart-box">
+                <h2>Leads por Dia - Matriz vs Dealers</h2>
+                <canvas id="leadsComparisonChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Orçamento por Dia - Matriz vs Dealers</h2>
+                <canvas id="budgetComparisonChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-comparison-container">
+            <div class="chart-box">
+                <h2>Matriz - Aspirado vs Turbo</h2>
+                <canvas id="matrixPieChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Dealers - Aspirado vs Turbo</h2>
+                <canvas id="dealersPieChart"></canvas>
             </div>
         </div>
         
@@ -588,6 +619,8 @@
         const totalLeads = [48, 91, 78, 49, 67, 26, 102, 50, 75, 92, 78, 22];
         const matrizTotal = [20, 29, 23, 18, 26, 11, 38, 8, 0, 99, 46, 7];
         const dealersTotal = [24, 58, 50, 27, 37, 12, 58, 21, 1, 98, 31, 15];
+        const matrizBudget = [131.53, 104.74, 99.15, 168.60, 90.39, 115.00, 218.79, 31.38, 0.00, 373.79, 206.87, 32.89];
+        const dealersBudget = [157.84, 209.48, 215.54, 252.90, 128.64, 125.46, 333.94, 82.37, 5.47, 370.01, 139.41, 70.47];
         
         // Gráfico de evolução de leads
         const leadsCtx = document.getElementById('leadsChart').getContext('2d');
@@ -692,6 +725,154 @@
                         title: {
                             display: true,
                             text: 'Valor em Reais'
+                        }
+                    }
+                }
+            }
+        });
+
+        // NOVOS GRÁFICOS ADICIONADOS
+
+        // Gráfico de comparação de leads por dia
+        const leadsComparisonCtx = document.getElementById('leadsComparisonChart').getContext('2d');
+        new Chart(leadsComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Matriz',
+                        data: matrizTotal,
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: '#2ecc71',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Dealers',
+                        data: dealersTotal,
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantidade de Leads'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de comparação de orçamento por dia
+        const budgetComparisonCtx = document.getElementById('budgetComparisonChart').getContext('2d');
+        new Chart(budgetComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Matriz',
+                        data: matrizBudget,
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: '#2ecc71',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Dealers',
+                        data: dealersBudget,
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Orçamento (R$)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de pizza para Matriz - Aspirado vs Turbo
+        const matrixPieCtx = document.getElementById('matrixPieChart').getContext('2d');
+        new Chart(matrixPieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Aspirado', 'Turbo'],
+                datasets: [{
+                    data: [210, 115],
+                    backgroundColor: [
+                        'rgba(46, 204, 113, 0.7)',
+                        'rgba(52, 152, 219, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de pizza para Dealers - Aspirado vs Turbo
+        const dealersPieCtx = document.getElementById('dealersPieChart').getContext('2d');
+        new Chart(dealersPieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Aspirado', 'Turbo'],
+                datasets: [{
+                    data: [287, 145],
+                    backgroundColor: [
+                        'rgba(231, 76, 60, 0.7)',
+                        'rgba(155, 89, 182, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
                         }
                     }
                 }
