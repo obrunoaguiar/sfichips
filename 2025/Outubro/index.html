@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Desempenho - Outubro 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .card h3 {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .card .subvalue {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .card.highlight {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+        }
+        
+        .card.highlight .value,
+        .card.highlight .subvalue {
+            color: white;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            height: 400px;
+        }
+        
+        .chart-box h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background-color: #f5f7f9;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            margin: 30px 0 20px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .matrix-header {
+            background-color: rgba(46, 204, 113, 0.2);
+        }
+        
+        .dealers-header {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+        
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .comparison-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .comparison-box.matrix {
+            border-top: 5px solid #2ecc71;
+        }
+        
+        .comparison-box.dealers {
+            border-top: 5px solid #e74c3c;
+        }
+        
+        .comparison-box h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .comparison-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .comparison-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .comparison-item h3 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .comparison-item .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .matrix-bg {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+        
+        .dealers-bg {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .chart-comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .comparison-container,
+            .chart-comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-data {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Dashboard de Desempenho de Marketing - Outubro 2025</h1>
+            <p>Análise de leads, CPL e desempenho por canal</p>
+        </header>
+        
+        <div class="summary-cards">
+            <div class="card highlight">
+                <h3>TOTAL DE LEADS</h3>
+                <div class="value">551</div>
+                <div class="subvalue">Período: 01/10/2025 - 09/10/2025</div>
+            </div>
+            <div class="card">
+                <h3>CUSTO POR LEAD (CPL)</h3>
+                <div class="value">R$ 4.50</div>
+                <div class="subvalue">Média ponderada</div>
+            </div>
+            <div class="card">
+                <h3>ORÇAMENTO TOTAL</h3>
+                <div class="value">R$ 2,478.72</div>
+                <div class="subvalue">Investimento total</div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Comparativo Matriz vs Dealers</h2>
+        <div class="comparison-container">
+            <div class="comparison-box matrix">
+                <h2>MATRIZ</h2>
+                <div class="comparison-data">
+                    <div class="comparison-item matrix-bg">
+                        <h3>Total de Leads</h3>
+                        <div class="value">249</div>
+                        <div class="subvalue">45.2% do total</div>
+                    </div>
+                    <div class="comparison-item matrix-bg">
+                        <h3>Orçamento</h3>
+                        <div class="value">R$ 1,117.51</div>
+                        <div class="subvalue">45.1% do total</div>
+                    </div>
+                    <div class="comparison-item matrix-bg">
+                        <h3>Aspirados</h3>
+                        <div class="value">172</div>
+                        <div class="subvalue">69.1% dos leads</div>
+                    </div>
+                    <div class="comparison-item matrix-bg">
+                        <h3>Turbo</h3>
+                        <div class="value">77</div>
+                        <div class="subvalue">30.9% dos leads</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-box dealers">
+                <h2>DEALERS</h2>
+                <div class="comparison-data">
+                    <div class="comparison-item dealers-bg">
+                        <h3>Total de Leads</h3>
+                        <div class="value">284</div>
+                        <div class="subvalue">51.5% do total</div>
+                    </div>
+                    <div class="comparison-item dealers-bg">
+                        <h3>Orçamento</h3>
+                        <div class="value">R$ 1,277.95</div>
+                        <div class="subvalue">51.6% do total</div>
+                    </div>
+                    <div class="comparison-item dealers-bg">
+                        <h3>Aspirados</h3>
+                        <div class="value">184</div>
+                        <div class="subvalue">64.8% dos leads</div>
+                    </div>
+                    <div class="comparison-item dealers-bg">
+                        <h3>Turbo</h3>
+                        <div class="value">100</div>
+                        <div class="subvalue">35.2% dos leads</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Gráficos Comparativos - Matriz vs Dealers</h2>
+        <div class="chart-comparison-container">
+            <div class="chart-box">
+                <h2>Leads por Dia - Matriz vs Dealers</h2>
+                <canvas id="leadsComparisonChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Orçamento por Dia - Matriz vs Dealers</h2>
+                <canvas id="budgetComparisonChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-comparison-container">
+            <div class="chart-box">
+                <h2>Matriz - Aspirado vs Turbo</h2>
+                <canvas id="matrixPieChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Dealers - Aspirado vs Turbo</h2>
+                <canvas id="dealersPieChart"></canvas>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Desempenho por Data</h2>
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2">Data</th>
+                        <th rowspan="2">Total de Leads</th>
+                        <th rowspan="2">CPL</th>
+                        <th rowspan="2">Orçamento Total</th>
+                        <th colspan="6" class="matrix-header">MATRIZ</th>
+                        <th colspan="4" class="dealers-header">DEALERS</th>
+                    </tr>
+                    <tr>
+                        <th class="matrix-header">Aspirado</th>
+                        <th class="matrix-header">Conversão</th>
+                        <th class="matrix-header">Turbo</th>
+                        <th class="matrix-header">Conversão</th>
+                        <th class="matrix-header">Total</th>
+                        <th class="matrix-header">Orçamento Matriz</th>
+                        <th class="dealers-header">Aspirado</th>
+                        <th class="dealers-header">Turbo</th>
+                        <th class="dealers-header">Total</th>
+                        <th class="dealers-header">Orçamento Dealers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados da tabela serão preenchidos pelo JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #f8f9fa; font-weight: bold;">
+                        <td>TOTAL</td>
+                        <td>551</td>
+                        <td>4.50</td>
+                        <td>2,478.72</td>
+                        <td>172</td>
+                        <td>0</td>
+                        <td>77</td>
+                        <td>0</td>
+                        <td>249</td>
+                        <td>1,117.51</td>
+                        <td>184</td>
+                        <td>100</td>
+                        <td>284</td>
+                        <td>1,277.95</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <h2 class="section-title">Visualizações Gráficas</h2>
+        <div class="charts-container">
+            <div class="chart-box">
+                <h2>Evolução de Leads ao Longo do Tempo</h2>
+                <canvas id="leadsChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>Distribuição entre Matriz e Dealers</h2>
+                <canvas id="channelChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="charts-container">
+            <div class="chart-box">
+                <h2>Comparativo de Orçamento</h2>
+                <canvas id="budgetChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados completos da tabela - Outubro 2025
+        const tableData = [
+            { date: '2025-10-01', totalLeads: 73, cpl: 4.03, totalBudget: 293.90, matrizAspirado: 21, matrizConversao: 0, matrizTurbo: 10, matrizConversaoTurbo: 0, matrizTotal: 31, matrizBudget: 124.81, dealersAspirado: 25, dealersTurbo: 16, dealersTotal: 41, dealersBudget: 165.07 },
+            { date: '2025-10-02', totalLeads: 81, cpl: 3.70, totalBudget: 299.32, matrizAspirado: 27, matrizConversao: 0, matrizTurbo: 13, matrizConversaoTurbo: 0, matrizTotal: 40, matrizBudget: 147.81, dealersAspirado: 30, dealersTurbo: 11, dealersTotal: 41, dealersBudget: 151.51 },
+            { date: '2025-10-03', totalLeads: 73, cpl: 3.91, totalBudget: 285.13, matrizAspirado: 19, matrizConversao: 0, matrizTurbo: 15, matrizConversaoTurbo: 0, matrizTotal: 34, matrizBudget: 132.80, dealersAspirado: 23, dealersTurbo: 14, dealersTotal: 37, dealersBudget: 144.52 },
+            { date: '2025-10-04', totalLeads: 64, cpl: 4.28, totalBudget: 273.70, matrizAspirado: 19, matrizConversao: 0, matrizTurbo: 7, matrizConversaoTurbo: 0, matrizTotal: 26, matrizBudget: 111.19, dealersAspirado: 15, dealersTurbo: 13, dealersTotal: 28, dealersBudget: 119.74 },
+            { date: '2025-10-05', totalLeads: 65, cpl: 5.00, totalBudget: 324.91, matrizAspirado: 0, matrizConversao: 0, matrizTurbo: 0, matrizConversaoTurbo: 0, matrizTotal: 0, matrizBudget: 0.00, dealersAspirado: 0, dealersTurbo: 0, dealersTotal: 0, dealersBudget: 0.00 },
+            { date: '2025-10-06', totalLeads: 58, cpl: 4.97, totalBudget: 288.37, matrizAspirado: 42, matrizConversao: 0, matrizTurbo: 12, matrizConversaoTurbo: 0, matrizTotal: 54, matrizBudget: 268.48, dealersAspirado: 46, dealersTurbo: 25, dealersTotal: 71, dealersBudget: 353.00 },
+            { date: '2025-10-07', totalLeads: 50, cpl: 5.87, totalBudget: 293.40, matrizAspirado: 20, matrizConversao: 0, matrizTurbo: 4, matrizConversaoTurbo: 0, matrizTotal: 24, matrizBudget: 140.83, dealersAspirado: 15, dealersTurbo: 8, dealersTotal: 23, dealersBudget: 134.96 },
+            { date: '2025-10-08', totalLeads: 64, cpl: 4.57, totalBudget: 292.70, matrizAspirado: 21, matrizConversao: 0, matrizTurbo: 10, matrizConversaoTurbo: 0, matrizTotal: 31, matrizBudget: 141.78, dealersAspirado: 21, dealersTurbo: 9, dealersTotal: 30, dealersBudget: 137.20 },
+            { date: '2025-10-09', totalLeads: 23, cpl: 5.53, totalBudget: 127.29, matrizAspirado: 3, matrizConversao: 0, matrizTurbo: 6, matrizConversaoTurbo: 0, matrizTotal: 9, matrizBudget: 49.81, dealersAspirado: 9, dealersTurbo: 4, dealersTotal: 13, dealersBudget: 71.95 }
+        ];
+
+        // Preencher tabela
+        const tableBody = document.querySelector('.data-table tbody');
+        tableData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.date}</td>
+                <td>${row.totalLeads}</td>
+                <td>${row.cpl}</td>
+                <td>${row.totalBudget}</td>
+                <td>${row.matrizAspirado}</td>
+                <td>${row.matrizConversao}</td>
+                <td>${row.matrizTurbo}</td>
+                <td>${row.matrizConversaoTurbo}</td>
+                <td>${row.matrizTotal}</td>
+                <td>${row.matrizBudget}</td>
+                <td>${row.dealersAspirado}</td>
+                <td>${row.dealersTurbo}</td>
+                <td>${row.dealersTotal}</td>
+                <td>${row.dealersBudget}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        // Dados para os gráficos
+        const dates = tableData.map(row => row.date.substring(8, 10) + '/10');
+        const totalLeads = tableData.map(row => row.totalLeads);
+        const matrizTotal = tableData.map(row => row.matrizTotal);
+        const dealersTotal = tableData.map(row => row.dealersTotal);
+        const matrizBudget = tableData.map(row => row.matrizBudget);
+        const dealersBudget = tableData.map(row => row.dealersBudget);
+        
+        // Gráfico de evolução de leads
+        const leadsCtx = document.getElementById('leadsChart').getContext('2d');
+        new Chart(leadsCtx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Total de Leads',
+                        data: totalLeads,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Leads Matriz',
+                        data: matrizTotal,
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Leads Dealers',
+                        data: dealersTotal,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evolução de Leads por Dia'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de distribuição entre canais
+        const channelCtx = document.getElementById('channelChart').getContext('2d');
+        new Chart(channelCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Matriz', 'Dealers'],
+                datasets: [{
+                    data: [249, 284],
+                    backgroundColor: ['#2ecc71', '#e74c3c'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Gráfico comparativo de orçamento
+        const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+        new Chart(budgetCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Matriz', 'Dealers'],
+                datasets: [{
+                    label: 'Orçamento (R$)',
+                    data: [1117.51, 1277.95],
+                    backgroundColor: ['#2ecc71', '#e74c3c'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Valor em Reais'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de comparação de leads por dia
+        const leadsComparisonCtx = document.getElementById('leadsComparisonChart').getContext('2d');
+        new Chart(leadsComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Matriz',
+                        data: matrizTotal,
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: '#2ecc71',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Dealers',
+                        data: dealersTotal,
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantidade de Leads'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de comparação de orçamento por dia
+        const budgetComparisonCtx = document.getElementById('budgetComparisonChart').getContext('2d');
+        new Chart(budgetComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Matriz',
+                        data: matrizBudget,
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: '#2ecc71',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Dealers',
+                        data: dealersBudget,
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Orçamento (R$)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de pizza para Matriz - Aspirado vs Turbo
+        const matrixPieCtx = document.getElementById('matrixPieChart').getContext('2d');
+        new Chart(matrixPieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Aspirado', 'Turbo'],
+                datasets: [{
+                    data: [172, 77],
+                    backgroundColor: ['rgba(46, 204, 113, 0.7)', 'rgba(52, 152, 219, 0.7)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de pizza para Dealers - Aspirado vs Turbo
+        const dealersPieCtx = document.getElementById('dealersPieChart').getContext('2d');
+        new Chart(dealersPieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Aspirado', 'Turbo'],
+                datasets: [{
+                    data: [184, 100],
+                    backgroundColor: ['rgba(231, 76, 60, 0.7)', 'rgba(155, 89, 182, 0.7)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
