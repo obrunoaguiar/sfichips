@@ -1,1 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Leads - Matriz e Dealers</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f7f7f7; }
+        h1 { color: #2c3e50; }
+        .chart-container { background: #fff; padding: 20px; margin-bottom: 30px; border-radius: 10px; box-shadow: 0 2px 8px #0001; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #2c3e50; color: #fff; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard de Leads - Matriz e Dealers</h1>
+    <div class="chart-container">
+        <canvas id="leadsChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="orcamentoChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="aspiradoTurboChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="dealersChart"></canvas>
+    </div>
+    <h2>Tabela de Dados</h2>
+    <div style="overflow-x:auto;">
+        <table id="data-table"></table>
+    </div>
+    <script>
+        // Dados
+        const data = [
+            {Data:'2026-01-01',TotalLeads:72,CPL:4.05,OrcamentoTotal:291.54,LeadsAspirado:12,ConvAspirado:0,LeadsTurbo:17,ConvTurbo:0,TotalLeadsDealers:29,OrcamentoMatriz:117.43,Aspirado:21,Turbo:17,TotalDealers:38,OrcamentoDealers:153.87},
+            {Data:'2026-01-02',TotalLeads:86,CPL:3.56,OrcamentoTotal:306.36,LeadsAspirado:21,ConvAspirado:0,LeadsTurbo:20,ConvTurbo:0,TotalLeadsDealers:41,OrcamentoMatriz:146.06,Aspirado:26,Turbo:17,TotalDealers:43,OrcamentoDealers:153.18},
+            {Data:'2026-01-03',TotalLeads:78,CPL:3.70,OrcamentoTotal:288.42,LeadsAspirado:20,ConvAspirado:0,LeadsTurbo:7,ConvTurbo:0,TotalLeadsDealers:27,OrcamentoMatriz:99.84,Aspirado:20,Turbo:26,TotalDealers:46,OrcamentoDealers:170.09},
+            {Data:'2026-01-04',TotalLeads:108,CPL:2.91,OrcamentoTotal:314.32,LeadsAspirado:19,ConvAspirado:0,LeadsTurbo:13,ConvTurbo:0,TotalLeadsDealers:32,OrcamentoMatriz:93.13,Aspirado:45,Turbo:27,TotalDealers:72,OrcamentoDealers:209.55},
+            {Data:'2026-01-05',TotalLeads:70,CPL:4.10,OrcamentoTotal:287.08,LeadsAspirado:18,ConvAspirado:0,LeadsTurbo:12,ConvTurbo:0,TotalLeadsDealers:30,OrcamentoMatriz:123.03,Aspirado:17,Turbo:19,TotalDealers:36,OrcamentoDealers:147.64},
+            {Data:'2026-01-06',TotalLeads:78,CPL:3.77,OrcamentoTotal:294.03,LeadsAspirado:0,ConvAspirado:0,LeadsTurbo:0,ConvTurbo:0,TotalLeadsDealers:0,OrcamentoMatriz:0,Aspirado:2,Turbo:1,TotalDealers:3,OrcamentoDealers:11.31},
+            {Data:'2026-01-07',TotalLeads:55,CPL:5.29,OrcamentoTotal:291.05,LeadsAspirado:27,ConvAspirado:0,LeadsTurbo:14,ConvTurbo:0,TotalLeadsDealers:41,OrcamentoMatriz:216.96,Aspirado:37,Turbo:43,TotalDealers:80,OrcamentoDealers:423.35},
+            {Data:'2026-01-08',TotalLeads:76,CPL:3.69,OrcamentoTotal:280.06,LeadsAspirado:17,ConvAspirado:0,LeadsTurbo:12,ConvTurbo:0,TotalLeadsDealers:29,OrcamentoMatriz:106.87,Aspirado:17,Turbo:27,TotalDealers:44,OrcamentoDealers:162.14},
+            {Data:'2026-01-09',TotalLeads:56,CPL:5.24,OrcamentoTotal:293.61,LeadsAspirado:8,ConvAspirado:0,LeadsTurbo:9,ConvTurbo:0,TotalLeadsDealers:17,OrcamentoMatriz:89.13,Aspirado:6,Turbo:8,TotalDealers:14,OrcamentoDealers:73.40},
+            {Data:'2026-01-10',TotalLeads:56,CPL:4.97,OrcamentoTotal:278.12,LeadsAspirado:26,ConvAspirado:0,LeadsTurbo:16,ConvTurbo:0,TotalLeadsDealers:42,OrcamentoMatriz:208.59,Aspirado:10,Turbo:26,TotalDealers:36,OrcamentoDealers:178.79},
+            {Data:'2026-01-11',TotalLeads:71,CPL:4.52,OrcamentoTotal:320.96,LeadsAspirado:22,ConvAspirado:0,LeadsTurbo:8,ConvTurbo:0,TotalLeadsDealers:30,OrcamentoMatriz:135.62,Aspirado:18,Turbo:22,TotalDealers:40,OrcamentoDealers:180.82},
+            {Data:'2026-01-12',TotalLeads:75,CPL:4.08,OrcamentoTotal:305.73,LeadsAspirado:14,ConvAspirado:0,LeadsTurbo:9,ConvTurbo:0,TotalLeadsDealers:23,OrcamentoMatriz:93.76,Aspirado:23,Turbo:24,TotalDealers:47,OrcamentoDealers:191.59},
+            {Data:'2026-01-13',TotalLeads:90,CPL:3.24,OrcamentoTotal:291.38,LeadsAspirado:17,ConvAspirado:0,LeadsTurbo:13,ConvTurbo:0,TotalLeadsDealers:30,OrcamentoMatriz:97.13,Aspirado:34,Turbo:21,TotalDealers:55,OrcamentoDealers:178.07},
+            {Data:'2026-01-14',TotalLeads:74,CPL:3.96,OrcamentoTotal:293.07,LeadsAspirado:18,ConvAspirado:0,LeadsTurbo:7,ConvTurbo:0,TotalLeadsDealers:25,OrcamentoMatriz:99.01,Aspirado:12,Turbo:26,TotalDealers:38,OrcamentoDealers:150.50},
+            {Data:'2026-01-15',TotalLeads:94,CPL:2.98,OrcamentoTotal:279.85,LeadsAspirado:17,ConvAspirado:0,LeadsTurbo:13,ConvTurbo:0,TotalLeadsDealers:30,OrcamentoMatriz:89.31,Aspirado:35,Turbo:22,TotalDealers:57,OrcamentoDealers:169.70},
+            {Data:'2026-01-16',TotalLeads:68,CPL:4.24,OrcamentoTotal:288,LeadsAspirado:12,ConvAspirado:0,LeadsTurbo:9,ConvTurbo:0,TotalLeadsDealers:21,OrcamentoMatriz:88.94,Aspirado:17,Turbo:25,TotalDealers:42,OrcamentoDealers:177.88},
+            {Data:'2026-01-17',TotalLeads:74,CPL:3.91,OrcamentoTotal:289.6,LeadsAspirado:13,ConvAspirado:0,LeadsTurbo:10,ConvTurbo:0,TotalLeadsDealers:23,OrcamentoMatriz:90.01,Aspirado:21,Turbo:21,TotalDealers:42,OrcamentoDealers:164.37},
+            {Data:'2026-01-18',TotalLeads:91,CPL:3.58,OrcamentoTotal:326.03,LeadsAspirado:20,ConvAspirado:0,LeadsTurbo:18,ConvTurbo:0,TotalLeadsDealers:38,OrcamentoMatriz:136.14,Aspirado:24,Turbo:22,TotalDealers:46,OrcamentoDealers:164.81},
+            {Data:'2026-01-19',TotalLeads:69,CPL:4.36,OrcamentoTotal:301.03,LeadsAspirado:13,ConvAspirado:0,LeadsTurbo:16,ConvTurbo:0,TotalLeadsDealers:29,OrcamentoMatriz:126.52,Aspirado:17,Turbo:15,TotalDealers:32,OrcamentoDealers:139.61},
+            {Data:'2026-01-20',TotalLeads:76,CPL:3.88,OrcamentoTotal:294.64,LeadsAspirado:15,ConvAspirado:0,LeadsTurbo:8,ConvTurbo:0,TotalLeadsDealers:23,OrcamentoMatriz:89.17,Aspirado:29,Turbo:14,TotalDealers:43,OrcamentoDealers:166.70},
+            {Data:'2026-01-21',TotalLeads:68,CPL:4.15,OrcamentoTotal:282.45,LeadsAspirado:25,ConvAspirado:0,LeadsTurbo:8,ConvTurbo:0,TotalLeadsDealers:33,OrcamentoMatriz:137.07,Aspirado:40,Turbo:21,TotalDealers:61,OrcamentoDealers:253.37}
+        ];
 
+        // Tabela
+        const table = document.getElementById('data-table');
+        const headers = Object.keys(data[0]);
+        let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+        data.forEach(row => {
+            html += '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>';
+        });
+        table.innerHTML = html;
+
+        // Gráficos
+        const labels = data.map(d => d.Data);
+        new Chart(document.getElementById('leadsChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Total de Leads',
+                    data: data.map(d => d.TotalLeads),
+                    borderColor: '#2980b9',
+                    backgroundColor: 'rgba(41,128,185,0.1)',
+                    fill: true
+                }]
+            },
+            options: { responsive: true }
+        });
+        new Chart(document.getElementById('orcamentoChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Orçamento Total',
+                    data: data.map(d => d.OrcamentoTotal),
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39,174,96,0.1)',
+                    fill: true
+                }]
+            },
+            options: { responsive: true }
+        });
+        new Chart(document.getElementById('aspiradoTurboChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Leads Aspirado',
+                        data: data.map(d => d.LeadsAspirado),
+                        borderColor: '#e67e22',
+                        backgroundColor: 'rgba(230,126,34,0.1)',
+                        fill: true
+                    },
+                    {
+                        label: 'Leads Turbo',
+                        data: data.map(d => d.LeadsTurbo),
+                        borderColor: '#8e44ad',
+                        backgroundColor: 'rgba(142,68,173,0.1)',
+                        fill: true
+                    }
+                ]
+            },
+            options: { responsive: true }
+        });
+        new Chart(document.getElementById('dealersChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Total Leads Dealers',
+                        data: data.map(d => d.TotalLeadsDealers),
+                        borderColor: '#c0392b',
+                        backgroundColor: 'rgba(192,57,43,0.1)',
+                        fill: true
+                    },
+                    {
+                        label: 'Total Dealers',
+                        data: data.map(d => d.TotalDealers),
+                        borderColor: '#16a085',
+                        backgroundColor: 'rgba(22,160,133,0.1)',
+                        fill: true
+                    }
+                ]
+            },
+            options: { responsive: true }
+        });
+    </script>
+</body>
+</html>
