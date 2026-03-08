@@ -26,6 +26,7 @@
             display: flex;
             flex-direction: row;
             gap: 32px;
+            flex-wrap: wrap;
         }
         .panel-left {
             flex: 2;
@@ -73,19 +74,61 @@
             border-radius: 8px;
             padding: 16px;
         }
-        @media (max-width: 700px) {
+        @media (max-width: 900px) {
+            .dashboard {
+                padding: 12px;
+            }
             .panel {
                 flex-direction: column;
+                gap: 16px;
             }
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .controls button, .controls select {
+            background: #00eaff;
+            color: #232526;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .controls button:hover {
+            background: #00b3b3;
+        }
+        .controls select {
+            font-weight: 400;
+        }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <h1>Painel do Veículo</h1>
+        <div class="controls">
+            <button id="toggleTable">Tabela</button>
+            <button id="toggleChart">Gráfico</button>
+            <select id="selectChartType">
+                <option value="line">Linha</option>
+                <option value="bar">Barra</option>
+                <option value="pie">Pizza</option>
+            </select>
+            <select id="selectMetric">
+                <option value="auto">Auto</option>
+            </select>
+        </div>
         <div class="panel">
             <div class="panel-left">
-                <div class="chart-container">
+                <div class="chart-container" id="chartContainer">
                     <canvas id="vehicleChart"></canvas>
                 </div>
                 <table id="dataTable"></table>
@@ -102,7 +145,9 @@
         // URL do CSV publicado
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
 
-        // Função para converter CSV em array de objetos
+        let globalData = [];
+        let chartInstance = null;
+
         function csvToArray(str, delimiter = ',') {
             const rows = str.trim().split('\n');
             const headers = rows[0].split(delimiter);
@@ -115,17 +160,16 @@
             });
         }
 
-        // Busca e renderiza os dados
         fetch(csvUrl)
             .then(response => response.text())
             .then(csv => {
-                const data = csvToArray(csv);
-                renderTable(data);
-                renderChart(data);
-                renderRetrovisor(data);
+                globalData = csvToArray(csv);
+                renderTable(globalData);
+                renderChart(globalData);
+                renderRetrovisor(globalData);
+                setupControls(globalData);
             });
 
-        // Renderiza tabela
         function renderTable(data) {
             const table = document.getElementById('dataTable');
             if (!data.length) {
@@ -138,34 +182,47 @@
             table.innerHTML = html;
         }
 
-        // Renderiza gráfico (exemplo: velocidade ao longo do tempo)
-        function renderChart(data) {
-            // Tenta encontrar colunas de tempo e velocidade
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            const speedCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade'));
-            if (!timeCol || !speedCol) return;
-            const labels = data.map(row => row[timeCol]);
-            const speeds = data.map(row => parseFloat(row[speedCol]) || 0);
+        function renderChart(data, chartType = 'line', metric = 'auto') {
             const ctx = document.getElementById('vehicleChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
+            // Detecta colunas
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            let metricCol = metric === 'auto' ? Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade')) : metric;
+            if (!timeCol || !metricCol) return;
+            const labels = data.map(row => row[timeCol]);
+            const values = data.map(row => parseFloat(row[metricCol]) || 0);
+            if (chartInstance) chartInstance.destroy();
+            let chartData = {};
+            if (chartType === 'pie') {
+                chartData = {
                     labels,
                     datasets: [{
-                        label: 'Velocidade (km/h)',
-                        data: speeds,
+                        label: metricCol,
+                        data: values,
+                        backgroundColor: labels.map((_,i) => `rgba(${100+i*10},${200-i*10},255,0.7)`),
+                    }]
+                };
+            } else {
+                chartData = {
+                    labels,
+                    datasets: [{
+                        label: metricCol,
+                        data: values,
                         borderColor: '#00eaff',
                         backgroundColor: 'rgba(0,234,255,0.15)',
                         tension: 0.3,
                         pointRadius: 3,
                         fill: true
                     }]
-                },
+                };
+            }
+            chartInstance = new Chart(ctx, {
+                type: chartType,
+                data: chartData,
                 options: {
                     plugins: {
                         legend: { display: true, labels: { color: '#fff' } }
                     },
-                    scales: {
+                    scales: chartType === 'pie' ? {} : {
                         x: { ticks: { color: '#fff' } },
                         y: { ticks: { color: '#fff' } }
                     }
@@ -173,10 +230,8 @@
             });
         }
 
-        // Renderiza retrovisor (últimos eventos)
         function renderRetrovisor(data) {
             const historyList = document.getElementById('historyList');
-            // Mostra os 5 últimos eventos (linhas)
             const lastRows = data.slice(-5).reverse();
             const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
             const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
@@ -185,6 +240,37 @@
                 const event = eventCol ? row[eventCol] : JSON.stringify(row);
                 return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
             }).join('');
+        }
+
+        function setupControls(data) {
+            const btnTable = document.getElementById('toggleTable');
+            const btnChart = document.getElementById('toggleChart');
+            const chartContainer = document.getElementById('chartContainer');
+            const table = document.getElementById('dataTable');
+            const selectChartType = document.getElementById('selectChartType');
+            const selectMetric = document.getElementById('selectMetric');
+            // Alternância
+            btnTable.onclick = () => {
+                chartContainer.classList.add('hidden');
+                table.classList.remove('hidden');
+            };
+            btnChart.onclick = () => {
+                chartContainer.classList.remove('hidden');
+                table.classList.add('hidden');
+            };
+            // Inicial: mostra gráfico
+            chartContainer.classList.remove('hidden');
+            table.classList.add('hidden');
+            // Chart type
+            selectChartType.onchange = () => {
+                renderChart(globalData, selectChartType.value, selectMetric.value);
+            };
+            // Métricas
+            const headers = Object.keys(data[0]);
+            selectMetric.innerHTML = '<option value="auto">Auto</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join('');
+            selectMetric.onchange = () => {
+                renderChart(globalData, selectChartType.value, selectMetric.value);
+            };
         }
     </script>
 </body>
