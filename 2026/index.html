@@ -333,8 +333,7 @@
                 if (filterMotor.value) {
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
-                // Filtro data range
-                                if (dateRangeInput.value) {
+                if (dateRangeInput.value) {
                     const dates = dateRangeInput.value.split(' to ');
                     if (dates.length === 2) {
                         const start = dates[0];
