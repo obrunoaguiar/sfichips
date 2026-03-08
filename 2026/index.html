@@ -1,371 +1,274 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Interativo | CRM</title>
-    <!-- TailwindCSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PapaParse para CSV -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <!-- Flatpickr para calendário (date range) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <!-- Fonte Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
-    <!-- Ícones FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Dashboard Veículo - Google Sheets</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:700,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .transition-all { transition: all 0.2s ease; }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        .filter-active { background-color: #e0f2fe; border-color: #0284c7; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(34, 34, 34, 0.95);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 32px;
+        }
+        .panel {
+            display: flex;
+            flex-direction: row;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .panel-left {
+            flex: 2;
+        }
+        .panel-right {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 220px;
+        }
+        .retrovisor {
+            font-size: 1.1em;
+            color: #b3b3b3;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+        }
+        th {
+            background: #2c2c2c;
+        }
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.03);
+        }
+        .chart-container {
+            margin-top: 24px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        @media (max-width: 900px) {
+            .dashboard {
+                padding: 12px;
+            }
+            .panel {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .controls button, .controls select {
+            background: #00eaff;
+            color: #232526;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .controls button:hover {
+            background: #00b3b3;
+        }
+        .controls select {
+            font-weight: 400;
+        }
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-700 antialiased">
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <!-- Cabeçalho -->
-        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM
-                </h1>
-                <p class="text-sm text-slate-500 mt-1">Explore e filtre os dados em tempo real</p>
+<body>
+    <div class="dashboard">
+        <h1>Painel do Veículo</h1>
+        <div class="controls">
+            <button id="toggleTable">Tabela</button>
+            <button id="toggleChart">Gráfico</button>
+            <select id="selectChartType">
+                <option value="line">Linha</option>
+                <option value="bar">Barra</option>
+                <option value="pie">Pizza</option>
+            </select>
+            <select id="selectMetric">
+                <option value="auto">Auto</option>
+            </select>
+        </div>
+        <div class="panel">
+            <div class="panel-left">
+                <div class="chart-container" id="chartContainer">
+                    <canvas id="vehicleChart"></canvas>
+                </div>
+                <table id="dataTable"></table>
             </div>
-            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
-                <i class="fas fa-sync-alt text-blue-400"></i>
-                <span id="data-info">Carregando...</span>
+            <div class="panel-right">
+                <div class="retrovisor" id="retrovisor">
+                    <strong>Retrovisor:</strong> Últimos eventos do veículo
+                </div>
+                <ul id="historyList"></ul>
             </div>
         </div>
-
-        <!-- ========== CARDS DE KPI ========== -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Registros</p>
-                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-total">0</p>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-lg"><i class="fas fa-database text-blue-500 text-xl"></i></div>
-                </div>
-                <p class="text-xs text-slate-400 mt-4">Registros filtrados</p>
-            </div>
-            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Dealers</p>
-                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-dealers">0</p>
-                    </div>
-                    <div class="bg-emerald-50 p-3 rounded-lg"><i class="fas fa-store text-emerald-500 text-xl"></i></div>
-                </div>
-                <p class="text-xs text-slate-400 mt-4">Unidades distintas</p>
-            </div>
-            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Origens</p>
-                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-origens">0</p>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-lg"><i class="fas fa-globe text-purple-500 text-xl"></i></div>
-                </div>
-                <p class="text-xs text-slate-400 mt-4">Canais de origem</p>
-            </div>
-        </div>
-
-        <!-- ========== FILTROS AVANÇADOS ========== -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-8">
-            <div class="flex flex-wrap items-center gap-2 mb-4">
-                <i class="fas fa-sliders-h text-blue-400"></i>
-                <h2 class="font-semibold text-slate-700">Filtros dinâmicos</h2>
-                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">instantâneo</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                <!-- Filtro Data (Range) -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
-                    <div class="relative">
-                        <i class="fas fa-calendar-alt absolute left-3 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="date-range" class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
-                    </div>
-                </div>
-                <!-- Filtro Dealer -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Dealer</label>
-                    <div class="relative">
-                        <select id="filter-dealer" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
-                            <option value="">Todos os Dealers</option>
-                        </select>
-                        <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-                <!-- Filtro Origem -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Origem</label>
-                    <div class="relative">
-                        <select id="filter-origem" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
-                            <option value="">Todas as Origens</option>
-                        </select>
-                        <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-                <!-- Filtro Veículo -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Veículo</label>
-                    <div class="relative">
-                        <select id="filter-veiculo" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
-                            <option value="">Todos os Veículos</option>
-                        </select>
-                        <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
-                    </div>
-                </div>
-                <!-- Filtro Motor -->
-                <div class="lg:col-span-4 flex flex-wrap items-end justify-end gap-3">
-                    <div class="w-full sm:w-auto">
-                        <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Motor</label>
-                        <select id="filter-motor" class="w-full sm:w-64 appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
-                            <option value="">Todos os Motores</option>
-                        </select>
-                    </div>
-                    <button id="clear-filters" class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm hover:bg-slate-50 transition flex items-center gap-2 mt-2 sm:mt-0">
-                        <i class="fas fa-times-circle"></i> Limpar Filtros
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========== BARRA DE PESQUISA GLOBAL ========== -->
-        <div class="mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div class="relative w-full sm:w-80">
-                <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
-                <input type="text" id="global-search" placeholder="Pesquisar em toda tabela..." class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
-            </div>
-            <div class="text-sm text-slate-500 flex items-center gap-2">
-                <i class="fas fa-table"></i>
-                <span id="table-count">0 registros exibidos</span>
-            </div>
-        </div>
-
-        <!-- ========== TABELA DE DADOS ========== -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200" id="data-table">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Data">
-                                Data <i class="fas fa-sort ml-1 text-slate-400"></i>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Dealer">
-                                Dealer <i class="fas fa-sort ml-1 text-slate-400"></i>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Origem">
-                                Origem <i class="fas fa-sort ml-1 text-slate-400"></i>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Veículo">
-                                Veículo <i class="fas fa-sort ml-1 text-slate-400"></i>
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Motor">
-                                Motor <i class="fas fa-sort ml-1 text-slate-400"></i>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="bg-white divide-y divide-slate-200 text-sm">
-                        <tr><td colspan="5" class="text-center py-8 text-slate-400">Carregando dados...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Rodapé -->
-        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados reais do Google Sheets</p>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script>
-        // CSV URL
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
-        const COLS = ['Data', 'Dealer', 'Origem', 'Veículo', 'Motor'];
-        let masterData = [];
-        let filteredData = [];
-        let sortConfig = { key: 'Data', direction: 'asc' };
-
-        // DOM refs
-        const tableBody = document.getElementById('table-body');
-        const kpiTotal = document.getElementById('kpi-total');
-        const kpiDealers = document.getElementById('kpi-dealers');
-        const kpiOrigens = document.getElementById('kpi-origens');
-        const tableCount = document.getElementById('table-count');
-        const dataInfo = document.getElementById('data-info');
-        const filterDealer = document.getElementById('filter-dealer');
-        const filterOrigem = document.getElementById('filter-origem');
-        const filterVeiculo = document.getElementById('filter-veiculo');
-        const filterMotor = document.getElementById('filter-motor');
-        const globalSearch = document.getElementById('global-search');
-        const clearBtn = document.getElementById('clear-filters');
-        const dateRangeInput = document.getElementById('date-range');
-
-        // Flatpickr
-        let datePicker = flatpickr(dateRangeInput, {
-            mode: 'range',
-            dateFormat: 'Y-m-d',
-            onChange: applyAllFilters
-        });
-
-        // Utilidades
-        function unique(arr) {
-            return [...new Set(arr.filter(x => x && x.trim()))];
-        }
-
-        function fillSelect(selectElement, values, label) {
-            const currentValue = selectElement.value;
-            selectElement.innerHTML = `<option value="">${label}</option>`;
-            values.forEach(v => {
-                const option = document.createElement('option');
-                option.value = v;
-                option.textContent = v;
-                if (v === currentValue) option.selected = true;
-                selectElement.appendChild(option);
-            });
-        }
-
-        // Carregar CSV
-        function loadData() {
-            dataInfo.innerHTML = '<i class="fas fa-sync-alt text-blue-400"></i> Carregando...';
-            Papa.parse(CSV_URL, {
+        // URL do CSV publicado
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
+        let globalData = [];
+        let chartInstance = null;
+        // Parse CSV com PapaParse
+        function loadCSV() {
+            Papa.parse(csvUrl, {
                 download: true,
                 header: true,
+                skipEmptyLines: true,
                 complete: function(results) {
-                    masterData = results.data.filter(row => COLS.every(c => row[c]));
-                    populateFilters();
-                    applyAllFilters();
-                    dataInfo.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-1"></i> ${masterData.length} registros carregados`;
+                    globalData = results.data;
+                    renderTable(globalData);
+                    renderChart(globalData);
+                    renderRetrovisor(globalData);
+                    setupControls(globalData);
                 },
-                error: function() {
-                    dataInfo.innerHTML = '<span class="text-red-500">Erro ao carregar dados</span>';
-                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Erro ao carregar dados</td></tr>`;
+                error: function(err) {
+                    alert('Erro ao carregar dados: ' + err);
                 }
             });
         }
+        loadCSV();
 
-        // Popular filtros
-        function populateFilters() {
-            fillSelect(filterDealer, unique(masterData.map(d => d.Dealer)), 'Todos os Dealers');
-            fillSelect(filterOrigem, unique(masterData.map(d => d.Origem)), 'Todas as Origens');
-            fillSelect(filterVeiculo, unique(masterData.map(d => d.Veículo)), 'Todos os Veículos');
-            fillSelect(filterMotor, unique(masterData.map(d => d.Motor)), 'Todos os Motores');
-        }
-
-        // Filtragem
-        function applyAllFilters() {
-            let filtered = [...masterData];
-            // Dealer
-            if (filterDealer.value) filtered = filtered.filter(item => item.Dealer === filterDealer.value);
-            // Origem
-            if (filterOrigem.value) filtered = filtered.filter(item => item.Origem === filterOrigem.value);
-            // Veículo
-            if (filterVeiculo.value) filtered = filtered.filter(item => item.Veículo === filterVeiculo.value);
-            // Motor
-            if (filterMotor.value) filtered = filtered.filter(item => item.Motor === filterMotor.value);
-            // Data
-            if (dateRangeInput.value) {
-                const dates = dateRangeInput.value.split(' to ');
-                if (dates.length === 2) {
-                    const start = dates[0];
-                    const end = dates[1];
-                    filtered = filtered.filter(item => item.Data >= start && item.Data <= end);
-                } else if (dates.length === 1) {
-                    filtered = filtered.filter(item => item.Data === dates[0]);
-                }
-            }
-            // Busca global
-            if (globalSearch.value.trim() !== '') {
-                const searchTerm = globalSearch.value.toLowerCase();
-                filtered = filtered.filter(item =>
-                    COLS.some(col => item[col].toLowerCase().includes(searchTerm))
-                );
-            }
-            filteredData = filtered;
-            sortData();
-            renderTable();
-            updateKPIs();
-        }
-
-        // Ordenação
-        function sortData() {
-            const { key, direction } = sortConfig;
-            filteredData.sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
-                if (key === 'Data') {
-                    valA = new Date(valA);
-                    valB = new Date(valB);
-                }
-                if (valA < valB) return direction === 'asc' ? -1 : 1;
-                if (valA > valB) return direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-
-        // Renderizar tabela
-        function renderTable() {
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Nenhum registro encontrado</td></tr>`;
-                tableCount.textContent = '0 registros exibidos';
+        function renderTable(data) {
+            const table = document.getElementById('dataTable');
+            if (!data.length) {
+                table.innerHTML = '<tr><td>Sem dados</td></tr>';
                 return;
             }
-            let html = '';
-            filteredData.forEach(item => {
-                html += `<tr class="hover:bg-slate-50 transition">
-                    <td class="px-6 py-3 whitespace-nowrap">${item.Data}</td>
-                    <td class="px-6 py-3 whitespace-nowrap">${item.Dealer}</td>
-                    <td class="px-6 py-3 whitespace-nowrap">${item.Origem}</td>
-                    <td class="px-6 py-3 whitespace-nowrap">${item.Veículo}</td>
-                    <td class="px-6 py-3 whitespace-nowrap">${item.Motor}</td>
-                </tr>`;
-            });
-            tableBody.innerHTML = html;
-            tableCount.textContent = `${filteredData.length} registros exibidos`;
+            const headers = Object.keys(data[0]);
+            let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+            html += data.map(row => '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>').join('');
+            table.innerHTML = html;
         }
 
-        // Atualizar KPIs
-        function updateKPIs() {
-            kpiTotal.textContent = filteredData.length;
-            kpiDealers.textContent = unique(filteredData.map(d => d.Dealer)).length;
-            kpiOrigens.textContent = unique(filteredData.map(d => d.Origem)).length;
-        }
-
-        // Event listeners
-        filterDealer.addEventListener('change', applyAllFilters);
-        filterOrigem.addEventListener('change', applyAllFilters);
-        filterVeiculo.addEventListener('change', applyAllFilters);
-        filterMotor.addEventListener('change', applyAllFilters);
-        globalSearch.addEventListener('input', applyAllFilters);
-        // Ordenação ao clicar nos cabeçalhos
-        document.querySelectorAll('[data-sort]').forEach(th => {
-            th.addEventListener('click', (e) => {
-                const key = e.currentTarget.dataset.sort;
-                if (sortConfig.key === key) {
-                    sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortConfig.key = key;
-                    sortConfig.direction = 'asc';
+        function renderChart(data, chartType = 'line', metric = 'auto') {
+            const ctx = document.getElementById('vehicleChart').getContext('2d');
+            // Detecta colunas
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            let metricCol = metric === 'auto' ? Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade')) : metric;
+            if (!timeCol || !metricCol) return;
+            const labels = data.map(row => row[timeCol]);
+            const values = data.map(row => parseFloat(row[metricCol]) || 0);
+            if (chartInstance) chartInstance.destroy();
+            let chartData = {};
+            if (chartType === 'pie') {
+                chartData = {
+                    labels,
+                    datasets: [{
+                        label: metricCol,
+                        data: values,
+                        backgroundColor: labels.map((_,i) => `rgba(${100+i*10},${200-i*10},255,0.7)`),
+                    }]
+                };
+            } else {
+                chartData = {
+                    labels,
+                    datasets: [{
+                        label: metricCol,
+                        data: values,
+                        borderColor: '#00eaff',
+                        backgroundColor: 'rgba(0,234,255,0.15)',
+                        tension: 0.3,
+                        pointRadius: 3,
+                        fill: true
+                    }]
+                };
+            }
+            chartInstance = new Chart(ctx, {
+                type: chartType,
+                data: chartData,
+                options: {
+                    plugins: {
+                        legend: { display: true, labels: { color: '#fff' } }
+                    },
+                    scales: chartType === 'pie' ? {} : {
+                        x: { ticks: { color: '#fff' } },
+                        y: { ticks: { color: '#fff' } }
+                    }
                 }
-                sortData();
-                renderTable();
             });
-        });
-        // Limpar filtros
-        clearBtn.addEventListener('click', () => {
-            filterDealer.value = '';
-            filterOrigem.value = '';
-            filterVeiculo.value = '';
-            filterMotor.value = '';
-            globalSearch.value = '';
-            datePicker.clear();
-            applyAllFilters();
-        });
-        // Inicialização
-        loadData();
+        }
+
+        function renderRetrovisor(data) {
+            const historyList = document.getElementById('historyList');
+            const lastRows = data.slice(-5).reverse();
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
+            historyList.innerHTML = lastRows.map(row => {
+                const time = timeCol ? row[timeCol] : '';
+                const event = eventCol ? row[eventCol] : JSON.stringify(row);
+                return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
+            }).join('');
+        }
+
+        function setupControls(data) {
+            const btnTable = document.getElementById('toggleTable');
+            const btnChart = document.getElementById('toggleChart');
+            const chartContainer = document.getElementById('chartContainer');
+            const table = document.getElementById('dataTable');
+            const selectChartType = document.getElementById('selectChartType');
+            const selectMetric = document.getElementById('selectMetric');
+            // Alternância
+            btnTable.onclick = () => {
+                chartContainer.classList.add('hidden');
+                table.classList.remove('hidden');
+            };
+            btnChart.onclick = () => {
+                chartContainer.classList.remove('hidden');
+                table.classList.add('hidden');
+            };
+            // Inicial: mostra gráfico
+            chartContainer.classList.remove('hidden');
+            table.classList.add('hidden');
+            // Chart type
+            selectChartType.onchange = () => {
+                renderChart(globalData, selectChartType.value, selectMetric.value);
+            };
+            // Métricas
+            const headers = Object.keys(data[0]);
+            selectMetric.innerHTML = '<option value="auto">Auto</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join('');
+            selectMetric.onchange = () => {
+                renderChart(globalData, selectChartType.value, selectMetric.value);
+            };
+        }
     </script>
 </body>
 </html>
