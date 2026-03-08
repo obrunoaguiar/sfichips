@@ -6,7 +6,7 @@
     <title>Dashboard Interativo | CRM - Dados Reais</title>
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Flatpickr para calendário -->
+    <!-- Flatpickr para calendário (configurado para PT-BR) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- PapaParse para CSV -->
@@ -30,9 +30,9 @@
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Dados Reais
+                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads (08/03/2026)</p>
+                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads</p>
             </div>
             <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
                 <i class="fas fa-cloud-download-alt text-blue-400"></i>
@@ -92,10 +92,10 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <!-- Data Range -->
+                <!-- Data Range - Configurado para PT-BR -->
                 <div class="lg:col-span-1">
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
-                    <input type="text" id="date-range" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
+                    <input type="text" id="date-range" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="DD/MM/YYYY até DD/MM/YYYY">
                 </div>
                 <!-- Dealer -->
                 <div>
@@ -176,8 +176,8 @@
 
     <script>
         (function() {
-            // URL do CSV (fornecida por você)
-            const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1421458048&single=true&output=csv';
+            // URL do CSV
+            const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSTzroLbBE7Y4C_qv6fZSkhJetJrG6rn7AP21LqzLiHajJiwfhvkA7z_uKo2gmM4PVGEJvuzF_nVTJg/pub?gid=0&single=true&output=csv';
             
             // Estado global
             let masterData = [];
@@ -202,29 +202,57 @@
             const clearBtn = document.getElementById('clear-filters');
             const dateRangeInput = document.getElementById('date-range');
             
-            // Inicializa Flatpickr
+            // Função para converter data brasileira para ISO para comparação
+            function brDateToISO(brDate) {
+                if (!brDate) return null;
+                // Se já estiver no formato ISO, retorna como está
+                if (brDate.includes('-') && brDate.split('-')[0].length === 4) {
+                    return brDate;
+                }
+                // Converte DD/MM/YYYY para YYYY-MM-DD
+                const [dia, mes, ano] = brDate.split('/');
+                return `${ano}-${mes}-${dia}`;
+            }
+
+            // Função para converter ISO para data brasileira para exibição
+            function isoToBRDate(isoDate) {
+                if (!isoDate) return '';
+                const [ano, mes, dia] = isoDate.split('-');
+                return `${dia}/${mes}/${ano}`;
+            }
+
+            // Inicializa Flatpickr com formato brasileiro
             let datePicker = flatpickr(dateRangeInput, {
                 mode: 'range',
-                dateFormat: 'Y-m-d',
+                dateFormat: 'd/m/Y', // Formato brasileiro
+                locale: {
+                    firstDayOfWeek: 1,
+                    weekdays: {
+                        shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                        longhand: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+                    },
+                    months: {
+                        shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+                    }
+                },
                 onClose: applyAllFilters
             });
 
-            // Carregar dados do CSV usando PapaParse com configuração especial
+            // Carregar dados do CSV
             function loadData() {
                 dataStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando...';
                 
-                // Configuração do PapaParse para download direto
                 Papa.parse(CSV_URL, {
                     download: true,
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => {
                         try {
-                            // Mapear os dados - verificar nomes das colunas
                             const firstRow = results.data[0] || {};
                             const keys = Object.keys(firstRow);
                             
-                            // Identificar as colunas (podem ter nomes diferentes)
+                            // Identificar colunas
                             const dataKey = keys.find(k => k.toLowerCase().includes('data')) || 'Data';
                             const dealerKey = keys.find(k => k.toLowerCase().includes('dealer')) || 'Dealer';
                             const origemKey = keys.find(k => k.toLowerCase().includes('origem')) || 'Origem';
@@ -232,10 +260,7 @@
                             const motorKey = keys.find(k => k.toLowerCase().includes('motor')) || 'Motor';
                             
                             masterData = results.data
-                                .filter(row => {
-                                    // Filtrar linhas vazias
-                                    return row[dataKey] && row[dataKey].trim() !== '';
-                                })
+                                .filter(row => row[dataKey] && row[dataKey].trim() !== '')
                                 .map(row => ({
                                     data: row[dataKey] ? row[dataKey].trim() : '',
                                     dealer: row[dealerKey] ? row[dealerKey].trim() : '',
@@ -243,9 +268,7 @@
                                     veiculo: row[veiculoKey] ? row[veiculoKey].trim() : '',
                                     motor: row[motorKey] ? row[motorKey].trim() : ''
                                 }))
-                                .filter(item => 
-                                    item.data && item.dealer && item.origem && item.veiculo && item.motor
-                                );
+                                .filter(item => item.data && item.dealer && item.origem && item.veiculo && item.motor);
                             
                             if (masterData.length === 0) {
                                 throw new Error('Nenhum dado válido encontrado');
@@ -260,17 +283,13 @@
                         }
                     },
                     error: (error) => {
-                        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Erro ao carregar dados: ${error.message || 'Falha no download'}</td></tr>`;
-                        dataStatus.innerHTML = '<i class="fas fa-exclamation-circle text-red-400 mr-1"></i> Erro no carregamento';
-                        console.error('Erro PapaParse:', error);
-                        
-                        // Dados de fallback (baseados na sua imagem)
+                        // Dados de fallback
                         masterData = [
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'}
+                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
+                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
+                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
+                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
+                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'}
                         ];
                         filteredData = [...masterData];
                         populateFilters();
@@ -280,7 +299,7 @@
                 });
             }
 
-            // Popular selects com valores únicos
+            // Popular selects
             function populateFilters() {
                 const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
                 const origens = [...new Set(masterData.map(d => d.origem))].sort();
@@ -303,7 +322,7 @@
                 });
             }
 
-            // Aplicar todos os filtros
+            // Aplicar filtros
             function applyAllFilters() {
                 let filtered = [...masterData];
 
@@ -323,17 +342,38 @@
                 if (filterMotor.value) {
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
-                // Filtro data range
+                
+                // Filtro de data range (CORRIGIDO)
                 if (dateRangeInput.value) {
                     const dates = dateRangeInput.value.split(' to ');
+                    
                     if (dates.length === 2) {
-                        const start = dates[0];
-                        const end = dates[1];
-                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
+                        // Converter datas do filtro para formato ISO para comparação
+                        const [startDay, startMonth, startYear] = dates[0].split('/');
+                        const [endDay, endMonth, endYear] = dates[1].split('/');
+                        
+                        const startISO = `${startYear}-${startMonth}-${startDay}`;
+                        const endISO = `${endYear}-${endMonth}-${endDay}`;
+                        
+                        filtered = filtered.filter(item => {
+                            // Converter data do item para ISO para comparação
+                            const [itemDay, itemMonth, itemYear] = item.data.split('/');
+                            const itemISO = `${itemYear}-${itemMonth}-${itemDay}`;
+                            
+                            return itemISO >= startISO && itemISO <= endISO;
+                        });
                     } else if (dates.length === 1) {
-                        filtered = filtered.filter(item => item.data === dates[0]);
+                        const [day, month, year] = dates[0].split('/');
+                        const filterISO = `${year}-${month}-${day}`;
+                        
+                        filtered = filtered.filter(item => {
+                            const [itemDay, itemMonth, itemYear] = item.data.split('/');
+                            const itemISO = `${itemYear}-${itemMonth}-${itemDay}`;
+                            return itemISO === filterISO;
+                        });
                     }
                 }
+                
                 // Busca global
                 if (globalSearch.value.trim() !== '') {
                     const term = globalSearch.value.toLowerCase();
@@ -352,38 +392,29 @@
                 updateKPIs();
             }
 
-            // Ordenação
-// Ordenação com suporte ao formato brasileiro
-function sortData() {
-    const { key, direction } = sortConfig;
-    filteredData.sort((a, b) => {
-        let valA = a[key];
-        let valB = b[key];
-        
-        if (key === 'data') {
-            // Função para converter data brasileira para timestamp
-            const parseDate = (dateStr) => {
-                // Se já estiver no formato ISO (YYYY-MM-DD)
-                if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
-                    return new Date(dateStr).getTime();
-                }
-                // Formato brasileiro DD/MM/YYYY
-                if (dateStr.includes('/')) {
-                    const [dia, mes, ano] = dateStr.split('/');
-                    return new Date(`${ano}-${mes}-${dia}`).getTime();
-                }
-                return new Date(dateStr).getTime();
-            };
-            
-            valA = parseDate(valA);
-            valB = parseDate(valB);
-        }
-        
-        if (valA < valB) return direction === 'asc' ? -1 : 1;
-        if (valA > valB) return direction === 'asc' ? 1 : -1;
-        return 0;
-    });
-}
+            // Ordenação com suporte ao formato brasileiro
+            function sortData() {
+                const { key, direction } = sortConfig;
+                filteredData.sort((a, b) => {
+                    let valA = a[key];
+                    let valB = b[key];
+                    
+                    if (key === 'data') {
+                        // Converter datas brasileiras para timestamps
+                        const parseDate = (dateStr) => {
+                            const [dia, mes, ano] = dateStr.split('/');
+                            return new Date(`${ano}-${mes}-${dia}`).getTime();
+                        };
+                        
+                        valA = parseDate(valA);
+                        valB = parseDate(valB);
+                    }
+                    
+                    if (valA < valB) return direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
 
             // Renderizar tabela
             function renderTable() {
