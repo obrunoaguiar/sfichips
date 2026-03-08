@@ -353,28 +353,37 @@
             }
 
             // Ordenação
-            function sortData() {
-                const { key, direction } = sortConfig;
-                filteredData.sort((a, b) => {
-                    let valA = a[key];
-                    let valB = b[key];
-                    if (key === 'data') {
-                        // Converter formato DD/MM/YYYY para comparação
-                        const parseDate = (dateStr) => {
-                            if (dateStr.includes('/')) {
-                                const [d, m, y] = dateStr.split('/');
-                                return new Date(`${y}-${m}-${d}`).getTime();
-                            }
-                            return new Date(dateStr).getTime();
-                        };
-                        valA = parseDate(valA);
-                        valB = parseDate(valB);
-                    }
-                    if (valA < valB) return direction === 'asc' ? -1 : 1;
-                    if (valA > valB) return direction === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
+// Ordenação com suporte ao formato brasileiro
+function sortData() {
+    const { key, direction } = sortConfig;
+    filteredData.sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+        
+        if (key === 'data') {
+            // Função para converter data brasileira para timestamp
+            const parseDate = (dateStr) => {
+                // Se já estiver no formato ISO (YYYY-MM-DD)
+                if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+                    return new Date(dateStr).getTime();
+                }
+                // Formato brasileiro DD/MM/YYYY
+                if (dateStr.includes('/')) {
+                    const [dia, mes, ano] = dateStr.split('/');
+                    return new Date(`${ano}-${mes}-${dia}`).getTime();
+                }
+                return new Date(dateStr).getTime();
+            };
+            
+            valA = parseDate(valA);
+            valB = parseDate(valB);
+        }
+        
+        if (valA < valB) return direction === 'asc' ? -1 : 1;
+        if (valA > valB) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
 
             // Renderizar tabela
             function renderTable() {
