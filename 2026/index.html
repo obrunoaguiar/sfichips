@@ -1,12 +1,16 @@
 <!DOCTYPE html>
+<html lang="pt-br">
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Veículo - Google Sheets</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:700,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Dashboard Interativo | CRM - Dados Reais</title>
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Flatpickr para calendário (configurado para PT-BR) -->
+    <!-- Flatpickr para calendário -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- PapaParse para CSV -->
@@ -15,6 +19,108 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(34, 34, 34, 0.95);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 32px;
+        }
+        .panel {
+            display: flex;
+            flex-direction: row;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .panel-left {
+            flex: 2;
+        }
+        .panel-right {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 220px;
+        }
+        .retrovisor {
+            font-size: 1.1em;
+            color: #b3b3b3;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+        }
+        th {
+            background: #2c2c2c;
+        }
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.03);
+        }
+        .chart-container {
+            margin-top: 24px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        @media (max-width: 900px) {
+            .dashboard {
+                padding: 12px;
+            }
+            .panel {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .controls button, .controls select {
+            background: #00eaff;
+            color: #232526;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .controls button:hover {
+            background: #00b3b3;
+        }
+        .controls select {
+            font-weight: 400;
+        }
+        .hidden {
+            display: none !important;
+        }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .transition-all { transition: all 0.2s ease; }
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
@@ -22,6 +128,20 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
+<body>
+    <div class="dashboard">
+        <h1>Painel do Veículo</h1>
+        <div class="controls">
+            <button id="toggleTable">Tabela</button>
+            <button id="toggleChart">Gráfico</button>
+            <select id="selectChartType">
+                <option value="line">Linha</option>
+                <option value="bar">Barra</option>
+                <option value="pie">Pizza</option>
+            </select>
+            <select id="selectMetric">
+                <option value="auto">Auto</option>
+            </select>
 <body class="text-slate-700 antialiased">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -30,15 +150,19 @@
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM
+                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Dados Reais
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads</p>
+                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads (08/03/2026)</p>
             </div>
             <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
                 <i class="fas fa-cloud-download-alt text-blue-400"></i>
                 <span id="data-status">Carregando dados...</span>
             </div>
         </div>
+        <div class="panel">
+            <div class="panel-left">
+                <div class="chart-container" id="chartContainer">
+                    <canvas id="vehicleChart"></canvas>
 
         <!-- Cards de KPI -->
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-8">
@@ -50,7 +174,11 @@
                     </div>
                     <div class="bg-blue-50 p-3 rounded-lg"><i class="fas fa-database text-blue-500 text-xl"></i></div>
                 </div>
+                <table id="dataTable"></table>
             </div>
+            <div class="panel-right">
+                <div class="retrovisor" id="retrovisor">
+                    <strong>Retrovisor:</strong> Últimos eventos do veículo
             <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start">
                     <div>
@@ -77,6 +205,7 @@
                     </div>
                     <div class="bg-amber-50 p-3 rounded-lg"><i class="fas fa-car text-amber-500 text-xl"></i></div>
                 </div>
+                <ul id="historyList"></ul>
             </div>
         </div>
 
@@ -92,10 +221,10 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <!-- Data Range - Configurado para PT-BR -->
+                <!-- Data Range -->
                 <div class="lg:col-span-1">
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
-                    <input type="text" id="date-range" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="DD/MM/YYYY até DD/MM/YYYY">
+                    <input type="text" id="date-range" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
                 </div>
                 <!-- Dealer -->
                 <div>
@@ -173,11 +302,32 @@
         <!-- Rodapé -->
         <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados carregados via Google Sheets</p>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <script>
+        // URL do CSV publicado
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
+        let globalData = [];
+        let chartInstance = null;
+        // Parse CSV com PapaParse
+        function loadCSV() {
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    globalData = results.data;
+                    renderTable(globalData);
+                    renderChart(globalData);
+                    renderRetrovisor(globalData);
+                    setupControls(globalData);
+                },
+                error: function(err) {
+                    alert('Erro ao carregar dados: ' + err);
+                }
         (function() {
-            // URL do CSV
-            const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSTzroLbBE7Y4C_qv6fZSkhJetJrG6rn7AP21LqzLiHajJiwfhvkA7z_uKo2gmM4PVGEJvuzF_nVTJg/pub?gid=0&single=true&output=csv';
+            // URL do CSV (fornecida por você)
+            const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1421458048&single=true&output=csv';
             
             // Estado global
             let masterData = [];
@@ -202,57 +352,36 @@
             const clearBtn = document.getElementById('clear-filters');
             const dateRangeInput = document.getElementById('date-range');
             
-            // Função para converter data brasileira para ISO para comparação
-            function brDateToISO(brDate) {
-                if (!brDate) return null;
-                // Se já estiver no formato ISO, retorna como está
-                if (brDate.includes('-') && brDate.split('-')[0].length === 4) {
-                    return brDate;
-                }
-                // Converte DD/MM/YYYY para YYYY-MM-DD
-                const [dia, mes, ano] = brDate.split('/');
-                return `${ano}-${mes}-${dia}`;
-            }
-
-            // Função para converter ISO para data brasileira para exibição
-            function isoToBRDate(isoDate) {
-                if (!isoDate) return '';
-                const [ano, mes, dia] = isoDate.split('-');
-                return `${dia}/${mes}/${ano}`;
-            }
-
-            // Inicializa Flatpickr com formato brasileiro
+            // Inicializa Flatpickr
             let datePicker = flatpickr(dateRangeInput, {
                 mode: 'range',
-                dateFormat: 'd/m/Y', // Formato brasileiro
-                locale: {
-                    firstDayOfWeek: 1,
-                    weekdays: {
-                        shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-                        longhand: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
-                    },
-                    months: {
-                        shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                        longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-                    }
-                },
+                dateFormat: 'Y-m-d',
                 onClose: applyAllFilters
             });
+        }
+        loadCSV();
 
-            // Carregar dados do CSV
+        function renderTable(data) {
+            const table = document.getElementById('dataTable');
+            if (!data.length) {
+                table.innerHTML = '<tr><td>Sem dados</td></tr>';
+                return;
+            // Carregar dados do CSV usando PapaParse com configuração especial
             function loadData() {
                 dataStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando...';
                 
+                // Configuração do PapaParse para download direto
                 Papa.parse(CSV_URL, {
                     download: true,
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => {
                         try {
+                            // Mapear os dados - verificar nomes das colunas
                             const firstRow = results.data[0] || {};
                             const keys = Object.keys(firstRow);
                             
-                            // Identificar colunas
+                            // Identificar as colunas (podem ter nomes diferentes)
                             const dataKey = keys.find(k => k.toLowerCase().includes('data')) || 'Data';
                             const dealerKey = keys.find(k => k.toLowerCase().includes('dealer')) || 'Dealer';
                             const origemKey = keys.find(k => k.toLowerCase().includes('origem')) || 'Origem';
@@ -260,7 +389,10 @@
                             const motorKey = keys.find(k => k.toLowerCase().includes('motor')) || 'Motor';
                             
                             masterData = results.data
-                                .filter(row => row[dataKey] && row[dataKey].trim() !== '')
+                                .filter(row => {
+                                    // Filtrar linhas vazias
+                                    return row[dataKey] && row[dataKey].trim() !== '';
+                                })
                                 .map(row => ({
                                     data: row[dataKey] ? row[dataKey].trim() : '',
                                     dealer: row[dealerKey] ? row[dealerKey].trim() : '',
@@ -268,7 +400,9 @@
                                     veiculo: row[veiculoKey] ? row[veiculoKey].trim() : '',
                                     motor: row[motorKey] ? row[motorKey].trim() : ''
                                 }))
-                                .filter(item => item.data && item.dealer && item.origem && item.veiculo && item.motor);
+                                .filter(item => 
+                                    item.data && item.dealer && item.origem && item.veiculo && item.motor
+                                );
                             
                             if (masterData.length === 0) {
                                 throw new Error('Nenhum dado válido encontrado');
@@ -283,13 +417,17 @@
                         }
                     },
                     error: (error) => {
-                        // Dados de fallback
+                        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Erro ao carregar dados: ${error.message || 'Falha no download'}</td></tr>`;
+                        dataStatus.innerHTML = '<i class="fas fa-exclamation-circle text-red-400 mr-1"></i> Erro no carregamento';
+                        console.error('Erro PapaParse:', error);
+                        
+                        // Dados de fallback (baseados na sua imagem)
                         masterData = [
-                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
-                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
-                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
-                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
-                            {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'}
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'}
                         ];
                         filteredData = [...masterData];
                         populateFilters();
@@ -299,7 +437,7 @@
                 });
             }
 
-            // Popular selects
+            // Popular selects com valores únicos
             function populateFilters() {
                 const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
                 const origens = [...new Set(masterData.map(d => d.origem))].sort();
@@ -311,7 +449,44 @@
                 fillSelect(filterVeiculo, veiculos);
                 fillSelect(filterMotor, motores);
             }
+            const headers = Object.keys(data[0]);
+            let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+            html += data.map(row => '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>').join('');
+            table.innerHTML = html;
+        }
 
+        function renderChart(data, chartType = 'line', metric = 'auto') {
+            const ctx = document.getElementById('vehicleChart').getContext('2d');
+            // Detecta colunas
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            let metricCol = metric === 'auto' ? Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade')) : metric;
+            if (!timeCol || !metricCol) return;
+            const labels = data.map(row => row[timeCol]);
+            const values = data.map(row => parseFloat(row[metricCol]) || 0);
+            if (chartInstance) chartInstance.destroy();
+            let chartData = {};
+            if (chartType === 'pie') {
+                chartData = {
+                    labels,
+                    datasets: [{
+                        label: metricCol,
+                        data: values,
+                        backgroundColor: labels.map((_,i) => `rgba(${100+i*10},${200-i*10},255,0.7)`),
+                    }]
+                };
+            } else {
+                chartData = {
+                    labels,
+                    datasets: [{
+                        label: metricCol,
+                        data: values,
+                        borderColor: '#00eaff',
+                        backgroundColor: 'rgba(0,234,255,0.15)',
+                        tension: 0.3,
+                        pointRadius: 3,
+                        fill: true
+                    }]
+                };
             function fillSelect(selectElement, values) {
                 selectElement.innerHTML = `<option value="">Todos ${selectElement.id.replace('filter-', '')}s</option>`;
                 values.forEach(v => {
@@ -321,8 +496,18 @@
                     selectElement.appendChild(option);
                 });
             }
+            chartInstance = new Chart(ctx, {
+                type: chartType,
+                data: chartData,
+                options: {
+                    plugins: {
+                        legend: { display: true, labels: { color: '#fff' } }
+                    },
+                    scales: chartType === 'pie' ? {} : {
+                        x: { ticks: { color: '#fff' } },
+                        y: { ticks: { color: '#fff' } }
 
-            // Aplicar filtros
+            // Aplicar todos os filtros
             function applyAllFilters() {
                 let filtered = [...masterData];
 
@@ -342,38 +527,17 @@
                 if (filterMotor.value) {
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
-                
-                // Filtro de data range (CORRIGIDO)
+                // Filtro data range
                 if (dateRangeInput.value) {
                     const dates = dateRangeInput.value.split(' to ');
-                    
                     if (dates.length === 2) {
-                        // Converter datas do filtro para formato ISO para comparação
-                        const [startDay, startMonth, startYear] = dates[0].split('/');
-                        const [endDay, endMonth, endYear] = dates[1].split('/');
-                        
-                        const startISO = `${startYear}-${startMonth}-${startDay}`;
-                        const endISO = `${endYear}-${endMonth}-${endDay}`;
-                        
-                        filtered = filtered.filter(item => {
-                            // Converter data do item para ISO para comparação
-                            const [itemDay, itemMonth, itemYear] = item.data.split('/');
-                            const itemISO = `${itemYear}-${itemMonth}-${itemDay}`;
-                            
-                            return itemISO >= startISO && itemISO <= endISO;
-                        });
+                        const start = dates[0];
+                        const end = dates[1];
+                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
                     } else if (dates.length === 1) {
-                        const [day, month, year] = dates[0].split('/');
-                        const filterISO = `${year}-${month}-${day}`;
-                        
-                        filtered = filtered.filter(item => {
-                            const [itemDay, itemMonth, itemYear] = item.data.split('/');
-                            const itemISO = `${itemYear}-${itemMonth}-${itemDay}`;
-                            return itemISO === filterISO;
-                        });
+                        filtered = filtered.filter(item => item.data === dates[0]);
                     }
                 }
-                
                 // Busca global
                 if (globalSearch.value.trim() !== '') {
                     const term = globalSearch.value.toLowerCase();
@@ -392,24 +556,24 @@
                 updateKPIs();
             }
 
-            // Ordenação com suporte ao formato brasileiro
+            // Ordenação
             function sortData() {
                 const { key, direction } = sortConfig;
                 filteredData.sort((a, b) => {
                     let valA = a[key];
                     let valB = b[key];
-                    
                     if (key === 'data') {
-                        // Converter datas brasileiras para timestamps
+                        // Converter formato DD/MM/YYYY para comparação
                         const parseDate = (dateStr) => {
-                            const [dia, mes, ano] = dateStr.split('/');
-                            return new Date(`${ano}-${mes}-${dia}`).getTime();
+                            if (dateStr.includes('/')) {
+                                const [d, m, y] = dateStr.split('/');
+                                return new Date(`${y}-${m}-${d}`).getTime();
+                            }
+                            return new Date(dateStr).getTime();
                         };
-                        
                         valA = parseDate(valA);
                         valB = parseDate(valB);
                     }
-                    
                     if (valA < valB) return direction === 'asc' ? -1 : 1;
                     if (valA > valB) return direction === 'asc' ? 1 : -1;
                     return 0;
@@ -467,7 +631,19 @@
                     renderTable();
                 });
             });
+        }
 
+        function renderRetrovisor(data) {
+            const historyList = document.getElementById('historyList');
+            const lastRows = data.slice(-5).reverse();
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
+            historyList.innerHTML = lastRows.map(row => {
+                const time = timeCol ? row[timeCol] : '';
+                const event = eventCol ? row[eventCol] : JSON.stringify(row);
+                return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
+            }).join('');
+        }
             // Limpar filtros
             clearBtn.addEventListener('click', () => {
                 filterDealer.value = '';
@@ -479,6 +655,36 @@
                 applyAllFilters();
             });
 
+        function setupControls(data) {
+            const btnTable = document.getElementById('toggleTable');
+            const btnChart = document.getElementById('toggleChart');
+            const chartContainer = document.getElementById('chartContainer');
+            const table = document.getElementById('dataTable');
+            const selectChartType = document.getElementById('selectChartType');
+            const selectMetric = document.getElementById('selectMetric');
+            // Alternância
+            btnTable.onclick = () => {
+                chartContainer.classList.add('hidden');
+                table.classList.remove('hidden');
+            };
+            btnChart.onclick = () => {
+                chartContainer.classList.remove('hidden');
+                table.classList.add('hidden');
+            };
+            // Inicial: mostra gráfico
+            chartContainer.classList.remove('hidden');
+            table.classList.add('hidden');
+            // Chart type
+            selectChartType.onchange = () => {
+                renderChart(globalData, selectChartType.value, selectMetric.value);
+            };
+            // Métricas
+            const headers = Object.keys(data[0]);
+            selectMetric.innerHTML = '<option value="auto">Auto</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join('');
+            selectMetric.onchange = () => {
+                renderChart(globalData, selectChartType.value, selectMetric.value);
+            };
+        }
             // Inicializar
             loadData();
         })();
