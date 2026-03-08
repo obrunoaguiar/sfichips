@@ -324,44 +324,33 @@
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
                 // Filtro data range
-              // Filtro de data range (CORRIGIDO - versão definitiva)
-if (dateRangeInput.value) {
-    const dates = dateRangeInput.value.split(' to ');
-    
-    if (dates.length === 2) {
-        // Extrair dia, mês e ano das datas do filtro (formato DD/MM/YYYY)
-        const [startDay, startMonth, startYear] = dates[0].split('/');
-        const [endDay, endMonth, endYear] = dates[1].split('/');
-        
-        // Criar objetos Date no formato ISO para comparação correta
-        const startDate = new Date(`${startYear}-${startMonth}-${startDay}`);
-        const endDate = new Date(`${endYear}-${endMonth}-${endDay}`);
-        
-        // Ajustar para fim do dia (23:59:59) para incluir todo o dia final
-        endDate.setHours(23, 59, 59, 999);
-        
-        filtered = filtered.filter(item => {
-            // Extrair dia, mês e ano da data do item (formato DD/MM/YYYY)
-            const [itemDay, itemMonth, itemYear] = item.data.split('/');
-            
-            // Criar objeto Date para comparação
-            const itemDate = new Date(`${itemYear}-${itemMonth}-${itemDay}`);
-            
-            // Comparar timestamps
-            return itemDate >= startDate && itemDate <= endDate;
-        });
-    } else if (dates.length === 1) {
-        // Data única selecionada
-        const [day, month, year] = dates[0].split('/');
-        const filterDate = new Date(`${year}-${month}-${day}`).setHours(0, 0, 0, 0);
-        
-        filtered = filtered.filter(item => {
-            const [itemDay, itemMonth, itemYear] = item.data.split('/');
-            const itemDate = new Date(`${itemYear}-${itemMonth}-${itemDay}`).setHours(0, 0, 0, 0);
-            return itemDate === filterDate;
-        });
-    }
-}
+                if (dateRangeInput.value) {
+                    const dates = dateRangeInput.value.split(' to ');
+                    if (dates.length === 2) {
+                        const start = dates[0];
+                        const end = dates[1];
+                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
+                    } else if (dates.length === 1) {
+                        filtered = filtered.filter(item => item.data === dates[0]);
+                    }
+                }
+                // Busca global
+                if (globalSearch.value.trim() !== '') {
+                    const term = globalSearch.value.toLowerCase();
+                    filtered = filtered.filter(item => 
+                        item.data.toLowerCase().includes(term) ||
+                        item.dealer.toLowerCase().includes(term) ||
+                        item.origem.toLowerCase().includes(term) ||
+                        item.veiculo.toLowerCase().includes(term) ||
+                        item.motor.toLowerCase().includes(term)
+                    );
+                }
+
+                filteredData = filtered;
+                sortData();
+                renderTable();
+                updateKPIs();
+            }
 
             // Ordenação
             function sortData() {
