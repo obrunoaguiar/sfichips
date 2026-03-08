@@ -1,277 +1,340 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Veículo - Google Sheets</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:700,400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #232526 0%, #414345 100%);
-            color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-        .dashboard {
-            max-width: 900px;
-            margin: 40px auto;
-            background: rgba(34, 34, 34, 0.95);
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            padding: 32px;
-        }
-        .panel {
-            display: flex;
-            flex-direction: row;
-            gap: 32px;
-            flex-wrap: wrap;
-        }
-        .panel-left {
-            flex: 2;
-        }
-        .panel-right {
-            flex: 1;
-            background: rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 16px;
-            min-width: 220px;
-        }
-        .retrovisor {
-            font-size: 1.1em;
-            color: #b3b3b3;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 8px;
-        }
-        h1 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 24px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 10px 8px;
-            text-align: left;
-        }
-        th {
-            background: #2c2c2c;
-        }
-        tr:nth-child(even) {
-            background: rgba(255,255,255,0.03);
-        }
-        .chart-container {
-            margin-top: 24px;
-            background: rgba(255,255,255,0.07);
-            border-radius: 8px;
-            padding: 16px;
-        }
-        @media (max-width: 900px) {
-            .dashboard {
-                padding: 12px;
-            }
-            .panel {
-                flex-direction: column;
-                gap: 16px;
-            }
-        }
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .controls button, .controls select {
-            background: #00eaff;
-            color: #232526;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .controls button:hover {
-            background: #00b3b3;
-        }
-        .controls select {
-            font-weight: 400;
-        }
-        .hidden {
-            display: none !important;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Interativo - Veículos</title>
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PapaParse CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- Flatpickr CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,700|Poppins:400,700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      min-height: 100vh;
+    }
+    .fade {
+      transition: opacity 0.3s;
+    }
+    .card {
+      box-shadow: 0 4px 16px rgba(30,41,59,0.12);
+      border-radius: 1rem;
+      background: #fff;
+    }
+    .card-dark {
+      background: #1e293b;
+      color: #fff;
+    }
+    .card-metric {
+      background: #2563eb;
+      color: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+    }
+    .card-metric .label {
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+    .card-metric .value {
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+    .filter-label {
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 0.25rem;
+    }
+    .filter-group {
+      margin-bottom: 1rem;
+    }
+    .table-scroll {
+      overflow-x: auto;
+    }
+    .table th {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .table th:hover {
+      background: #e0e7ef;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .checkbox-group label {
+      background: #e0e7ef;
+      border-radius: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.95em;
+      margin-bottom: 0.25rem;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 0.3rem;
+    }
+    .search-bar {
+      border-radius: 0.5rem;
+      border: 1px solid #cbd5e1;
+      padding: 0.5rem 1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+      font-size: 1em;
+    }
+  </style>
 </head>
-<body>
-    <div class="dashboard">
-        <h1>Painel do Veículo</h1>
-        <div class="controls">
-            <button id="toggleTable">Tabela</button>
-            <button id="toggleChart">Gráfico</button>
-            <select id="selectChartType">
-                <option value="line">Linha</option>
-                <option value="bar">Barra</option>
-                <option value="pie">Pizza</option>
-            </select>
-            <select id="selectMetric">
-                <option value="auto">Auto</option>
-            </select>
-        </div>
-        <div class="panel">
-            <div class="panel-left">
-                <div class="chart-container" id="chartContainer">
-                    <canvas id="vehicleChart"></canvas>
-                </div>
-                <table id="dataTable"></table>
-            </div>
-            <div class="panel-right">
-                <div class="retrovisor" id="retrovisor">
-                    <strong>Retrovisor:</strong> Últimos eventos do veículo
-                </div>
-                <ul id="historyList"></ul>
-            </div>
-        </div>
+<body class="fade">
+  <div class="max-w-6xl mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">Dashboard Interativo de Veículos</h1>
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="card-metric p-6 text-center">
+        <div class="label">Total de Registros</div>
+        <div class="value" id="kpi-total">0</div>
+      </div>
+      <div class="card-metric p-6 text-center">
+        <div class="label">Dealers Distintos</div>
+        <div class="value" id="kpi-dealers">0</div>
+      </div>
+      <div class="card-metric p-6 text-center">
+        <div class="label">Origens Distintas</div>
+        <div class="value" id="kpi-origens">0</div>
+      </div>
     </div>
-    <script>
-        // URL do CSV publicado
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
+    <!-- Filtros -->
+    <div class="card card-dark p-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div class="filter-group">
+          <div class="filter-label">Data</div>
+          <input id="filter-date" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Selecione o intervalo" readonly>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Dealer</div>
+          <div class="checkbox-group" id="filter-dealer"></div>
+          <div class="flex gap-2 mt-1">
+            <button id="dealer-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
+            <button id="dealer-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Origem</div>
+          <div class="checkbox-group" id="filter-origem"></div>
+          <div class="flex gap-2 mt-1">
+            <button id="origem-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
+            <button id="origem-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Veículo</div>
+          <div class="checkbox-group" id="filter-veiculo"></div>
+          <div class="flex gap-2 mt-1">
+            <button id="veiculo-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
+            <button id="veiculo-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Motor</div>
+          <div class="checkbox-group" id="filter-motor"></div>
+          <div class="flex gap-2 mt-1">
+            <button id="motor-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
+            <button id="motor-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Busca -->
+    <input type="text" id="search-bar" class="search-bar mb-4" placeholder="Buscar...">
+    <!-- Tabela -->
+    <div class="card table-scroll p-4">
+      <table class="table w-full min-w-max text-sm" id="data-table">
+        <thead>
+          <tr>
+            <th data-col="Data">Data</th>
+            <th data-col="Dealer">Dealer</th>
+            <th data-col="Origem">Origem</th>
+            <th data-col="Veículo">Veículo</th>
+            <th data-col="Motor">Motor</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="5" class="text-center text-gray-400">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="error-msg" class="mt-6 text-center text-red-500 font-bold hidden">Erro ao carregar dados. Tente novamente.</div>
+  </div>
+  <script>
+    // Config
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
+    const COLS = ['Data', 'Dealer', 'Origem', 'Veículo', 'Motor'];
+    let rawData = [];
+    let filteredData = [];
+    let sortCol = null;
+    let sortAsc = true;
+    let searchTerm = '';
+    let dateRange = [null, null];
+    let filters = {
+      Dealer: [],
+      Origem: [],
+      Veículo: [],
+      Motor: []
+    };
 
-        let globalData = [];
-        let chartInstance = null;
+    // Utilidades
+    function unique(arr) {
+      return [...new Set(arr.filter(x => x && x.trim()))];
+    }
+    function formatDate(d) {
+      if (!d) return '';
+      const [y, m, day] = d.split('-');
+      return `${day}/${m}/${y}`;
+    }
+    function parseDate(d) {
+      // Tenta DD/MM/YYYY ou YYYY-MM-DD
+      if (!d) return null;
+      if (d.includes('/')) {
+        const [day, m, y] = d.split('/');
+        return new Date(`${y}-${m}-${day}`);
+      } else if (d.includes('-')) {
+        return new Date(d);
+      }
+      return null;
+    }
 
-        function csvToArray(str, delimiter = ',') {
-            const rows = str.trim().split('\n');
-            const headers = rows[0].split(delimiter);
-            return rows.slice(1).map(row => {
-                const values = row.split(delimiter);
-                return headers.reduce((obj, header, i) => {
-                    obj[header] = values[i];
-                    return obj;
-                }, {});
-            });
+    // Carregar CSV
+    function loadData() {
+      Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        complete: function(results) {
+          rawData = results.data.filter(row => COLS.every(c => row[c]));
+          setupFilters();
+          applyFilters();
+        },
+        error: function() {
+          document.getElementById('error-msg').classList.remove('hidden');
         }
+      });
+    }
 
-        fetch(csvUrl)
-            .then(response => response.text())
-            .then(csv => {
-                globalData = csvToArray(csv);
-                renderTable(globalData);
-                renderChart(globalData);
-                renderRetrovisor(globalData);
-                setupControls(globalData);
-            });
-
-        function renderTable(data) {
-            const table = document.getElementById('dataTable');
-            if (!data.length) {
-                table.innerHTML = '<tr><td>Sem dados</td></tr>';
-                return;
-            }
-            const headers = Object.keys(data[0]);
-            let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-            html += data.map(row => '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>').join('');
-            table.innerHTML = html;
+    // Filtros
+    function setupFilters() {
+      COLS.slice(1).forEach(col => {
+        const values = unique(rawData.map(row => row[col]));
+        const group = document.getElementById('filter-' + col.toLowerCase());
+        group.innerHTML = values.map(v => `<label><input type="checkbox" value="${v}">${v}</label>`).join('');
+        filters[col] = values.slice();
+        // Eventos
+        group.querySelectorAll('input').forEach(cb => {
+          cb.checked = true;
+          cb.onchange = () => {
+            filters[col] = Array.from(group.querySelectorAll('input:checked')).map(x => x.value);
+            applyFilters();
+          };
+        });
+        // Botões
+        document.getElementById(col.toLowerCase() + '-all').onclick = () => {
+          group.querySelectorAll('input').forEach(cb => cb.checked = true);
+          filters[col] = values.slice();
+          applyFilters();
+        };
+        document.getElementById(col.toLowerCase() + '-clear').onclick = () => {
+          group.querySelectorAll('input').forEach(cb => cb.checked = false);
+          filters[col] = [];
+          applyFilters();
+        };
+      });
+      // Date picker
+      flatpickr('#filter-date', {
+        mode: 'range',
+        dateFormat: 'd/m/Y',
+        onChange: function(selectedDates, dateStr) {
+          if (selectedDates.length === 2) {
+            dateRange = selectedDates;
+          } else {
+            dateRange = [null, null];
+          }
+          applyFilters();
         }
+      });
+    }
 
-        function renderChart(data, chartType = 'line', metric = 'auto') {
-            const ctx = document.getElementById('vehicleChart').getContext('2d');
-            // Detecta colunas
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            let metricCol = metric === 'auto' ? Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade')) : metric;
-            if (!timeCol || !metricCol) return;
-            const labels = data.map(row => row[timeCol]);
-            const values = data.map(row => parseFloat(row[metricCol]) || 0);
-            if (chartInstance) chartInstance.destroy();
-            let chartData = {};
-            if (chartType === 'pie') {
-                chartData = {
-                    labels,
-                    datasets: [{
-                        label: metricCol,
-                        data: values,
-                        backgroundColor: labels.map((_,i) => `rgba(${100+i*10},${200-i*10},255,0.7)`),
-                    }]
-                };
-            } else {
-                chartData = {
-                    labels,
-                    datasets: [{
-                        label: metricCol,
-                        data: values,
-                        borderColor: '#00eaff',
-                        backgroundColor: 'rgba(0,234,255,0.15)',
-                        tension: 0.3,
-                        pointRadius: 3,
-                        fill: true
-                    }]
-                };
-            }
-            chartInstance = new Chart(ctx, {
-                type: chartType,
-                data: chartData,
-                options: {
-                    plugins: {
-                        legend: { display: true, labels: { color: '#fff' } }
-                    },
-                    scales: chartType === 'pie' ? {} : {
-                        x: { ticks: { color: '#fff' } },
-                        y: { ticks: { color: '#fff' } }
-                    }
-                }
-            });
-        }
+    // Busca
+    document.getElementById('search-bar').oninput = function(e) {
+      searchTerm = e.target.value.toLowerCase();
+      applyFilters();
+    };
 
-        function renderRetrovisor(data) {
-            const historyList = document.getElementById('historyList');
-            const lastRows = data.slice(-5).reverse();
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
-            historyList.innerHTML = lastRows.map(row => {
-                const time = timeCol ? row[timeCol] : '';
-                const event = eventCol ? row[eventCol] : JSON.stringify(row);
-                return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
-            }).join('');
+    // Ordenação
+    document.querySelectorAll('#data-table th').forEach(th => {
+      th.onclick = function() {
+        const col = th.getAttribute('data-col');
+        if (sortCol === col) sortAsc = !sortAsc;
+        else {
+          sortCol = col;
+          sortAsc = true;
         }
+        applyFilters();
+      };
+    });
 
-        function setupControls(data) {
-            const btnTable = document.getElementById('toggleTable');
-            const btnChart = document.getElementById('toggleChart');
-            const chartContainer = document.getElementById('chartContainer');
-            const table = document.getElementById('dataTable');
-            const selectChartType = document.getElementById('selectChartType');
-            const selectMetric = document.getElementById('selectMetric');
-            // Alternância
-            btnTable.onclick = () => {
-                chartContainer.classList.add('hidden');
-                table.classList.remove('hidden');
-            };
-            btnChart.onclick = () => {
-                chartContainer.classList.remove('hidden');
-                table.classList.add('hidden');
-            };
-            // Inicial: mostra gráfico
-            chartContainer.classList.remove('hidden');
-            table.classList.add('hidden');
-            // Chart type
-            selectChartType.onchange = () => {
-                renderChart(globalData, selectChartType.value, selectMetric.value);
-            };
-            // Métricas
-            const headers = Object.keys(data[0]);
-            selectMetric.innerHTML = '<option value="auto">Auto</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join('');
-            selectMetric.onchange = () => {
-                renderChart(globalData, selectChartType.value, selectMetric.value);
-            };
-        }
-    </script>
+    // Aplicar filtros
+    function applyFilters() {
+      filteredData = rawData.filter(row => {
+        // Filtros múltiplos
+        return COLS.slice(1).every(col => filters[col].length === 0 || filters[col].includes(row[col])) &&
+          // Filtro de data
+          (!dateRange[0] || !dateRange[1] || (parseDate(row.Data) >= dateRange[0] && parseDate(row.Data) <= dateRange[1])) &&
+          // Busca global
+          (searchTerm === '' || COLS.some(col => row[col].toLowerCase().includes(searchTerm)));
+      });
+      // Ordenação
+      if (sortCol) {
+        filteredData.sort((a, b) => {
+          if (sortCol === 'Data') {
+            return sortAsc ? parseDate(a.Data) - parseDate(b.Data) : parseDate(b.Data) - parseDate(a.Data);
+          }
+          return sortAsc ? a[sortCol].localeCompare(b[sortCol]) : b[sortCol].localeCompare(a[sortCol]);
+        });
+      }
+      renderTable();
+      renderKPIs();
+    }
+
+    // Renderizar tabela
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      if (!filteredData.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-400">Nenhum registro encontrado.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = filteredData.map(row =>
+        `<tr>
+          <td>${row.Data}</td>
+          <td>${row.Dealer}</td>
+          <td>${row.Origem}</td>
+          <td>${row.Veículo}</td>
+          <td>${row.Motor}</td>
+        </tr>`
+      ).join('');
+    }
+
+    // Renderizar KPIs
+    function renderKPIs() {
+      document.getElementById('kpi-total').textContent = filteredData.length;
+      document.getElementById('kpi-dealers').textContent = unique(filteredData.map(r => r.Dealer)).length;
+      document.getElementById('kpi-origens').textContent = unique(filteredData.map(r => r.Origem)).length;
+    }
+
+    // Inicialização
+    loadData();
+  </script>
 </body>
 </html>
