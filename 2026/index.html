@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Veículo - Google Sheets</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:700,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(34, 34, 34, 0.95);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 32px;
+        }
+        .panel {
+            display: flex;
+            flex-direction: row;
+            gap: 32px;
+        }
+        .panel-left {
+            flex: 2;
+        }
+        .panel-right {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 220px;
+        }
+        .retrovisor {
+            font-size: 1.1em;
+            color: #b3b3b3;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+        }
+        th {
+            background: #2c2c2c;
+        }
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.03);
+        }
+        .chart-container {
+            margin-top: 24px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        @media (max-width: 700px) {
+            .panel {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>Painel do Veículo</h1>
+        <div class="panel">
+            <div class="panel-left">
+                <div class="chart-container">
+                    <canvas id="vehicleChart"></canvas>
+                </div>
+                <table id="dataTable"></table>
+            </div>
+            <div class="panel-right">
+                <div class="retrovisor" id="retrovisor">
+                    <strong>Retrovisor:</strong> Últimos eventos do veículo
+                </div>
+                <ul id="historyList"></ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        // URL do CSV publicado
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
+
+        // Função para converter CSV em array de objetos
+        function csvToArray(str, delimiter = ',') {
+            const rows = str.trim().split('\n');
+            const headers = rows[0].split(delimiter);
+            return rows.slice(1).map(row => {
+                const values = row.split(delimiter);
+                return headers.reduce((obj, header, i) => {
+                    obj[header] = values[i];
+                    return obj;
+                }, {});
+            });
+        }
+
+        // Busca e renderiza os dados
+        fetch(csvUrl)
+            .then(response => response.text())
+            .then(csv => {
+                const data = csvToArray(csv);
+                renderTable(data);
+                renderChart(data);
+                renderRetrovisor(data);
+            });
+
+        // Renderiza tabela
+        function renderTable(data) {
+            const table = document.getElementById('dataTable');
+            if (!data.length) {
+                table.innerHTML = '<tr><td>Sem dados</td></tr>';
+                return;
+            }
+            const headers = Object.keys(data[0]);
+            let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+            html += data.map(row => '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>').join('');
+            table.innerHTML = html;
+        }
+
+        // Renderiza gráfico (exemplo: velocidade ao longo do tempo)
+        function renderChart(data) {
+            // Tenta encontrar colunas de tempo e velocidade
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            const speedCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade'));
+            if (!timeCol || !speedCol) return;
+            const labels = data.map(row => row[timeCol]);
+            const speeds = data.map(row => parseFloat(row[speedCol]) || 0);
+            const ctx = document.getElementById('vehicleChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Velocidade (km/h)',
+                        data: speeds,
+                        borderColor: '#00eaff',
+                        backgroundColor: 'rgba(0,234,255,0.15)',
+                        tension: 0.3,
+                        pointRadius: 3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: true, labels: { color: '#fff' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#fff' } },
+                        y: { ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        // Renderiza retrovisor (últimos eventos)
+        function renderRetrovisor(data) {
+            const historyList = document.getElementById('historyList');
+            // Mostra os 5 últimos eventos (linhas)
+            const lastRows = data.slice(-5).reverse();
+            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
+            const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
+            historyList.innerHTML = lastRows.map(row => {
+                const time = timeCol ? row[timeCol] : '';
+                const event = eventCol ? row[eventCol] : JSON.stringify(row);
+                return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
