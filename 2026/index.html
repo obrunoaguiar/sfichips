@@ -1,274 +1,447 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Veículo - Google Sheets</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:700,400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Dashboard Interativo | CRM - Dados Reais</title>
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Flatpickr para calendário -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- PapaParse para CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Fonte Inter e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #232526 0%, #414345 100%);
-            color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-        .dashboard {
-            max-width: 900px;
-            margin: 40px auto;
-            background: rgba(34, 34, 34, 0.95);
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            padding: 32px;
-        }
-        .panel {
-            display: flex;
-            flex-direction: row;
-            gap: 32px;
-            flex-wrap: wrap;
-        }
-        .panel-left {
-            flex: 2;
-        }
-        .panel-right {
-            flex: 1;
-            background: rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 16px;
-            min-width: 220px;
-        }
-        .retrovisor {
-            font-size: 1.1em;
-            color: #b3b3b3;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 8px;
-        }
-        h1 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 24px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 10px 8px;
-            text-align: left;
-        }
-        th {
-            background: #2c2c2c;
-        }
-        tr:nth-child(even) {
-            background: rgba(255,255,255,0.03);
-        }
-        .chart-container {
-            margin-top: 24px;
-            background: rgba(255,255,255,0.07);
-            border-radius: 8px;
-            padding: 16px;
-        }
-        @media (max-width: 900px) {
-            .dashboard {
-                padding: 12px;
-            }
-            .panel {
-                flex-direction: column;
-                gap: 16px;
-            }
-        }
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .controls button, .controls select {
-            background: #00eaff;
-            color: #232526;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .controls button:hover {
-            background: #00b3b3;
-        }
-        .controls select {
-            font-weight: 400;
-        }
-        .hidden {
-            display: none !important;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .transition-all { transition: all 0.2s ease; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-    <div class="dashboard">
-        <h1>Painel do Veículo</h1>
-        <div class="controls">
-            <button id="toggleTable">Tabela</button>
-            <button id="toggleChart">Gráfico</button>
-            <select id="selectChartType">
-                <option value="line">Linha</option>
-                <option value="bar">Barra</option>
-                <option value="pie">Pizza</option>
-            </select>
-            <select id="selectMetric">
-                <option value="auto">Auto</option>
-            </select>
-        </div>
-        <div class="panel">
-            <div class="panel-left">
-                <div class="chart-container" id="chartContainer">
-                    <canvas id="vehicleChart"></canvas>
-                </div>
-                <table id="dataTable"></table>
+<body class="text-slate-700 antialiased">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Cabeçalho -->
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Dados Reais
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads (08/03/2026)</p>
             </div>
-            <div class="panel-right">
-                <div class="retrovisor" id="retrovisor">
-                    <strong>Retrovisor:</strong> Últimos eventos do veículo
-                </div>
-                <ul id="historyList"></ul>
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
+                <i class="fas fa-cloud-download-alt text-blue-400"></i>
+                <span id="data-status">Carregando dados...</span>
             </div>
         </div>
+
+        <!-- Cards de KPI -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-8">
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Registros</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-total">0</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg"><i class="fas fa-database text-blue-500 text-xl"></i></div>
+                </div>
+            </div>
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Dealers</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-dealers">0</p>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-lg"><i class="fas fa-store text-emerald-500 text-xl"></i></div>
+                </div>
+            </div>
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Origens</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-origens">0</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg"><i class="fas fa-globe text-purple-500 text-xl"></i></div>
+                </div>
+            </div>
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Veículos</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-veiculos">0</p>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg"><i class="fas fa-car text-amber-500 text-xl"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros Avançados -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-8">
+            <div class="flex flex-wrap items-center gap-2 mb-5">
+                <i class="fas fa-sliders-h text-blue-400"></i>
+                <h2 class="font-semibold text-slate-700">Filtros dinâmicos</h2>
+                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">atualização instantânea</span>
+                <button id="clear-filters" class="ml-auto text-sm text-slate-500 hover:text-blue-600 transition flex items-center gap-1">
+                    <i class="fas fa-undo-alt"></i> Limpar todos
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Data Range -->
+                <div class="lg:col-span-1">
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
+                    <input type="text" id="date-range" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
+                </div>
+                <!-- Dealer -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Dealer</label>
+                    <select id="filter-dealer" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                        <option value="">Todos os Dealers</option>
+                    </select>
+                </div>
+                <!-- Origem -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Origem</label>
+                    <select id="filter-origem" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                        <option value="">Todas as Origens</option>
+                    </select>
+                </div>
+                <!-- Veículo -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Veículo</label>
+                    <select id="filter-veiculo" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                        <option value="">Todos os Veículos</option>
+                    </select>
+                </div>
+                <!-- Motor -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Motor</label>
+                    <select id="filter-motor" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                        <option value="">Todos os Motores</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Busca Global e Contador -->
+        <div class="mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="relative w-full sm:w-80">
+                <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+                <input type="text" id="global-search" placeholder="Pesquisar em toda tabela..." class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+            </div>
+            <div class="text-sm text-slate-500 flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm">
+                <i class="fas fa-table text-blue-400"></i>
+                <span id="table-count">0 registros exibidos</span>
+            </div>
+        </div>
+
+        <!-- Tabela de Dados -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200" id="data-table">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="data">
+                                Data <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="dealer">
+                                Dealer <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="origem">
+                                Origem <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="veiculo">
+                                Veículo <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="motor">
+                                Motor <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white divide-y divide-slate-200 text-sm">
+                        <tr><td colspan="5" class="text-center py-12"><div class="spinner"></div><p class="text-slate-400 mt-2">Carregando dados da planilha...</p></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados carregados via Google Sheets</p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
     <script>
-        // URL do CSV publicado
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
-        let globalData = [];
-        let chartInstance = null;
-        // Parse CSV com PapaParse
-        function loadCSV() {
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    globalData = results.data;
-                    renderTable(globalData);
-                    renderChart(globalData);
-                    renderRetrovisor(globalData);
-                    setupControls(globalData);
-                },
-                error: function(err) {
-                    alert('Erro ao carregar dados: ' + err);
-                }
+        (function() {
+            // URL do CSV (fornecida por você)
+            const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1421458048&single=true&output=csv';
+            
+            // Estado global
+            let masterData = [];
+            let filteredData = [];
+            let sortConfig = { key: 'data', direction: 'asc' };
+            
+            // Elementos DOM
+            const tableBody = document.getElementById('table-body');
+            const kpiTotal = document.getElementById('kpi-total');
+            const kpiDealers = document.getElementById('kpi-dealers');
+            const kpiOrigens = document.getElementById('kpi-origens');
+            const kpiVeiculos = document.getElementById('kpi-veiculos');
+            const tableCount = document.getElementById('table-count');
+            const dataStatus = document.getElementById('data-status');
+            
+            // Filtros
+            const filterDealer = document.getElementById('filter-dealer');
+            const filterOrigem = document.getElementById('filter-origem');
+            const filterVeiculo = document.getElementById('filter-veiculo');
+            const filterMotor = document.getElementById('filter-motor');
+            const globalSearch = document.getElementById('global-search');
+            const clearBtn = document.getElementById('clear-filters');
+            const dateRangeInput = document.getElementById('date-range');
+            
+            // Inicializa Flatpickr
+            let datePicker = flatpickr(dateRangeInput, {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                onClose: applyAllFilters
             });
-        }
-        loadCSV();
 
-        function renderTable(data) {
-            const table = document.getElementById('dataTable');
-            if (!data.length) {
-                table.innerHTML = '<tr><td>Sem dados</td></tr>';
-                return;
-            }
-            const headers = Object.keys(data[0]);
-            let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-            html += data.map(row => '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>').join('');
-            table.innerHTML = html;
-        }
-
-        function renderChart(data, chartType = 'line', metric = 'auto') {
-            const ctx = document.getElementById('vehicleChart').getContext('2d');
-            // Detecta colunas
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            let metricCol = metric === 'auto' ? Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade')) : metric;
-            if (!timeCol || !metricCol) return;
-            const labels = data.map(row => row[timeCol]);
-            const values = data.map(row => parseFloat(row[metricCol]) || 0);
-            if (chartInstance) chartInstance.destroy();
-            let chartData = {};
-            if (chartType === 'pie') {
-                chartData = {
-                    labels,
-                    datasets: [{
-                        label: metricCol,
-                        data: values,
-                        backgroundColor: labels.map((_,i) => `rgba(${100+i*10},${200-i*10},255,0.7)`),
-                    }]
-                };
-            } else {
-                chartData = {
-                    labels,
-                    datasets: [{
-                        label: metricCol,
-                        data: values,
-                        borderColor: '#00eaff',
-                        backgroundColor: 'rgba(0,234,255,0.15)',
-                        tension: 0.3,
-                        pointRadius: 3,
-                        fill: true
-                    }]
-                };
-            }
-            chartInstance = new Chart(ctx, {
-                type: chartType,
-                data: chartData,
-                options: {
-                    plugins: {
-                        legend: { display: true, labels: { color: '#fff' } }
+            // Carregar dados do CSV usando PapaParse com configuração especial
+            function loadData() {
+                dataStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando...';
+                
+                // Configuração do PapaParse para download direto
+                Papa.parse(CSV_URL, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        try {
+                            // Mapear os dados - verificar nomes das colunas
+                            const firstRow = results.data[0] || {};
+                            const keys = Object.keys(firstRow);
+                            
+                            // Identificar as colunas (podem ter nomes diferentes)
+                            const dataKey = keys.find(k => k.toLowerCase().includes('data')) || 'Data';
+                            const dealerKey = keys.find(k => k.toLowerCase().includes('dealer')) || 'Dealer';
+                            const origemKey = keys.find(k => k.toLowerCase().includes('origem')) || 'Origem';
+                            const veiculoKey = keys.find(k => k.toLowerCase().includes('veículo') || k.toLowerCase().includes('veiculo')) || 'Veículo';
+                            const motorKey = keys.find(k => k.toLowerCase().includes('motor')) || 'Motor';
+                            
+                            masterData = results.data
+                                .filter(row => {
+                                    // Filtrar linhas vazias
+                                    return row[dataKey] && row[dataKey].trim() !== '';
+                                })
+                                .map(row => ({
+                                    data: row[dataKey] ? row[dataKey].trim() : '',
+                                    dealer: row[dealerKey] ? row[dealerKey].trim() : '',
+                                    origem: row[origemKey] ? row[origemKey].trim() : '',
+                                    veiculo: row[veiculoKey] ? row[veiculoKey].trim() : '',
+                                    motor: row[motorKey] ? row[motorKey].trim() : ''
+                                }))
+                                .filter(item => 
+                                    item.data && item.dealer && item.origem && item.veiculo && item.motor
+                                );
+                            
+                            if (masterData.length === 0) {
+                                throw new Error('Nenhum dado válido encontrado');
+                            }
+                            
+                            filteredData = [...masterData];
+                            populateFilters();
+                            applyAllFilters();
+                            dataStatus.innerHTML = '<i class="fas fa-check-circle text-green-400 mr-1"></i> Dados carregados: ' + masterData.length + ' registros';
+                        } catch (error) {
+                            throw error;
+                        }
                     },
-                    scales: chartType === 'pie' ? {} : {
-                        x: { ticks: { color: '#fff' } },
-                        y: { ticks: { color: '#fff' } }
+                    error: (error) => {
+                        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Erro ao carregar dados: ${error.message || 'Falha no download'}</td></tr>`;
+                        dataStatus.innerHTML = '<i class="fas fa-exclamation-circle text-red-400 mr-1"></i> Erro no carregamento';
+                        console.error('Erro PapaParse:', error);
+                        
+                        // Dados de fallback (baseados na sua imagem)
+                        masterData = [
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
+                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'}
+                        ];
+                        filteredData = [...masterData];
+                        populateFilters();
+                        applyAllFilters();
+                        dataStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-400 mr-1"></i> Usando dados de exemplo';
+                    }
+                });
+            }
+
+            // Popular selects com valores únicos
+            function populateFilters() {
+                const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
+                const origens = [...new Set(masterData.map(d => d.origem))].sort();
+                const veiculos = [...new Set(masterData.map(d => d.veiculo))].sort();
+                const motores = [...new Set(masterData.map(d => d.motor))].sort();
+
+                fillSelect(filterDealer, dealers);
+                fillSelect(filterOrigem, origens);
+                fillSelect(filterVeiculo, veiculos);
+                fillSelect(filterMotor, motores);
+            }
+
+            function fillSelect(selectElement, values) {
+                selectElement.innerHTML = `<option value="">Todos ${selectElement.id.replace('filter-', '')}s</option>`;
+                values.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v;
+                    option.textContent = v;
+                    selectElement.appendChild(option);
+                });
+            }
+
+            // Aplicar todos os filtros
+            function applyAllFilters() {
+                let filtered = [...masterData];
+
+                // Filtro dealer
+                if (filterDealer.value) {
+                    filtered = filtered.filter(item => item.dealer === filterDealer.value);
+                }
+                // Filtro origem
+                if (filterOrigem.value) {
+                    filtered = filtered.filter(item => item.origem === filterOrigem.value);
+                }
+                // Filtro veículo
+                if (filterVeiculo.value) {
+                    filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
+                }
+                // Filtro motor
+                if (filterMotor.value) {
+                    filtered = filtered.filter(item => item.motor === filterMotor.value);
+                }
+                // Filtro data range
+                if (dateRangeInput.value) {
+                    const dates = dateRangeInput.value.split(' to ');
+                    if (dates.length === 2) {
+                        const start = dates[0];
+                        const end = dates[1];
+                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
+                    } else if (dates.length === 1) {
+                        filtered = filtered.filter(item => item.data === dates[0]);
                     }
                 }
+                // Busca global
+                if (globalSearch.value.trim() !== '') {
+                    const term = globalSearch.value.toLowerCase();
+                    filtered = filtered.filter(item => 
+                        item.data.toLowerCase().includes(term) ||
+                        item.dealer.toLowerCase().includes(term) ||
+                        item.origem.toLowerCase().includes(term) ||
+                        item.veiculo.toLowerCase().includes(term) ||
+                        item.motor.toLowerCase().includes(term)
+                    );
+                }
+
+                filteredData = filtered;
+                sortData();
+                renderTable();
+                updateKPIs();
+            }
+
+            // Ordenação
+            function sortData() {
+                const { key, direction } = sortConfig;
+                filteredData.sort((a, b) => {
+                    let valA = a[key];
+                    let valB = b[key];
+                    if (key === 'data') {
+                        // Converter formato DD/MM/YYYY para comparação
+                        const parseDate = (dateStr) => {
+                            if (dateStr.includes('/')) {
+                                const [d, m, y] = dateStr.split('/');
+                                return new Date(`${y}-${m}-${d}`).getTime();
+                            }
+                            return new Date(dateStr).getTime();
+                        };
+                        valA = parseDate(valA);
+                        valB = parseDate(valB);
+                    }
+                    if (valA < valB) return direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            // Renderizar tabela
+            function renderTable() {
+                if (filteredData.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400"><i class="fas fa-search mr-2"></i>Nenhum registro encontrado</td></tr>`;
+                    tableCount.textContent = '0 registros exibidos';
+                    return;
+                }
+
+                let html = '';
+                filteredData.forEach(item => {
+                    html += `<tr class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-3 whitespace-nowrap">${item.data}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.dealer}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.origem}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.veiculo}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.motor}</td>
+                    </tr>`;
+                });
+                tableBody.innerHTML = html;
+                tableCount.textContent = `${filteredData.length} registros exibidos`;
+            }
+
+            // Atualizar KPIs
+            function updateKPIs() {
+                kpiTotal.textContent = filteredData.length;
+                kpiDealers.textContent = new Set(filteredData.map(d => d.dealer)).size;
+                kpiOrigens.textContent = new Set(filteredData.map(d => d.origem)).size;
+                kpiVeiculos.textContent = new Set(filteredData.map(d => d.veiculo)).size;
+            }
+
+            // Event listeners
+            filterDealer.addEventListener('change', applyAllFilters);
+            filterOrigem.addEventListener('change', applyAllFilters);
+            filterVeiculo.addEventListener('change', applyAllFilters);
+            filterMotor.addEventListener('change', applyAllFilters);
+            globalSearch.addEventListener('input', applyAllFilters);
+
+            // Ordenação nos cabeçalhos
+            document.querySelectorAll('[data-sort]').forEach(th => {
+                th.addEventListener('click', (e) => {
+                    const key = e.currentTarget.dataset.sort;
+                    if (sortConfig.key === key) {
+                        sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortConfig.key = key;
+                        sortConfig.direction = 'asc';
+                    }
+                    sortData();
+                    renderTable();
+                });
             });
-        }
 
-        function renderRetrovisor(data) {
-            const historyList = document.getElementById('historyList');
-            const lastRows = data.slice(-5).reverse();
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
-            historyList.innerHTML = lastRows.map(row => {
-                const time = timeCol ? row[timeCol] : '';
-                const event = eventCol ? row[eventCol] : JSON.stringify(row);
-                return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
-            }).join('');
-        }
+            // Limpar filtros
+            clearBtn.addEventListener('click', () => {
+                filterDealer.value = '';
+                filterOrigem.value = '';
+                filterVeiculo.value = '';
+                filterMotor.value = '';
+                globalSearch.value = '';
+                datePicker.clear();
+                applyAllFilters();
+            });
 
-        function setupControls(data) {
-            const btnTable = document.getElementById('toggleTable');
-            const btnChart = document.getElementById('toggleChart');
-            const chartContainer = document.getElementById('chartContainer');
-            const table = document.getElementById('dataTable');
-            const selectChartType = document.getElementById('selectChartType');
-            const selectMetric = document.getElementById('selectMetric');
-            // Alternância
-            btnTable.onclick = () => {
-                chartContainer.classList.add('hidden');
-                table.classList.remove('hidden');
-            };
-            btnChart.onclick = () => {
-                chartContainer.classList.remove('hidden');
-                table.classList.add('hidden');
-            };
-            // Inicial: mostra gráfico
-            chartContainer.classList.remove('hidden');
-            table.classList.add('hidden');
-            // Chart type
-            selectChartType.onchange = () => {
-                renderChart(globalData, selectChartType.value, selectMetric.value);
-            };
-            // Métricas
-            const headers = Object.keys(data[0]);
-            selectMetric.innerHTML = '<option value="auto">Auto</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join('');
-            selectMetric.onchange = () => {
-                renderChart(globalData, selectChartType.value, selectMetric.value);
-            };
-        }
+            // Inicializar
+            loadData();
+        })();
     </script>
 </body>
 </html>
