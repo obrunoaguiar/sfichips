@@ -1,340 +1,422 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Interativo - Veículos</title>
-  <!-- TailwindCSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PapaParse CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <!-- Flatpickr CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,700|Poppins:400,700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-      min-height: 100vh;
-    }
-    .fade {
-      transition: opacity 0.3s;
-    }
-    .card {
-      box-shadow: 0 4px 16px rgba(30,41,59,0.12);
-      border-radius: 1rem;
-      background: #fff;
-    }
-    .card-dark {
-      background: #1e293b;
-      color: #fff;
-    }
-    .card-metric {
-      background: #2563eb;
-      color: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(37,99,235,0.15);
-    }
-    .card-metric .label {
-      font-size: 0.9em;
-      opacity: 0.8;
-    }
-    .card-metric .value {
-      font-size: 1.5em;
-      font-weight: 700;
-    }
-    .filter-label {
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 0.25rem;
-    }
-    .filter-group {
-      margin-bottom: 1rem;
-    }
-    .table-scroll {
-      overflow-x: auto;
-    }
-    .table th {
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.2s;
-    }
-    .table th:hover {
-      background: #e0e7ef;
-    }
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .checkbox-group label {
-      background: #e0e7ef;
-      border-radius: 0.5rem;
-      padding: 0.25rem 0.75rem;
-      cursor: pointer;
-      font-size: 0.95em;
-      margin-bottom: 0.25rem;
-    }
-    .checkbox-group input[type="checkbox"] {
-      margin-right: 0.3rem;
-    }
-    .search-bar {
-      border-radius: 0.5rem;
-      border: 1px solid #cbd5e1;
-      padding: 0.5rem 1rem;
-      width: 100%;
-      margin-bottom: 1rem;
-      font-size: 1em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interativo | CRM</title>
+    <!-- TailwindCSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Flatpickr para calendário (date range) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <!-- Ícones Heroicons (via CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .transition-all { transition: all 0.2s ease; }
+        /* Animação sutil para cards */
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        /* Estilo para filtros ativos */
+        .filter-active { background-color: #e0f2fe; border-color: #0284c7; }
+    </style>
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
 </head>
-<body class="fade">
-  <div class="max-w-6xl mx-auto py-8 px-4">
-    <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">Dashboard Interativo de Veículos</h1>
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="card-metric p-6 text-center">
-        <div class="label">Total de Registros</div>
-        <div class="value" id="kpi-total">0</div>
-      </div>
-      <div class="card-metric p-6 text-center">
-        <div class="label">Dealers Distintos</div>
-        <div class="value" id="kpi-dealers">0</div>
-      </div>
-      <div class="card-metric p-6 text-center">
-        <div class="label">Origens Distintas</div>
-        <div class="value" id="kpi-origens">0</div>
-      </div>
-    </div>
-    <!-- Filtros -->
-    <div class="card card-dark p-6 mb-8">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <div class="filter-group">
-          <div class="filter-label">Data</div>
-          <input id="filter-date" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Selecione o intervalo" readonly>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">Dealer</div>
-          <div class="checkbox-group" id="filter-dealer"></div>
-          <div class="flex gap-2 mt-1">
-            <button id="dealer-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
-            <button id="dealer-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
-          </div>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">Origem</div>
-          <div class="checkbox-group" id="filter-origem"></div>
-          <div class="flex gap-2 mt-1">
-            <button id="origem-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
-            <button id="origem-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
-          </div>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">Veículo</div>
-          <div class="checkbox-group" id="filter-veiculo"></div>
-          <div class="flex gap-2 mt-1">
-            <button id="veiculo-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
-            <button id="veiculo-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
-          </div>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">Motor</div>
-          <div class="checkbox-group" id="filter-motor"></div>
-          <div class="flex gap-2 mt-1">
-            <button id="motor-all" class="text-xs bg-blue-500 text-white px-2 py-1 rounded">Selecionar Todos</button>
-            <button id="motor-clear" class="text-xs bg-gray-400 text-white px-2 py-1 rounded">Limpar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Busca -->
-    <input type="text" id="search-bar" class="search-bar mb-4" placeholder="Buscar...">
-    <!-- Tabela -->
-    <div class="card table-scroll p-4">
-      <table class="table w-full min-w-max text-sm" id="data-table">
-        <thead>
-          <tr>
-            <th data-col="Data">Data</th>
-            <th data-col="Dealer">Dealer</th>
-            <th data-col="Origem">Origem</th>
-            <th data-col="Veículo">Veículo</th>
-            <th data-col="Motor">Motor</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <tr><td colspan="5" class="text-center text-gray-400">Carregando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div id="error-msg" class="mt-6 text-center text-red-500 font-bold hidden">Erro ao carregar dados. Tente novamente.</div>
-  </div>
-  <script>
-    // Config
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1421458048&single=true&output=csv';
-    const COLS = ['Data', 'Dealer', 'Origem', 'Veículo', 'Motor'];
-    let rawData = [];
-    let filteredData = [];
-    let sortCol = null;
-    let sortAsc = true;
-    let searchTerm = '';
-    let dateRange = [null, null];
-    let filters = {
-      Dealer: [],
-      Origem: [],
-      Veículo: [],
-      Motor: []
-    };
+<body class="bg-slate-50 text-slate-700 antialiased">
 
-    // Utilidades
-    function unique(arr) {
-      return [...new Set(arr.filter(x => x && x.trim()))];
-    }
-    function formatDate(d) {
-      if (!d) return '';
-      const [y, m, day] = d.split('-');
-      return `${day}/${m}/${y}`;
-    }
-    function parseDate(d) {
-      // Tenta DD/MM/YYYY ou YYYY-MM-DD
-      if (!d) return null;
-      if (d.includes('/')) {
-        const [day, m, y] = d.split('/');
-        return new Date(`${y}-${m}-${day}`);
-      } else if (d.includes('-')) {
-        return new Date(d);
-      }
-      return null;
-    }
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    // Carregar CSV
-    function loadData() {
-      Papa.parse(CSV_URL, {
-        download: true,
-        header: true,
-        complete: function(results) {
-          rawData = results.data.filter(row => COLS.every(c => row[c]));
-          setupFilters();
-          applyFilters();
-        },
-        error: function() {
-          document.getElementById('error-msg').classList.remove('hidden');
-        }
-      });
-    }
+        <!-- Cabeçalho -->
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Explore e filtre os dados em tempo real</p>
+            </div>
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
+                <i class="fas fa-sync-alt text-blue-400"></i>
+                <span id="data-info">Carregando...</span>
+            </div>
+        </div>
 
-    // Filtros
-    function setupFilters() {
-      COLS.slice(1).forEach(col => {
-        const values = unique(rawData.map(row => row[col]));
-        const group = document.getElementById('filter-' + col.toLowerCase());
-        group.innerHTML = values.map(v => `<label><input type="checkbox" value="${v}">${v}</label>`).join('');
-        filters[col] = values.slice();
-        // Eventos
-        group.querySelectorAll('input').forEach(cb => {
-          cb.checked = true;
-          cb.onchange = () => {
-            filters[col] = Array.from(group.querySelectorAll('input:checked')).map(x => x.value);
-            applyFilters();
-          };
+        <!-- ========== CARDS DE KPI ========== -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Registros</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-total">0</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg"><i class="fas fa-database text-blue-500 text-xl"></i></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-4">Registros filtrados</p>
+            </div>
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Dealers</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-dealers">0</p>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-lg"><i class="fas fa-store text-emerald-500 text-xl"></i></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-4">Unidades distintas</p>
+            </div>
+            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Origens</p>
+                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-origens">0</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg"><i class="fas fa-globe text-purple-500 text-xl"></i></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-4">Canais de origem</p>
+            </div>
+        </div>
+
+        <!-- ========== FILTROS AVANÇADOS ========== -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-8">
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <i class="fas fa-sliders-h text-blue-400"></i>
+                <h2 class="font-semibold text-slate-700">Filtros dinâmicos</h2>
+                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">instantâneo</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Filtro Data (Range) -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
+                    <div class="relative">
+                        <i class="fas fa-calendar-alt absolute left-3 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="date-range" class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
+                    </div>
+                </div>
+
+                <!-- Filtro Dealer -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Dealer</label>
+                    <div class="relative">
+                        <select id="filter-dealer" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                            <option value="">Todos os Dealers</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Filtro Origem -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Origem</label>
+                    <div class="relative">
+                        <select id="filter-origem" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                            <option value="">Todas as Origens</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Filtro Veículo -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Veículo</label>
+                    <div class="relative">
+                        <select id="filter-veiculo" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                            <option value="">Todos os Veículos</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Filtro Motor -->
+                <div class="lg:col-span-4 flex flex-wrap items-end justify-end gap-3">
+                    <div class="w-full sm:w-auto">
+                        <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Motor</label>
+                        <select id="filter-motor" class="w-full sm:w-64 appearance-none bg-white border border-slate-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+                            <option value="">Todos os Motores</option>
+                        </select>
+                    </div>
+                    <button id="clear-filters" class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm hover:bg-slate-50 transition flex items-center gap-2 mt-2 sm:mt-0">
+                        <i class="fas fa-times-circle"></i> Limpar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== BARRA DE PESQUISA GLOBAL ========== -->
+        <div class="mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="relative w-full sm:w-80">
+                <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+                <input type="text" id="global-search" placeholder="Pesquisar em toda tabela..." class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
+            </div>
+            <div class="text-sm text-slate-500 flex items-center gap-2">
+                <i class="fas fa-table"></i>
+                <span id="table-count">0 registros exibidos</span>
+            </div>
+        </div>
+
+        <!-- ========== TABELA DE DADOS ========== -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200" id="data-table">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="data">
+                                Data <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="dealer">
+                                Dealer <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="origem">
+                                Origem <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="veiculo">
+                                Veículo <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="motor">
+                                Motor <i class="fas fa-sort ml-1 text-slate-400"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white divide-y divide-slate-200 text-sm">
+                        <!-- Linhas serão inseridas via JavaScript -->
+                        <tr><td colspan="5" class="text-center py-8 text-slate-400">Carregando dados simulados...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados simulados para demonstração</p>
+    </div>
+
+    <script>
+        (function() {
+            // --- DADOS SIMULADOS (substitua pela sua fonte real quando disponível) ---
+   // Substitua os dados simulados por este código
+fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?output=csv')
+    .then(response => {
+        if (!response.ok) throw new Error('Erro ao carregar CSV');
+        return response.text();
+    })
+    .then(csvText => {
+        // Usando PapaParse para converter CSV em objeto
+        Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+                masterData = results.data.filter(row => 
+                    row.Data && row.Dealer && row.Origem && row.Veículo && row.Motor
+                ).map(row => ({
+                    data: row.Data,
+                    dealer: row.Dealer,
+                    origem: row.Origem,
+                    veiculo: row.Veículo,
+                    motor: row.Motor
+                }));
+                // Inicializa o dashboard com os dados carregados
+                filteredData = [...masterData];
+                populateFilters();
+                applyAllFilters();
+            },
+            error: (error) => console.error('Erro no parse:', error)
         });
-        // Botões
-        document.getElementById(col.toLowerCase() + '-all').onclick = () => {
-          group.querySelectorAll('input').forEach(cb => cb.checked = true);
-          filters[col] = values.slice();
-          applyFilters();
-        };
-        document.getElementById(col.toLowerCase() + '-clear').onclick = () => {
-          group.querySelectorAll('input').forEach(cb => cb.checked = false);
-          filters[col] = [];
-          applyFilters();
-        };
-      });
-      // Date picker
-      flatpickr('#filter-date', {
-        mode: 'range',
-        dateFormat: 'd/m/Y',
-        onChange: function(selectedDates, dateStr) {
-          if (selectedDates.length === 2) {
-            dateRange = selectedDates;
-          } else {
-            dateRange = [null, null];
-          }
-          applyFilters();
-        }
-      });
-    }
-
-    // Busca
-    document.getElementById('search-bar').oninput = function(e) {
-      searchTerm = e.target.value.toLowerCase();
-      applyFilters();
-    };
-
-    // Ordenação
-    document.querySelectorAll('#data-table th').forEach(th => {
-      th.onclick = function() {
-        const col = th.getAttribute('data-col');
-        if (sortCol === col) sortAsc = !sortAsc;
-        else {
-          sortCol = col;
-          sortAsc = true;
-        }
-        applyFilters();
-      };
+    })
+    .catch(error => {
+        document.getElementById('table-body').innerHTML = 
+            `<tr><td colspan="5" class="text-center py-8 text-red-400">Erro ao carregar dados: ${error.message}</td></tr>`;
     });
+            // ----------------------------------------------------------------
 
-    // Aplicar filtros
-    function applyFilters() {
-      filteredData = rawData.filter(row => {
-        // Filtros múltiplos
-        return COLS.slice(1).every(col => filters[col].length === 0 || filters[col].includes(row[col])) &&
-          // Filtro de data
-          (!dateRange[0] || !dateRange[1] || (parseDate(row.Data) >= dateRange[0] && parseDate(row.Data) <= dateRange[1])) &&
-          // Busca global
-          (searchTerm === '' || COLS.some(col => row[col].toLowerCase().includes(searchTerm)));
-      });
-      // Ordenação
-      if (sortCol) {
-        filteredData.sort((a, b) => {
-          if (sortCol === 'Data') {
-            return sortAsc ? parseDate(a.Data) - parseDate(b.Data) : parseDate(b.Data) - parseDate(a.Data);
-          }
-          return sortAsc ? a[sortCol].localeCompare(b[sortCol]) : b[sortCol].localeCompare(a[sortCol]);
-        });
-      }
-      renderTable();
-      renderKPIs();
-    }
+            // Estado global dos dados e filtros
+            let masterData = [...sampleData]; // Em produção, aqui viria os dados do CSV
+            let filteredData = [...masterData];
+            let sortConfig = { key: 'data', direction: 'asc' };
+            
+            // Referências DOM
+            const tableBody = document.getElementById('table-body');
+            const kpiTotal = document.getElementById('kpi-total');
+            const kpiDealers = document.getElementById('kpi-dealers');
+            const kpiOrigens = document.getElementById('kpi-origens');
+            const tableCount = document.getElementById('table-count');
+            const dataInfo = document.getElementById('data-info');
+            
+            // Filtros
+            const filterDealer = document.getElementById('filter-dealer');
+            const filterOrigem = document.getElementById('filter-origem');
+            const filterVeiculo = document.getElementById('filter-veiculo');
+            const filterMotor = document.getElementById('filter-motor');
+            const globalSearch = document.getElementById('global-search');
+            const clearBtn = document.getElementById('clear-filters');
+            const dateRangeInput = document.getElementById('date-range');
+            
+            // Flatpickr (date range)
+            let datePicker = flatpickr(dateRangeInput, {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                onChange: applyAllFilters
+            });
 
-    // Renderizar tabela
-    function renderTable() {
-      const tbody = document.getElementById('table-body');
-      if (!filteredData.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-400">Nenhum registro encontrado.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = filteredData.map(row =>
-        `<tr>
-          <td>${row.Data}</td>
-          <td>${row.Dealer}</td>
-          <td>${row.Origem}</td>
-          <td>${row.Veículo}</td>
-          <td>${row.Motor}</td>
-        </tr>`
-      ).join('');
-    }
+            // Função para popular selects com valores únicos
+            function populateFilters() {
+                const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
+                const origens = [...new Set(masterData.map(d => d.origem))].sort();
+                const veiculos = [...new Set(masterData.map(d => d.veiculo))].sort();
+                const motores = [...new Set(masterData.map(d => d.motor))].sort();
 
-    // Renderizar KPIs
-    function renderKPIs() {
-      document.getElementById('kpi-total').textContent = filteredData.length;
-      document.getElementById('kpi-dealers').textContent = unique(filteredData.map(r => r.Dealer)).length;
-      document.getElementById('kpi-origens').textContent = unique(filteredData.map(r => r.Origem)).length;
-    }
+                fillSelect(filterDealer, dealers);
+                fillSelect(filterOrigem, origens);
+                fillSelect(filterVeiculo, veiculos);
+                fillSelect(filterMotor, motores);
+            }
 
-    // Inicialização
-    loadData();
-  </script>
+            function fillSelect(selectElement, values) {
+                const currentValue = selectElement.value;
+                selectElement.innerHTML = `<option value="">Todos ${selectElement.id.replace('filter-', '')}s</option>`;
+                values.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v;
+                    option.textContent = v;
+                    if (v === currentValue) option.selected = true;
+                    selectElement.appendChild(option);
+                });
+            }
+
+            // Função principal de filtragem
+            function applyAllFilters() {
+                let filtered = [...masterData];
+
+                // Filtro por dealer
+                if (filterDealer.value) {
+                    filtered = filtered.filter(item => item.dealer === filterDealer.value);
+                }
+                // Filtro por origem
+                if (filterOrigem.value) {
+                    filtered = filtered.filter(item => item.origem === filterOrigem.value);
+                }
+                // Filtro por veículo
+                if (filterVeiculo.value) {
+                    filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
+                }
+                // Filtro por motor
+                if (filterMotor.value) {
+                    filtered = filtered.filter(item => item.motor === filterMotor.value);
+                }
+                // Filtro por data (range)
+                if (dateRangeInput.value) {
+                    const dates = dateRangeInput.value.split(' to ');
+                    if (dates.length === 2) {
+                        const start = dates[0];
+                        const end = dates[1];
+                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
+                    } else if (dates.length === 1) {
+                        // dia único selecionado
+                        filtered = filtered.filter(item => item.data === dates[0]);
+                    }
+                }
+                // Busca global
+                if (globalSearch.value.trim() !== '') {
+                    const searchTerm = globalSearch.value.toLowerCase();
+                    filtered = filtered.filter(item => 
+                        item.data.toLowerCase().includes(searchTerm) ||
+                        item.dealer.toLowerCase().includes(searchTerm) ||
+                        item.origem.toLowerCase().includes(searchTerm) ||
+                        item.veiculo.toLowerCase().includes(searchTerm) ||
+                        item.motor.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                filteredData = filtered;
+                sortData();
+                renderTable();
+                updateKPIs();
+            }
+
+            // Ordenação
+            function sortData() {
+                const { key, direction } = sortConfig;
+                filteredData.sort((a, b) => {
+                    let valA = a[key];
+                    let valB = b[key];
+                    if (key === 'data') {
+                        valA = new Date(valA);
+                        valB = new Date(valB);
+                    }
+                    if (valA < valB) return direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            // Renderizar tabela
+            function renderTable() {
+                if (filteredData.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Nenhum registro encontrado</td></tr>`;
+                    tableCount.textContent = '0 registros exibidos';
+                    return;
+                }
+
+                let html = '';
+                filteredData.forEach(item => {
+                    html += `<tr class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-3 whitespace-nowrap">${item.data}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.dealer}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.origem}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.veiculo}</td>
+                        <td class="px-6 py-3 whitespace-nowrap">${item.motor}</td>
+                    </tr>`;
+                });
+                tableBody.innerHTML = html;
+                tableCount.textContent = `${filteredData.length} registros exibidos`;
+            }
+
+            // Atualizar cards de KPI
+            function updateKPIs() {
+                kpiTotal.textContent = filteredData.length;
+                const uniqueDealers = new Set(filteredData.map(d => d.dealer)).size;
+                const uniqueOrigens = new Set(filteredData.map(d => d.origem)).size;
+                kpiDealers.textContent = uniqueDealers;
+                kpiOrigens.textContent = uniqueOrigens;
+                dataInfo.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-1"></i> ${filteredData.length} registros`;
+            }
+
+            // Event listeners
+            filterDealer.addEventListener('change', applyAllFilters);
+            filterOrigem.addEventListener('change', applyAllFilters);
+            filterVeiculo.addEventListener('change', applyAllFilters);
+            filterMotor.addEventListener('change', applyAllFilters);
+            globalSearch.addEventListener('input', applyAllFilters);
+
+            // Ordenação ao clicar nos cabeçalhos
+            document.querySelectorAll('[data-sort]').forEach(th => {
+                th.addEventListener('click', (e) => {
+                    const key = e.currentTarget.dataset.sort;
+                    if (sortConfig.key === key) {
+                        sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortConfig.key = key;
+                        sortConfig.direction = 'asc';
+                    }
+                    sortData();
+                    renderTable();
+                });
+            });
+
+            // Limpar filtros
+            clearBtn.addEventListener('click', () => {
+                filterDealer.value = '';
+                filterOrigem.value = '';
+                filterVeiculo.value = '';
+                filterMotor.value = '';
+                globalSearch.value = '';
+                datePicker.clear();
+                applyAllFilters();
+            });
+
+            // Inicialização
+            populateFilters();
+            applyAllFilters();
+        })();
+    </script>
 </body>
 </html>
