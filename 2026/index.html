@@ -334,40 +334,32 @@
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
                 // Filtro data range
-// FILTRO DATA RANGE - Versão simples (que não trava)
-if (dateRangeInput.value) {
-    const dates = dateRangeInput.value.split(' to ');
-    if (dates.length === 2) {
-        const start = dates[0];
-        const end = dates[1];
-        filtered = filtered.filter(item => item.data >= start && item.data <= end);
-    } else if (dates.length === 1) {
-        filtered = filtered.filter(item => item.data === dates[0]);
-    }
-}
-
-            // Ordenação
-            function sortData() {
-                const { key, direction } = sortConfig;
-                filteredData.sort((a, b) => {
-                    let valA = a[key];
-                    let valB = b[key];
-                    if (key === 'data') {
-                        // Converter formato DD/MM/YYYY para comparação
-                        const parseDate = (dateStr) => {
-                            if (dateStr.includes('/')) {
-                                const [d, m, y] = dateStr.split('/');
-                                return new Date(`${y}-${m}-${d}`).getTime();
-                            }
-                            return new Date(dateStr).getTime();
-                        };
-                        valA = parseDate(valA);
-                        valB = parseDate(valB);
+                                if (dateRangeInput.value) {
+                    const dates = dateRangeInput.value.split(' to ');
+                    if (dates.length === 2) {
+                        const start = dates[0];
+                        const end = dates[1];
+                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
+                    } else if (dates.length === 1) {
+                        filtered = filtered.filter(item => item.data === dates[0]);
                     }
-                    if (valA < valB) return direction === 'asc' ? -1 : 1;
-                    if (valA > valB) return direction === 'asc' ? 1 : -1;
-                    return 0;
-                });
+                }
+                // Busca global
+                if (globalSearch.value.trim() !== '') {
+                    const term = globalSearch.value.toLowerCase();
+                    filtered = filtered.filter(item => 
+                        item.data.toLowerCase().includes(term) ||
+                        item.dealer.toLowerCase().includes(term) ||
+                        item.origem.toLowerCase().includes(term) ||
+                        item.veiculo.toLowerCase().includes(term) ||
+                        item.motor.toLowerCase().includes(term)
+                    );
+                }
+
+                filteredData = filtered;
+                sortData();
+                renderTable();
+                updateKPIs();
             }
 
             // Renderizar tabela
