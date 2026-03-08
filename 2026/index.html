@@ -1,12 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-br">
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Veículo - Google Sheets</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:700,400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Dashboard Interativo | CRM - Dados Reais</title>
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,108 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #232526 0%, #414345 100%);
-            color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-        .dashboard {
-            max-width: 900px;
-            margin: 40px auto;
-            background: rgba(34, 34, 34, 0.95);
-            border-radius: 18px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            padding: 32px;
-        }
-        .panel {
-            display: flex;
-            flex-direction: row;
-            gap: 32px;
-            flex-wrap: wrap;
-        }
-        .panel-left {
-            flex: 2;
-        }
-        .panel-right {
-            flex: 1;
-            background: rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 16px;
-            min-width: 220px;
-        }
-        .retrovisor {
-            font-size: 1.1em;
-            color: #b3b3b3;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 8px;
-        }
-        h1 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 24px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 10px 8px;
-            text-align: left;
-        }
-        th {
-            background: #2c2c2c;
-        }
-        tr:nth-child(even) {
-            background: rgba(255,255,255,0.03);
-        }
-        .chart-container {
-            margin-top: 24px;
-            background: rgba(255,255,255,0.07);
-            border-radius: 8px;
-            padding: 16px;
-        }
-        @media (max-width: 900px) {
-            .dashboard {
-                padding: 12px;
-            }
-            .panel {
-                flex-direction: column;
-                gap: 16px;
-            }
-        }
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .controls button, .controls select {
-            background: #00eaff;
-            color: #232526;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .controls button:hover {
-            background: #00b3b3;
-        }
-        .controls select {
-            font-weight: 400;
-        }
-        .hidden {
-            display: none !important;
-        }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .transition-all { transition: all 0.2s ease; }
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
@@ -128,20 +22,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-    <div class="dashboard">
-        <h1>Painel do Veículo</h1>
-        <div class="controls">
-            <button id="toggleTable">Tabela</button>
-            <button id="toggleChart">Gráfico</button>
-            <select id="selectChartType">
-                <option value="line">Linha</option>
-                <option value="bar">Barra</option>
-                <option value="pie">Pizza</option>
-            </select>
-            <select id="selectMetric">
-                <option value="auto">Auto</option>
-            </select>
 <body class="text-slate-700 antialiased">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -159,10 +39,6 @@
                 <span id="data-status">Carregando dados...</span>
             </div>
         </div>
-        <div class="panel">
-            <div class="panel-left">
-                <div class="chart-container" id="chartContainer">
-                    <canvas id="vehicleChart"></canvas>
 
         <!-- Cards de KPI -->
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-8">
@@ -174,11 +50,7 @@
                     </div>
                     <div class="bg-blue-50 p-3 rounded-lg"><i class="fas fa-database text-blue-500 text-xl"></i></div>
                 </div>
-                <table id="dataTable"></table>
             </div>
-            <div class="panel-right">
-                <div class="retrovisor" id="retrovisor">
-                    <strong>Retrovisor:</strong> Últimos eventos do veículo
             <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start">
                     <div>
@@ -205,7 +77,6 @@
                     </div>
                     <div class="bg-amber-50 p-3 rounded-lg"><i class="fas fa-car text-amber-500 text-xl"></i></div>
                 </div>
-                <ul id="historyList"></ul>
             </div>
         </div>
 
@@ -302,29 +173,8 @@
         <!-- Rodapé -->
         <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados carregados via Google Sheets</p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <script>
-        // URL do CSV publicado
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
-        let globalData = [];
-        let chartInstance = null;
-        // Parse CSV com PapaParse
-        function loadCSV() {
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    globalData = results.data;
-                    renderTable(globalData);
-                    renderChart(globalData);
-                    renderRetrovisor(globalData);
-                    setupControls(globalData);
-                },
-                error: function(err) {
-                    alert('Erro ao carregar dados: ' + err);
-                }
         (function() {
             // URL do CSV (fornecida por você)
             const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1421458048&single=true&output=csv';
@@ -358,14 +208,7 @@
                 dateFormat: 'Y-m-d',
                 onClose: applyAllFilters
             });
-        }
-        loadCSV();
 
-        function renderTable(data) {
-            const table = document.getElementById('dataTable');
-            if (!data.length) {
-                table.innerHTML = '<tr><td>Sem dados</td></tr>';
-                return;
             // Carregar dados do CSV usando PapaParse com configuração especial
             function loadData() {
                 dataStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando...';
@@ -449,44 +292,7 @@
                 fillSelect(filterVeiculo, veiculos);
                 fillSelect(filterMotor, motores);
             }
-            const headers = Object.keys(data[0]);
-            let html = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-            html += data.map(row => '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>').join('');
-            table.innerHTML = html;
-        }
 
-        function renderChart(data, chartType = 'line', metric = 'auto') {
-            const ctx = document.getElementById('vehicleChart').getContext('2d');
-            // Detecta colunas
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            let metricCol = metric === 'auto' ? Object.keys(data[0]).find(h => h.toLowerCase().includes('velocidade')) : metric;
-            if (!timeCol || !metricCol) return;
-            const labels = data.map(row => row[timeCol]);
-            const values = data.map(row => parseFloat(row[metricCol]) || 0);
-            if (chartInstance) chartInstance.destroy();
-            let chartData = {};
-            if (chartType === 'pie') {
-                chartData = {
-                    labels,
-                    datasets: [{
-                        label: metricCol,
-                        data: values,
-                        backgroundColor: labels.map((_,i) => `rgba(${100+i*10},${200-i*10},255,0.7)`),
-                    }]
-                };
-            } else {
-                chartData = {
-                    labels,
-                    datasets: [{
-                        label: metricCol,
-                        data: values,
-                        borderColor: '#00eaff',
-                        backgroundColor: 'rgba(0,234,255,0.15)',
-                        tension: 0.3,
-                        pointRadius: 3,
-                        fill: true
-                    }]
-                };
             function fillSelect(selectElement, values) {
                 selectElement.innerHTML = `<option value="">Todos ${selectElement.id.replace('filter-', '')}s</option>`;
                 values.forEach(v => {
@@ -496,16 +302,6 @@
                     selectElement.appendChild(option);
                 });
             }
-            chartInstance = new Chart(ctx, {
-                type: chartType,
-                data: chartData,
-                options: {
-                    plugins: {
-                        legend: { display: true, labels: { color: '#fff' } }
-                    },
-                    scales: chartType === 'pie' ? {} : {
-                        x: { ticks: { color: '#fff' } },
-                        y: { ticks: { color: '#fff' } }
 
             // Aplicar todos os filtros
             function applyAllFilters() {
@@ -631,19 +427,7 @@
                     renderTable();
                 });
             });
-        }
 
-        function renderRetrovisor(data) {
-            const historyList = document.getElementById('historyList');
-            const lastRows = data.slice(-5).reverse();
-            const timeCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('tempo') || h.toLowerCase().includes('data'));
-            const eventCol = Object.keys(data[0]).find(h => h.toLowerCase().includes('evento') || h.toLowerCase().includes('status'));
-            historyList.innerHTML = lastRows.map(row => {
-                const time = timeCol ? row[timeCol] : '';
-                const event = eventCol ? row[eventCol] : JSON.stringify(row);
-                return `<li style="margin-bottom:6px;">${time ? `<strong>${time}</strong>: ` : ''}${event}</li>`;
-            }).join('');
-        }
             // Limpar filtros
             clearBtn.addEventListener('click', () => {
                 filterDealer.value = '';
@@ -655,36 +439,6 @@
                 applyAllFilters();
             });
 
-        function setupControls(data) {
-            const btnTable = document.getElementById('toggleTable');
-            const btnChart = document.getElementById('toggleChart');
-            const chartContainer = document.getElementById('chartContainer');
-            const table = document.getElementById('dataTable');
-            const selectChartType = document.getElementById('selectChartType');
-            const selectMetric = document.getElementById('selectMetric');
-            // Alternância
-            btnTable.onclick = () => {
-                chartContainer.classList.add('hidden');
-                table.classList.remove('hidden');
-            };
-            btnChart.onclick = () => {
-                chartContainer.classList.remove('hidden');
-                table.classList.add('hidden');
-            };
-            // Inicial: mostra gráfico
-            chartContainer.classList.remove('hidden');
-            table.classList.add('hidden');
-            // Chart type
-            selectChartType.onchange = () => {
-                renderChart(globalData, selectChartType.value, selectMetric.value);
-            };
-            // Métricas
-            const headers = Object.keys(data[0]);
-            selectMetric.innerHTML = '<option value="auto">Auto</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join('');
-            selectMetric.onchange = () => {
-                renderChart(globalData, selectChartType.value, selectMetric.value);
-            };
-        }
             // Inicializar
             loadData();
         })();
