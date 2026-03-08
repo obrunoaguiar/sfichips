@@ -6,24 +6,21 @@
     <title>Dashboard Interativo | CRM</title>
     <!-- TailwindCSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse para CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- Flatpickr para calendário (date range) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
-    <!-- Ícones Heroicons (via CDN) -->
+    <!-- Ícones FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.2s ease; }
-        /* Animação sutil para cards */
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        /* Estilo para filtros ativos */
         .filter-active { background-color: #e0f2fe; border-color: #0284c7; }
     </style>
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  
 </head>
 <body class="bg-slate-50 text-slate-700 antialiased">
 
@@ -84,7 +81,6 @@
                 <h2 class="font-semibold text-slate-700">Filtros dinâmicos</h2>
                 <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">instantâneo</span>
             </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- Filtro Data (Range) -->
                 <div>
@@ -94,7 +90,6 @@
                         <input type="text" id="date-range" class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
                     </div>
                 </div>
-
                 <!-- Filtro Dealer -->
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Dealer</label>
@@ -105,7 +100,6 @@
                         <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
                     </div>
                 </div>
-
                 <!-- Filtro Origem -->
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Origem</label>
@@ -116,7 +110,6 @@
                         <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
                     </div>
                 </div>
-
                 <!-- Filtro Veículo -->
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Veículo</label>
@@ -127,7 +120,6 @@
                         <i class="fas fa-chevron-down absolute right-3 top-3 text-slate-400 pointer-events-none text-xs"></i>
                     </div>
                 </div>
-
                 <!-- Filtro Motor -->
                 <div class="lg:col-span-4 flex flex-wrap items-end justify-end gap-3">
                     <div class="w-full sm:w-auto">
@@ -161,262 +153,219 @@
                 <table class="min-w-full divide-y divide-slate-200" id="data-table">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="data">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Data">
                                 Data <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="dealer">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Dealer">
                                 Dealer <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="origem">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Origem">
                                 Origem <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="veiculo">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Veículo">
                                 Veículo <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="motor">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="Motor">
                                 Motor <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="bg-white divide-y divide-slate-200 text-sm">
-                        <!-- Linhas serão inseridas via JavaScript -->
-                        <tr><td colspan="5" class="text-center py-8 text-slate-400">Carregando dados simulados...</td></tr>
+                        <tr><td colspan="5" class="text-center py-8 text-slate-400">Carregando dados...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Rodapé -->
-        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados simulados para demonstração</p>
+        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados reais do Google Sheets</p>
     </div>
 
     <script>
-        (function() {
-            // --- DADOS SIMULADOS (substitua pela sua fonte real quando disponível) ---
-   // Substitua os dados simulados por este código
-fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?output=csv')
-    .then(response => {
-        if (!response.ok) throw new Error('Erro ao carregar CSV');
-        return response.text();
-    })
-    .then(csvText => {
-        // Usando PapaParse para converter CSV em objeto
-        Papa.parse(csvText, {
-            header: true,
-            skipEmptyLines: true,
-            complete: (results) => {
-                masterData = results.data.filter(row => 
-                    row.Data && row.Dealer && row.Origem && row.Veículo && row.Motor
-                ).map(row => ({
-                    data: row.Data,
-                    dealer: row.Dealer,
-                    origem: row.Origem,
-                    veiculo: row.Veículo,
-                    motor: row.Motor
-                }));
-                // Inicializa o dashboard com os dados carregados
-                filteredData = [...masterData];
-                populateFilters();
-                applyAllFilters();
-            },
-            error: (error) => console.error('Erro no parse:', error)
+        // CSV URL
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=721179758&single=true&output=csv';
+        const COLS = ['Data', 'Dealer', 'Origem', 'Veículo', 'Motor'];
+        let masterData = [];
+        let filteredData = [];
+        let sortConfig = { key: 'Data', direction: 'asc' };
+
+        // DOM refs
+        const tableBody = document.getElementById('table-body');
+        const kpiTotal = document.getElementById('kpi-total');
+        const kpiDealers = document.getElementById('kpi-dealers');
+        const kpiOrigens = document.getElementById('kpi-origens');
+        const tableCount = document.getElementById('table-count');
+        const dataInfo = document.getElementById('data-info');
+        const filterDealer = document.getElementById('filter-dealer');
+        const filterOrigem = document.getElementById('filter-origem');
+        const filterVeiculo = document.getElementById('filter-veiculo');
+        const filterMotor = document.getElementById('filter-motor');
+        const globalSearch = document.getElementById('global-search');
+        const clearBtn = document.getElementById('clear-filters');
+        const dateRangeInput = document.getElementById('date-range');
+
+        // Flatpickr
+        let datePicker = flatpickr(dateRangeInput, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            onChange: applyAllFilters
         });
-    })
-    .catch(error => {
-        document.getElementById('table-body').innerHTML = 
-            `<tr><td colspan="5" class="text-center py-8 text-red-400">Erro ao carregar dados: ${error.message}</td></tr>`;
-    });
-            // ----------------------------------------------------------------
 
-            // Estado global dos dados e filtros
-            let masterData = [...sampleData]; // Em produção, aqui viria os dados do CSV
-            let filteredData = [...masterData];
-            let sortConfig = { key: 'data', direction: 'asc' };
-            
-            // Referências DOM
-            const tableBody = document.getElementById('table-body');
-            const kpiTotal = document.getElementById('kpi-total');
-            const kpiDealers = document.getElementById('kpi-dealers');
-            const kpiOrigens = document.getElementById('kpi-origens');
-            const tableCount = document.getElementById('table-count');
-            const dataInfo = document.getElementById('data-info');
-            
-            // Filtros
-            const filterDealer = document.getElementById('filter-dealer');
-            const filterOrigem = document.getElementById('filter-origem');
-            const filterVeiculo = document.getElementById('filter-veiculo');
-            const filterMotor = document.getElementById('filter-motor');
-            const globalSearch = document.getElementById('global-search');
-            const clearBtn = document.getElementById('clear-filters');
-            const dateRangeInput = document.getElementById('date-range');
-            
-            // Flatpickr (date range)
-            let datePicker = flatpickr(dateRangeInput, {
-                mode: 'range',
-                dateFormat: 'Y-m-d',
-                onChange: applyAllFilters
+        // Utilidades
+        function unique(arr) {
+            return [...new Set(arr.filter(x => x && x.trim()))];
+        }
+
+        function fillSelect(selectElement, values, label) {
+            const currentValue = selectElement.value;
+            selectElement.innerHTML = `<option value="">${label}</option>`;
+            values.forEach(v => {
+                const option = document.createElement('option');
+                option.value = v;
+                option.textContent = v;
+                if (v === currentValue) option.selected = true;
+                selectElement.appendChild(option);
             });
+        }
 
-            // Função para popular selects com valores únicos
-            function populateFilters() {
-                const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
-                const origens = [...new Set(masterData.map(d => d.origem))].sort();
-                const veiculos = [...new Set(masterData.map(d => d.veiculo))].sort();
-                const motores = [...new Set(masterData.map(d => d.motor))].sort();
+        // Carregar CSV
+        function loadData() {
+            dataInfo.innerHTML = '<i class="fas fa-sync-alt text-blue-400"></i> Carregando...';
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    masterData = results.data.filter(row => COLS.every(c => row[c]));
+                    populateFilters();
+                    applyAllFilters();
+                    dataInfo.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-1"></i> ${masterData.length} registros carregados`;
+                },
+                error: function() {
+                    dataInfo.innerHTML = '<span class="text-red-500">Erro ao carregar dados</span>';
+                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Erro ao carregar dados</td></tr>`;
+                }
+            });
+        }
 
-                fillSelect(filterDealer, dealers);
-                fillSelect(filterOrigem, origens);
-                fillSelect(filterVeiculo, veiculos);
-                fillSelect(filterMotor, motores);
+        // Popular filtros
+        function populateFilters() {
+            fillSelect(filterDealer, unique(masterData.map(d => d.Dealer)), 'Todos os Dealers');
+            fillSelect(filterOrigem, unique(masterData.map(d => d.Origem)), 'Todas as Origens');
+            fillSelect(filterVeiculo, unique(masterData.map(d => d.Veículo)), 'Todos os Veículos');
+            fillSelect(filterMotor, unique(masterData.map(d => d.Motor)), 'Todos os Motores');
+        }
+
+        // Filtragem
+        function applyAllFilters() {
+            let filtered = [...masterData];
+            // Dealer
+            if (filterDealer.value) filtered = filtered.filter(item => item.Dealer === filterDealer.value);
+            // Origem
+            if (filterOrigem.value) filtered = filtered.filter(item => item.Origem === filterOrigem.value);
+            // Veículo
+            if (filterVeiculo.value) filtered = filtered.filter(item => item.Veículo === filterVeiculo.value);
+            // Motor
+            if (filterMotor.value) filtered = filtered.filter(item => item.Motor === filterMotor.value);
+            // Data
+            if (dateRangeInput.value) {
+                const dates = dateRangeInput.value.split(' to ');
+                if (dates.length === 2) {
+                    const start = dates[0];
+                    const end = dates[1];
+                    filtered = filtered.filter(item => item.Data >= start && item.Data <= end);
+                } else if (dates.length === 1) {
+                    filtered = filtered.filter(item => item.Data === dates[0]);
+                }
             }
-
-            function fillSelect(selectElement, values) {
-                const currentValue = selectElement.value;
-                selectElement.innerHTML = `<option value="">Todos ${selectElement.id.replace('filter-', '')}s</option>`;
-                values.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v;
-                    option.textContent = v;
-                    if (v === currentValue) option.selected = true;
-                    selectElement.appendChild(option);
-                });
+            // Busca global
+            if (globalSearch.value.trim() !== '') {
+                const searchTerm = globalSearch.value.toLowerCase();
+                filtered = filtered.filter(item =>
+                    COLS.some(col => item[col].toLowerCase().includes(searchTerm))
+                );
             }
+            filteredData = filtered;
+            sortData();
+            renderTable();
+            updateKPIs();
+        }
 
-            // Função principal de filtragem
-            function applyAllFilters() {
-                let filtered = [...masterData];
+        // Ordenação
+        function sortData() {
+            const { key, direction } = sortConfig;
+            filteredData.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+                if (key === 'Data') {
+                    valA = new Date(valA);
+                    valB = new Date(valB);
+                }
+                if (valA < valB) return direction === 'asc' ? -1 : 1;
+                if (valA > valB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
 
-                // Filtro por dealer
-                if (filterDealer.value) {
-                    filtered = filtered.filter(item => item.dealer === filterDealer.value);
-                }
-                // Filtro por origem
-                if (filterOrigem.value) {
-                    filtered = filtered.filter(item => item.origem === filterOrigem.value);
-                }
-                // Filtro por veículo
-                if (filterVeiculo.value) {
-                    filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
-                }
-                // Filtro por motor
-                if (filterMotor.value) {
-                    filtered = filtered.filter(item => item.motor === filterMotor.value);
-                }
-                // Filtro por data (range)
-                if (dateRangeInput.value) {
-                    const dates = dateRangeInput.value.split(' to ');
-                    if (dates.length === 2) {
-                        const start = dates[0];
-                        const end = dates[1];
-                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
-                    } else if (dates.length === 1) {
-                        // dia único selecionado
-                        filtered = filtered.filter(item => item.data === dates[0]);
-                    }
-                }
-                // Busca global
-                if (globalSearch.value.trim() !== '') {
-                    const searchTerm = globalSearch.value.toLowerCase();
-                    filtered = filtered.filter(item => 
-                        item.data.toLowerCase().includes(searchTerm) ||
-                        item.dealer.toLowerCase().includes(searchTerm) ||
-                        item.origem.toLowerCase().includes(searchTerm) ||
-                        item.veiculo.toLowerCase().includes(searchTerm) ||
-                        item.motor.toLowerCase().includes(searchTerm)
-                    );
-                }
+        // Renderizar tabela
+        function renderTable() {
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Nenhum registro encontrado</td></tr>`;
+                tableCount.textContent = '0 registros exibidos';
+                return;
+            }
+            let html = '';
+            filteredData.forEach(item => {
+                html += `<tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-3 whitespace-nowrap">${item.Data}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">${item.Dealer}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">${item.Origem}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">${item.Veículo}</td>
+                    <td class="px-6 py-3 whitespace-nowrap">${item.Motor}</td>
+                </tr>`;
+            });
+            tableBody.innerHTML = html;
+            tableCount.textContent = `${filteredData.length} registros exibidos`;
+        }
 
-                filteredData = filtered;
+        // Atualizar KPIs
+        function updateKPIs() {
+            kpiTotal.textContent = filteredData.length;
+            kpiDealers.textContent = unique(filteredData.map(d => d.Dealer)).length;
+            kpiOrigens.textContent = unique(filteredData.map(d => d.Origem)).length;
+        }
+
+        // Event listeners
+        filterDealer.addEventListener('change', applyAllFilters);
+        filterOrigem.addEventListener('change', applyAllFilters);
+        filterVeiculo.addEventListener('change', applyAllFilters);
+        filterMotor.addEventListener('change', applyAllFilters);
+        globalSearch.addEventListener('input', applyAllFilters);
+        // Ordenação ao clicar nos cabeçalhos
+        document.querySelectorAll('[data-sort]').forEach(th => {
+            th.addEventListener('click', (e) => {
+                const key = e.currentTarget.dataset.sort;
+                if (sortConfig.key === key) {
+                    sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortConfig.key = key;
+                    sortConfig.direction = 'asc';
+                }
                 sortData();
                 renderTable();
-                updateKPIs();
-            }
-
-            // Ordenação
-            function sortData() {
-                const { key, direction } = sortConfig;
-                filteredData.sort((a, b) => {
-                    let valA = a[key];
-                    let valB = b[key];
-                    if (key === 'data') {
-                        valA = new Date(valA);
-                        valB = new Date(valB);
-                    }
-                    if (valA < valB) return direction === 'asc' ? -1 : 1;
-                    if (valA > valB) return direction === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
-
-            // Renderizar tabela
-            function renderTable() {
-                if (filteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Nenhum registro encontrado</td></tr>`;
-                    tableCount.textContent = '0 registros exibidos';
-                    return;
-                }
-
-                let html = '';
-                filteredData.forEach(item => {
-                    html += `<tr class="hover:bg-slate-50 transition">
-                        <td class="px-6 py-3 whitespace-nowrap">${item.data}</td>
-                        <td class="px-6 py-3 whitespace-nowrap">${item.dealer}</td>
-                        <td class="px-6 py-3 whitespace-nowrap">${item.origem}</td>
-                        <td class="px-6 py-3 whitespace-nowrap">${item.veiculo}</td>
-                        <td class="px-6 py-3 whitespace-nowrap">${item.motor}</td>
-                    </tr>`;
-                });
-                tableBody.innerHTML = html;
-                tableCount.textContent = `${filteredData.length} registros exibidos`;
-            }
-
-            // Atualizar cards de KPI
-            function updateKPIs() {
-                kpiTotal.textContent = filteredData.length;
-                const uniqueDealers = new Set(filteredData.map(d => d.dealer)).size;
-                const uniqueOrigens = new Set(filteredData.map(d => d.origem)).size;
-                kpiDealers.textContent = uniqueDealers;
-                kpiOrigens.textContent = uniqueOrigens;
-                dataInfo.innerHTML = `<i class="fas fa-check-circle text-green-400 mr-1"></i> ${filteredData.length} registros`;
-            }
-
-            // Event listeners
-            filterDealer.addEventListener('change', applyAllFilters);
-            filterOrigem.addEventListener('change', applyAllFilters);
-            filterVeiculo.addEventListener('change', applyAllFilters);
-            filterMotor.addEventListener('change', applyAllFilters);
-            globalSearch.addEventListener('input', applyAllFilters);
-
-            // Ordenação ao clicar nos cabeçalhos
-            document.querySelectorAll('[data-sort]').forEach(th => {
-                th.addEventListener('click', (e) => {
-                    const key = e.currentTarget.dataset.sort;
-                    if (sortConfig.key === key) {
-                        sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        sortConfig.key = key;
-                        sortConfig.direction = 'asc';
-                    }
-                    sortData();
-                    renderTable();
-                });
             });
-
-            // Limpar filtros
-            clearBtn.addEventListener('click', () => {
-                filterDealer.value = '';
-                filterOrigem.value = '';
-                filterVeiculo.value = '';
-                filterMotor.value = '';
-                globalSearch.value = '';
-                datePicker.clear();
-                applyAllFilters();
-            });
-
-            // Inicialização
-            populateFilters();
+        });
+        // Limpar filtros
+        clearBtn.addEventListener('click', () => {
+            filterDealer.value = '';
+            filterOrigem.value = '';
+            filterVeiculo.value = '';
+            filterMotor.value = '';
+            globalSearch.value = '';
+            datePicker.clear();
             applyAllFilters();
-        })();
+        });
+        // Inicialização
+        loadData();
     </script>
 </body>
 </html>
