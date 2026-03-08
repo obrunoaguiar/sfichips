@@ -334,30 +334,32 @@
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
                 // Filtro data range
-// FILTRO DATA RANGE - Versão que funciona com DD/MM/YYYY
+// FILTRO DATA RANGE - Corrigido mantendo sua estrutura
 if (dateRangeInput.value) {
     const dates = dateRangeInput.value.split(' to ');
     
     if (dates.length === 2) {
-        // Converte as datas do filtro para YYYY-MM-DD (para comparação)
-        const [startDay, startMonth, startYear] = dates[0].split('/');
-        const [endDay, endMonth, endYear] = dates[1].split('/');
+        const startStr = dates[0]; // Formato DD/MM/YYYY
+        const endStr = dates[1];   // Formato DD/MM/YYYY
+        
+        // Converte para YYYY-MM-DD na hora de comparar
+        const [startDay, startMonth, startYear] = startStr.split('/');
+        const [endDay, endMonth, endYear] = endStr.split('/');
         
         const startCompare = `${startYear}-${startMonth}-${startDay}`;
         const endCompare = `${endYear}-${endMonth}-${endDay}`;
         
         filtered = filtered.filter(item => {
-            // Converte a data do item para YYYY-MM-DD
+            // Converte a data do item para YYYY-MM-DD na hora de comparar
             const [itemDay, itemMonth, itemYear] = item.data.split('/');
             const itemCompare = `${itemYear}-${itemMonth}-${itemDay}`;
             
-            // Comparação de strings no formato YYYY-MM-DD funciona!
             return itemCompare >= startCompare && itemCompare <= endCompare;
         });
         
     } else if (dates.length === 1) {
-        // Data única
-        const [day, month, year] = dates[0].split('/');
+        const filterStr = dates[0];
+        const [day, month, year] = filterStr.split('/');
         const filterCompare = `${year}-${month}-${day}`;
         
         filtered = filtered.filter(item => {
