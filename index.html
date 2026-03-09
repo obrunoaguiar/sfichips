@@ -44,19 +44,20 @@
         }
         
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             background: linear-gradient(135deg, #2563eb, #1e4a7a);
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 22px;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
         }
         
         .logo-text h1 {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #0f3b5e;
             line-height: 1.2;
@@ -81,18 +82,197 @@
             color: #2563eb;
         }
         
-        /* ÁREA PRINCIPAL COM IFRAME */
+        .reload-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reload-btn:hover {
+            background: #f1f5f9;
+            transform: rotate(90deg);
+            color: #2563eb;
+        }
+        
+        /* ÁREA PRINCIPAL */
         .main-content {
             flex: 1;
             position: relative;
             background: #f1f5f9;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        /* HOME - TELA INICIAL */
+        .home-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, #2563eb, #1e4a7a);
+            color: white;
+            border-radius: 28px;
+            padding: 32px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 30px -10px rgba(37, 99, 235, 0.4);
+        }
+        
+        .welcome-section h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .welcome-section p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 500px;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-icon.blue { background: #e0f2fe; color: #0284c7; }
+        .stat-icon.green { background: #dcfce7; color: #16a34a; }
+        .stat-icon.purple { background: #f3e8ff; color: #9333ea; }
+        .stat-icon.orange { background: #fff4e6; color: #f97316; }
+        
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f3b5e;
+            line-height: 1.2;
+        }
+        
+        .stat-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        /* CARDS DOS MÓDULOS */
+        .modules-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0f3b5e;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
             overflow: hidden;
         }
         
+        .module-card:hover {
+            transform: translateY(-8px);
+            border-color: #2563eb;
+            box-shadow: 0 30px 40px -15px rgba(37, 99, 235, 0.3);
+        }
+        
+        .module-card.orcamento { background: linear-gradient(145deg, #ffffff, #f8fafc); }
+        .module-card.leads { background: linear-gradient(145deg, #ffffff, #f8fafc); }
+        .module-card.atendimento { background: linear-gradient(145deg, #ffffff, #f8fafc); }
+        
+        .module-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .module-icon.orcamento { background: #e0f2fe; color: #0284c7; }
+        .module-icon.leads { background: #dcfce7; color: #16a34a; }
+        .module-icon.atendimento { background: #f3e8ff; color: #9333ea; }
+        
+        .module-card h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0f3b5e;
+            margin-bottom: 8px;
+        }
+        
+        .module-card p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .module-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #0f3b5e;
+        }
+        
+        .module-badge i {
+            color: #2563eb;
+        }
+        
+        /* CONTAINER DO IFRAME (escondido inicialmente) */
         .iframe-container {
             width: 100%;
             height: 100%;
             position: relative;
+            display: none;
         }
         
         .iframe-container iframe {
@@ -100,7 +280,7 @@
             height: 100%;
             border: none;
             background: white;
-            transition: opacity 0.3s ease;
+            border-radius: 12px;
         }
         
         /* OVERLAY DE CARREGAMENTO */
@@ -110,13 +290,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255,255,255,0.8);
-            display: flex;
+            background: rgba(255,255,255,0.9);
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 20;
             backdrop-filter: blur(3px);
-            transition: opacity 0.3s;
         }
         
         .loading-spinner {
@@ -132,7 +311,32 @@
             to { transform: rotate(360deg); }
         }
         
-        /* MENU INFERIOR (NAVEGAÇÃO) */
+        /* BOTÃO VOLTAR PARA HOME */
+        .back-home-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: #0f3b5e;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            z-index: 50;
+            border: 3px solid white;
+        }
+        
+        .back-home-btn:hover {
+            transform: scale(1.1);
+            background: #2563eb;
+        }
+        
+        /* MENU INFERIOR */
         .bottom-nav {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -179,7 +383,6 @@
             font-weight: 500;
         }
         
-        /* BADGE DE NOTIFICAÇÃO */
         .badge {
             position: absolute;
             top: 4px;
@@ -197,41 +400,24 @@
             border: 2px solid white;
         }
         
-        /* BOTÃO RECARREGAR */
-        .reload-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .reload-btn:hover {
-            background: #f1f5f9;
-            transform: rotate(90deg);
-        }
-        
-        /* RESPONSIVIDADE */
         @media (max-width: 640px) {
             .header-stats {
                 display: none;
             }
             
-            .logo-text h1 {
-                font-size: 1.2rem;
+            .welcome-section h2 {
+                font-size: 1.6rem;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO COM INFORMAÇÕES -->
+    <!-- CABEÇALHO -->
     <header class="app-header">
         <div class="logo-area">
             <div class="logo-icon">
@@ -239,7 +425,7 @@
             </div>
             <div class="logo-text">
                 <h1>SFICHIPS HUB</h1>
-                <p>1º Trimestre 2026 · v2.0</p>
+                <p id="header-subtitle">1º Trimestre 2026 · Visão Geral</p>
             </div>
         </div>
         
@@ -249,38 +435,147 @@
             <div><i class="fa-solid fa-wallet mr-1"></i> <span>R$ 19,5k</span></div>
         </div>
         
-        <div class="reload-btn" id="reloadIframe" title="Recarregar página atual">
+        <div class="reload-btn" id="reloadIframe" title="Recarregar">
             <i class="fa-solid fa-rotate-right"></i>
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL COM IFRAME -->
-    <main class="main-content">
-        <!-- OVERLAY DE CARREGAMENTO -->
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-spinner"></div>
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main-content" id="mainContent">
+        <!-- HOME - TELA INICIAL (sempre visível inicialmente) -->
+        <div id="homeScreen" class="home-container">
+            <!-- BEM-VINDO -->
+            <div class="welcome-section">
+                <h2>Olá, Bruno! 👋</h2>
+                <p>Bem-vindo ao seu hub de gestão. Acesse os módulos abaixo para visualizar seus dashboards.</p>
+            </div>
+            
+            <!-- ESTATÍSTICAS RÁPIDAS -->
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>4.932</h3>
+                        <p>Total de Leads</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>R$ 19,5k</h3>
+                        <p>Investimento</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>1.972</h3>
+                        <p>Leads Matriz</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>2.673</h3>
+                        <p>Leads Dealers</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MÓDULOS EM CARDS -->
+            <div class="modules-title">
+                <i class="fa-solid fa-cubes"></i>
+                <span>Módulos Disponíveis</span>
+            </div>
+            
+            <div class="modules-grid">
+                <!-- CARD ORÇAMENTO -->
+                <div class="module-card orcamento" data-module="orcamento" data-url="https://obrunoaguiar.github.io/sfichips/indexOld.html">
+                    <div class="module-icon orcamento">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3>Orçamento</h3>
+                    <p>Análise completa de investimentos, CPL e distribuição de recursos por canal.</p>
+                    <div class="module-badge">
+                        <i class="fa-regular fa-clock"></i> Atualizado 09/03
+                    </div>
+                </div>
+                
+                <!-- CARD LEADS -->
+                <div class="module-card leads" data-module="leads" data-url="https://obrunoaguiar.github.io/sfichips/2026/1trimestre.html">
+                    <div class="module-icon leads">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3>Leads</h3>
+                    <p>Comparativo mensal de leads, desempenho por produto e variações.</p>
+                    <div class="module-badge">
+                        <i class="fa-regular fa-calendar"></i> Jan a Mar
+                    </div>
+                </div>
+                
+                <!-- CARD ATENDIMENTO -->
+                <div class="module-card atendimento" data-module="atendimento" data-url="https://obrunoaguiar.github.io/sfichips/2026/index.html">
+                    <div class="module-icon atendimento">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <h3>Atendimento</h3>
+                    <p>CRM com filtros, distribuição por dealer, origem e motor.</p>
+                    <div class="module-badge">
+                        <i class="fa-solid fa-circle" style="color: #16a34a; font-size: 8px;"></i> 7 novos
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DICA DE USO -->
+            <div style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 0.85rem;">
+                <i class="fa-regular fa-fingerprint"></i> Clique nos cards acima ou use o menu inferior para navegar
+            </div>
         </div>
         
-        <!-- CONTAINER DO IFRAME -->
-        <div class="iframe-container">
+        <!-- CONTAINER DO IFRAME (inicialmente escondido) -->
+        <div id="iframeContainer" class="iframe-container">
+            <!-- OVERLAY DE CARREGAMENTO -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+            </div>
             <iframe id="mainIframe" src="about:blank" allowfullscreen></iframe>
         </div>
     </main>
 
-    <!-- MENU INFERIOR DE NAVEGAÇÃO -->
+    <!-- BOTÃO VOLTAR PARA HOME (aparece apenas quando estiver num módulo) -->
+    <div class="back-home-btn" id="backHomeBtn" style="display: none;">
+        <i class="fa-solid fa-house"></i>
+    </div>
+
+    <!-- MENU INFERIOR -->
     <nav class="bottom-nav">
-        <button class="nav-item active" data-src="https://obrunoaguiar.github.io/sfichips/indexOld.html" data-title="Orçamento">
-            <i class="nav-icon fa-solid fa-wallet"></i>
-            <span class="nav-label">Orçamento</span>
-            <span class="badge" style="display: none;">3</span>
+        <button class="nav-item active" data-module="home" data-url="">
+            <i class="nav-icon fa-solid fa-house"></i>
+            <span class="nav-label">Início</span>
         </button>
         
-        <button class="nav-item" data-src="https://obrunoaguiar.github.io/sfichips/2026/1trimestre.html" data-title="Leads">
+        <button class="nav-item" data-module="orcamento" data-url="https://obrunoaguiar.github.io/sfichips/indexOld.html">
+            <i class="nav-icon fa-solid fa-wallet"></i>
+            <span class="nav-label">Orçamento</span>
+        </button>
+        
+        <button class="nav-item" data-module="leads" data-url="https://obrunoaguiar.github.io/sfichips/2026/1trimestre.html">
             <i class="nav-icon fa-solid fa-chart-line"></i>
             <span class="nav-label">Leads</span>
         </button>
         
-        <button class="nav-item" data-src="https://obrunoaguiar.github.io/sfichips/2026/index.html" data-title="Atendimento">
+        <button class="nav-item" data-module="atendimento" data-url="https://obrunoaguiar.github.io/sfichips/2026/index.html">
             <i class="nav-icon fa-solid fa-headset"></i>
             <span class="nav-label">Atendimento</span>
             <span class="badge">7</span>
@@ -290,161 +585,122 @@
     <script>
         (function() {
             // Elementos
+            const homeScreen = document.getElementById('homeScreen');
+            const iframeContainer = document.getElementById('iframeContainer');
             const iframe = document.getElementById('mainIframe');
-            const navItems = document.querySelectorAll('.nav-item');
             const loadingOverlay = document.getElementById('loadingOverlay');
-            const reloadBtn = document.getElementById('reloadIframe');
-            const headerTitle = document.querySelector('.logo-text p');
+            const backHomeBtn = document.getElementById('backHomeBtn');
+            const navItems = document.querySelectorAll('.nav-item');
+            const headerSubtitle = document.getElementById('header-subtitle');
+            const moduleCards = document.querySelectorAll('.module-card');
             
-            // Mapeamento de títulos para cada página
-            const pageTitles = {
-                'https://obrunoaguiar.github.io/sfichips/.index.html': 'Orçamento · SFICHIPS',
-                'https://obrunoaguiar.github.io/sfichips/2026/1trimestre.html': 'Leads · Comparativo Mensal',
-                'https://obrunoaguiar.github.io/sfichips/2026/index.html': 'Atendimento · CRM'
+            // Mapeamento de títulos
+            const titles = {
+                'home': 'Visão Geral · Home',
+                'orcamento': 'Orçamento · SFICHIPS',
+                'leads': 'Leads · Comparativo Mensal',
+                'atendimento': 'Atendimento · CRM'
             };
             
-            // Função para carregar URL no iframe
-            function loadIframe(url) {
-                if (!url || url === 'about:blank') {
-                    // Página "Em Breco"
-                    iframe.srcdoc = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <style>
-                                body {
-                                    font-family: 'Inter', sans-serif;
-                                    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    height: 100vh;
-                                    margin: 0;
-                                    color: #1e293b;
-                                }
-                                .coming-soon {
-                                    text-align: center;
-                                    padding: 40px;
-                                    background: rgba(255,255,255,0.7);
-                                    backdrop-filter: blur(10px);
-                                    border-radius: 32px;
-                                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                                }
-                                .coming-soon i {
-                                    font-size: 80px;
-                                    color: #2563eb;
-                                    margin-bottom: 20px;
-                                    opacity: 0.8;
-                                }
-                                .coming-soon h2 {
-                                    font-size: 28px;
-                                    font-weight: 700;
-                                    margin-bottom: 8px;
-                                }
-                                .coming-soon p {
-                                    color: #64748b;
-                                    font-size: 16px;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="coming-soon">
-                                <i class="fa-solid fa-rocket"></i>
-                                <h2>Nova Funcionalidade</h2>
-                                <p>Estamos preparando algo incrível para você!</p>
-                                <p style="margin-top: 20px; font-size: 14px;">Em breve: métricas avançadas e IA</p>
-                            </div>
-                        </body>
-                        </html>
-                    `;
-                    headerTitle.innerHTML = 'Em Breve · Próximas novidades';
-                    return;
-                }
+            // Função para mostrar a Home
+            function showHome() {
+                homeScreen.style.display = 'block';
+                iframeContainer.style.display = 'none';
+                backHomeBtn.style.display = 'none';
+                headerSubtitle.textContent = '1º Trimestre 2026 · Visão Geral';
                 
-                // Mostra loading
-                loadingOverlay.style.opacity = '1';
-                loadingOverlay.style.display = 'flex';
-                
-                // Atualiza o src do iframe
-                iframe.src = url;
-                
-                // Atualiza título no header
-                headerTitle.innerHTML = pageTitles[url] || 'SFICHIPS · Dashboard';
+                // Atualiza menu
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.module === 'home') {
+                        item.classList.add('active');
+                    }
+                });
             }
             
-            // Evento quando o iframe termina de carregar
+            // Função para carregar módulo no iframe
+            function loadModule(moduleName, url) {
+                if (!url) return;
+                
+                // Esconde home, mostra iframe
+                homeScreen.style.display = 'none';
+                iframeContainer.style.display = 'block';
+                backHomeBtn.style.display = 'flex';
+                
+                // Mostra loading
+                loadingOverlay.style.display = 'flex';
+                loadingOverlay.style.opacity = '1';
+                
+                // Carrega URL no iframe
+                iframe.src = url;
+                
+                // Atualiza título
+                headerSubtitle.textContent = titles[moduleName] || 'SFICHIPS · Dashboard';
+                
+                // Atualiza menu
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.module === moduleName) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+            
+            // Evento quando iframe carrega
             iframe.addEventListener('load', function() {
-                // Esconde loading com uma pequena transição
                 setTimeout(() => {
                     loadingOverlay.style.opacity = '0';
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                     }, 300);
-                }, 500); // Pequeno delay para garantir que carregou
+                }, 500);
             });
             
-            // Navegação ao clicar nos itens do menu
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active de todos
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    
-                    // Adiciona active no clicado
-                    this.classList.add('active');
-                    
-                    // Pega a URL do atributo data-src
-                    const src = this.dataset.src;
-                    
-                    // Carrega no iframe
-                    loadIframe(src);
+            // Evento de erro no iframe
+            iframe.addEventListener('error', function() {
+                loadingOverlay.style.display = 'none';
+                alert('Erro ao carregar a página. Verifique a URL.');
+            });
+            
+            // Clique nos cards da home
+            moduleCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const moduleName = this.dataset.module;
+                    const url = this.dataset.url;
+                    loadModule(moduleName, url);
                 });
             });
             
-            // Botão de recarregar
-            reloadBtn.addEventListener('click', function() {
-                const currentSrc = iframe.src;
-                if (currentSrc && currentSrc !== 'about:blank') {
-                    // Força recarregamento
+            // Clique no menu inferior
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const moduleName = this.dataset.module;
+                    const url = this.dataset.url;
+                    
+                    if (moduleName === 'home') {
+                        showHome();
+                    } else {
+                        loadModule(moduleName, url);
+                    }
+                });
+            });
+            
+            // Botão voltar para home
+            backHomeBtn.addEventListener('click', showHome);
+            
+            // Botão recarregar
+            document.getElementById('reloadIframe').addEventListener('click', function() {
+                if (iframeContainer.style.display === 'block') {
+                    const currentSrc = iframe.src;
                     iframe.src = 'about:blank';
                     setTimeout(() => {
                         iframe.src = currentSrc;
                     }, 50);
-                } else {
-                    // Se estiver em branco, recarrega a página ativa do menu
-                    const activeItem = document.querySelector('.nav-item.active');
-                    if (activeItem) {
-                        loadIframe(activeItem.dataset.src);
-                    }
                 }
             });
             
-            // Carrega a primeira página automaticamente (Orçamento)
-            const firstItem = document.querySelector('.nav-item[data-src="https://obrunoaguiar.github.io/sfichips/.index.html"]');
-            if (firstItem) {
-                setTimeout(() => {
-                    loadIframe('https://obrunoaguiar.github.io/sfichips/.index.html');
-                }, 100);
-            }
-            
-            // SIMULAÇÃO DE NOTIFICAÇÕES (para o badge)
-            // Você pode remover isso depois
-            setTimeout(() => {
-                const badges = document.querySelectorAll('.badge');
-                badges.forEach(badge => {
-                    if (badge.textContent === '7') {
-                        // Mantém o 7
-                    }
-                });
-            }, 500);
-            
-            // TRATAMENTO DE ERRO NO IFRAME
-            iframe.addEventListener('error', function() {
-                console.log('Erro ao carregar iframe');
-                loadingOverlay.style.display = 'none';
-                alert('Não foi possível carregar a página. Verifique a URL.');
-            });
+            // Inicia com a home visível
+            showHome();
         })();
     </script>
 </body>
