@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard SFICHIPS - Janeiro 2026</title>
+    <title>Dashboard SFICHIPS - Janeiro a Março 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -462,12 +462,12 @@
         <header>
             <div class="logo">
                 <i class="fab fa-whatsapp"></i>
-                <span>SFICHIPSNORDESTE - Dashboard Janeiro 2026</span>
+                <span>SFICHIPSNORDESTE - Dashboard Janeiro a Março 2026</span>
             </div>
             <div class="date-filter">
-                <input type="date" id="startDate" class="date-input">
+                <input type="date" id="startDate" class="date-input" value="2026-01-01">
                 <span style="color: white;">até</span>
-                <input type="date" id="endDate" class="date-input">
+                <input type="date" id="endDate" class="date-input" value="2026-03-08">
                 <button class="filter-btn" id="applyFilter">
                     <i class="fas fa-filter"></i> Filtrar Período
                 </button>
@@ -484,7 +484,7 @@
                     </div>
                 </div>
                 <div class="card-value" id="totalLeads">0</div>
-                <div class="card-subvalue">Período: Janeiro 2026</div>
+                <div class="card-subvalue">Período: Jan a Mar 2026</div>
                 <div class="card-percentage positive" id="totalGrowth">+0%</div>
             </div>
 
@@ -581,7 +581,7 @@
         </div>
 
         <!-- Gráficos Comparativos -->
-        <h2 class="section-title">Análise Gráfica - Janeiro 2026</h2>
+        <h2 class="section-title">Análise Gráfica - Janeiro a Março 2026</h2>
         <div class="chart-comparison-container">
             <div class="chart-card">
                 <div class="chart-header">
@@ -677,597 +677,109 @@
         </div>
 
         <footer>
-            <p>Dashboard SFICHIPSNORDESTE - Análise de Performance Janeiro 2026 | Última atualização: 21/01/2026</p>
+            <p>Dashboard SFICHIPSNORDESTE - Análise de Performance Janeiro a Março 2026 | Última atualização: 08/03/2026</p>
             <p>Desenvolvido para análise estratégica de marketing e performance</p>
         </footer>
     </div>
 
     <script>
-        // Dados de Janeiro 2026
+        // Dados de Janeiro a Março 2026
         const rawData = [
+            // Janeiro 2026 (31 dias)
             {data: '2026-01-01', totalLeads: 72, cpl: 4.05, totalBudget: 291.54, 
              matrizAspirado: 12, matrizTurbo: 17, matrizTotal: 29, matrizBudget: 117.43,
              dealersAspirado: 21, dealersTurbo: 17, dealersTotal: 38, dealersBudget: 153.87},
-             
             {data: '2026-01-02', totalLeads: 86, cpl: 3.56, totalBudget: 306.36,
              matrizAspirado: 21, matrizTurbo: 20, matrizTotal: 41, matrizBudget: 146.06,
              dealersAspirado: 26, dealersTurbo: 17, dealersTotal: 43, dealersBudget: 153.18},
-             
             {data: '2026-01-03', totalLeads: 78, cpl: 3.70, totalBudget: 288.42,
              matrizAspirado: 20, matrizTurbo: 7, matrizTotal: 27, matrizBudget: 99.84,
              dealersAspirado: 20, dealersTurbo: 26, dealersTotal: 46, dealersBudget: 170.09},
-             
             {data: '2026-01-04', totalLeads: 108, cpl: 2.91, totalBudget: 314.32,
              matrizAspirado: 19, matrizTurbo: 13, matrizTotal: 32, matrizBudget: 93.13,
              dealersAspirado: 45, dealersTurbo: 27, dealersTotal: 72, dealersBudget: 209.55},
-             
             {data: '2026-01-05', totalLeads: 70, cpl: 4.10, totalBudget: 287.08,
              matrizAspirado: 18, matrizTurbo: 12, matrizTotal: 30, matrizBudget: 123.03,
              dealersAspirado: 17, dealersTurbo: 19, dealersTotal: 36, dealersBudget: 147.64},
-             
             {data: '2026-01-06', totalLeads: 78, cpl: 3.77, totalBudget: 294.03,
              matrizAspirado: 0, matrizTurbo: 0, matrizTotal: 0, matrizBudget: 0.00,
              dealersAspirado: 2, dealersTurbo: 1, dealersTotal: 3, dealersBudget: 11.31},
-             
             {data: '2026-01-07', totalLeads: 55, cpl: 5.29, totalBudget: 291.05,
              matrizAspirado: 27, matrizTurbo: 14, matrizTotal: 41, matrizBudget: 216.96,
              dealersAspirado: 37, dealersTurbo: 43, dealersTotal: 80, dealersBudget: 423.35},
-             
             {data: '2026-01-08', totalLeads: 76, cpl: 3.69, totalBudget: 280.06,
              matrizAspirado: 17, matrizTurbo: 12, matrizTotal: 29, matrizBudget: 106.87,
              dealersAspirado: 17, dealersTurbo: 27, dealersTotal: 44, dealersBudget: 162.14},
-             
             {data: '2026-01-09', totalLeads: 56, cpl: 5.24, totalBudget: 293.61,
              matrizAspirado: 8, matrizTurbo: 9, matrizTotal: 17, matrizBudget: 89.13,
              dealersAspirado: 6, dealersTurbo: 8, dealersTotal: 14, dealersBudget: 73.40},
-             
             {data: '2026-01-10', totalLeads: 56, cpl: 4.97, totalBudget: 278.12,
              matrizAspirado: 26, matrizTurbo: 16, matrizTotal: 42, matrizBudget: 208.59,
              dealersAspirado: 10, dealersTurbo: 26, dealersTotal: 36, dealersBudget: 178.79},
-             
             {data: '2026-01-11', totalLeads: 71, cpl: 4.52, totalBudget: 320.96,
              matrizAspirado: 22, matrizTurbo: 8, matrizTotal: 30, matrizBudget: 135.62,
              dealersAspirado: 18, dealersTurbo: 22, dealersTotal: 40, dealersBudget: 180.82},
-             
             {data: '2026-01-12', totalLeads: 75, cpl: 4.08, totalBudget: 305.73,
              matrizAspirado: 14, matrizTurbo: 9, matrizTotal: 23, matrizBudget: 93.76,
              dealersAspirado: 23, dealersTurbo: 24, dealersTotal: 47, dealersBudget: 191.59},
-             
             {data: '2026-01-13', totalLeads: 90, cpl: 3.24, totalBudget: 291.38,
              matrizAspirado: 17, matrizTurbo: 13, matrizTotal: 30, matrizBudget: 97.13,
              dealersAspirado: 34, dealersTurbo: 21, dealersTotal: 55, dealersBudget: 178.07},
-             
             {data: '2026-01-14', totalLeads: 74, cpl: 3.96, totalBudget: 293.07,
              matrizAspirado: 18, matrizTurbo: 7, matrizTotal: 25, matrizBudget: 99.01,
              dealersAspirado: 12, dealersTurbo: 26, dealersTotal: 38, dealersBudget: 150.50},
-             
             {data: '2026-01-15', totalLeads: 94, cpl: 2.98, totalBudget: 279.85,
              matrizAspirado: 17, matrizTurbo: 13, matrizTotal: 30, matrizBudget: 89.31,
              dealersAspirado: 35, dealersTurbo: 22, dealersTotal: 57, dealersBudget: 169.70},
-             
             {data: '2026-01-16', totalLeads: 68, cpl: 4.24, totalBudget: 288.00,
              matrizAspirado: 12, matrizTurbo: 9, matrizTotal: 21, matrizBudget: 88.94,
              dealersAspirado: 17, dealersTurbo: 25, dealersTotal: 42, dealersBudget: 177.88},
-             
             {data: '2026-01-17', totalLeads: 74, cpl: 3.91, totalBudget: 289.60,
              matrizAspirado: 13, matrizTurbo: 10, matrizTotal: 23, matrizBudget: 90.01,
              dealersAspirado: 21, dealersTurbo: 21, dealersTotal: 42, dealersBudget: 164.37},
-             
             {data: '2026-01-18', totalLeads: 91, cpl: 3.58, totalBudget: 326.03,
              matrizAspirado: 20, matrizTurbo: 18, matrizTotal: 38, matrizBudget: 136.14,
              dealersAspirado: 24, dealersTurbo: 22, dealersTotal: 46, dealersBudget: 164.81},
-             
             {data: '2026-01-19', totalLeads: 69, cpl: 4.36, totalBudget: 301.03,
              matrizAspirado: 13, matrizTurbo: 16, matrizTotal: 29, matrizBudget: 126.52,
              dealersAspirado: 17, dealersTurbo: 15, dealersTotal: 32, dealersBudget: 139.61},
-             
             {data: '2026-01-20', totalLeads: 76, cpl: 3.88, totalBudget: 294.64,
              matrizAspirado: 15, matrizTurbo: 8, matrizTotal: 23, matrizBudget: 89.17,
              dealersAspirado: 29, dealersTurbo: 14, dealersTotal: 43, dealersBudget: 166.70},
-             
-            {data: '2026-01-21', totalLeads: 68, cpl: 4.15, totalBudget: 282.45,
-             matrizAspirado: 25, matrizTurbo: 8, matrizTotal: 33, matrizBudget: 137.07,
-             dealersAspirado: 40, dealersTurbo: 21, dealersTotal: 61, dealersBudget: 253.37}
-        ];
-
-        // Dados de resumo geral (Data Específica)
-        const summaryData = {
-            totalLeads: 1600,
-            cpl: 3.92,
-            totalBudget: 6266.60,
-            matrizAspirado: 877,
-            matrizTurbo: 548,
-            matrizTotal: 1425,
-            matrizBudget: 2420.66,
-            dealersAspirado: 1298,
-            dealersTurbo: 946,
-            dealersTotal: 2244,
-            dealersBudget: 3703.86
-        };
-
-        // Variáveis para os gráficos
-        let leadsComparisonChart, budgetComparisonChart, matrixPieChart, dealersPieChart, leadsTrendChart, channelDistributionChart;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar datas padrão (Janeiro 2026)
-            const startDate = '2026-01-01';
-            const endDate = '2026-01-21';
+            {data: '2026-01-21', totalLeads: 68, cpl: 4.16, totalBudget: 282.65,
+             matrizAspirado: 25, matrizTurbo: 8, matrizTotal: 33, matrizBudget: 137.17,
+             dealersAspirado: 40, dealersTurbo: 21, dealersTotal: 61, dealersBudget: 253.55},
+            {data: '2026-01-22', totalLeads: 74, cpl: 3.90, totalBudget: 288.32,
+             matrizAspirado: 11, matrizTurbo: 19, matrizTotal: 30, matrizBudget: 116.89,
+             dealersAspirado: 25, dealersTurbo: 20, dealersTotal: 45, dealersBudget: 175.33},
+            {data: '2026-01-23', totalLeads: 85, cpl: 3.44, totalBudget: 292.10,
+             matrizAspirado: 18, matrizTurbo: 17, matrizTotal: 35, matrizBudget: 120.28,
+             dealersAspirado: 22, dealersTurbo: 22, dealersTotal: 44, dealersBudget: 151.20},
+            {data: '2026-01-24', totalLeads: 67, cpl: 4.20, totalBudget: 281.30,
+             matrizAspirado: 19, matrizTurbo: 12, matrizTotal: 31, matrizBudget: 130.15,
+             dealersAspirado: 22, dealersTurbo: 12, dealersTotal: 34, dealersBudget: 142.75},
+            {data: '2026-01-25', totalLeads: 87, cpl: 3.74, totalBudget: 325.38,
+             matrizAspirado: 20, matrizTurbo: 13, matrizTotal: 33, matrizBudget: 123.42,
+             dealersAspirado: 25, dealersTurbo: 25, dealersTotal: 50, dealersBudget: 187.00},
+            {data: '2026-01-26', totalLeads: 74, cpl: 4.08, totalBudget: 302.12,
+             matrizAspirado: 15, matrizTurbo: 10, matrizTotal: 25, matrizBudget: 102.07,
+             dealersAspirado: 23, dealersTurbo: 24, dealersTotal: 47, dealersBudget: 191.89},
+            {data: '2026-01-27', totalLeads: 83, cpl: 3.55, totalBudget: 294.80,
+             matrizAspirado: 17, matrizTurbo: 14, matrizTotal: 31, matrizBudget: 110.11,
+             dealersAspirado: 32, dealersTurbo: 19, dealersTotal: 51, dealersBudget: 181.14},
+            {data: '2026-01-28', totalLeads: 75, cpl: 3.74, totalBudget: 280.26,
+             matrizAspirado: 14, matrizTurbo: 14, matrizTotal: 28, matrizBudget: 104.63,
+             dealersAspirado: 22, dealersTurbo: 15, dealersTotal: 37, dealersBudget: 138.26},
+            {data: '2026-01-29', totalLeads: 69, cpl: 3.89, totalBudget: 268.51,
+             matrizAspirado: 16, matrizTurbo: 12, matrizTotal: 28, matrizBudget: 108.96,
+             dealersAspirado: 21, dealersTurbo: 19, dealersTotal: 40, dealersBudget: 155.66},
+            {data: '2026-01-30', totalLeads: 60, cpl: 4.84, totalBudget: 290.43,
+             matrizAspirado: 10, matrizTurbo: 11, matrizTotal: 21, matrizBudget: 101.65,
+             dealersAspirado: 19, dealersTurbo: 16, dealersTotal: 35, dealersBudget: 169.42},
+            {data: '2026-01-31', totalLeads: 64, cpl: 4.16, totalBudget: 266.45,
+             matrizAspirado: 15, matrizTurbo: 9, matrizTotal: 24, matrizBudget: 99.92,
+             dealersAspirado: 13, dealersTurbo: 21, dealersTotal: 34, dealersBudget: 141.55},
             
-            document.getElementById('startDate').value = startDate;
-            document.getElementById('endDate').value = endDate;
-            
-            // Aplicar filtro inicial
-            applyDateFilter();
-            
-            // Configurar evento do botão de filtro
-            document.getElementById('applyFilter').addEventListener('click', applyDateFilter);
-        });
-
-        function applyDateFilter() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            
-            if (!startDate || !endDate) {
-                alert('Por favor, selecione ambas as datas.');
-                return;
-            }
-            
-            if (startDate > endDate) {
-                alert('A data inicial não pode ser maior que a data final.');
-                return;
-            }
-            
-            // Filtrar dados pelo período selecionado
-            const filteredData = rawData.filter(item => {
-                return item.data >= startDate && item.data <= endDate;
-            });
-            
-            // Calcular métricas e atualizar interface
-            calculateMetrics(filteredData);
-            updateTable(filteredData);
-            updateCharts(filteredData);
-        }
-
-        function calculateMetrics(data) {
-            if (data.length === 0) {
-                alert('Nenhum dado encontrado para o período selecionado.');
-                return;
-            }
-            
-            // Calcular totais do período filtrado
-            let totalLeads = 0;
-            let totalBudget = 0;
-            
-            let matrixTotalLeads = 0;
-            let matrixTotalBudget = 0;
-            let matrixAspiradoLeads = 0;
-            let matrixTurboLeads = 0;
-            
-            let dealersTotalLeads = 0;
-            let dealersTotalBudget = 0;
-            let dealersAspiradoLeads = 0;
-            let dealersTurboLeads = 0;
-            
-            data.forEach(item => {
-                totalLeads += item.totalLeads;
-                totalBudget += item.totalBudget;
-                
-                matrixTotalLeads += item.matrizTotal;
-                matrixTotalBudget += item.matrizBudget;
-                matrixAspiradoLeads += item.matrizAspirado;
-                matrixTurboLeads += item.matrizTurbo;
-                
-                dealersTotalLeads += item.dealersTotal;
-                dealersTotalBudget += item.dealersBudget;
-                dealersAspiradoLeads += item.dealersAspirado;
-                dealersTurboLeads += item.dealersTurbo;
-            });
-            
-            // Calcular CPLs
-            const averageCPL = totalLeads > 0 ? totalBudget / totalLeads : 0;
-            const matrixCPL = matrixTotalLeads > 0 ? matrixTotalBudget / matrixTotalLeads : 0;
-            const dealersCPL = dealersTotalLeads > 0 ? dealersTotalBudget / dealersTotalLeads : 0;
-            
-            // Calcular shares
-            const matrixShare = totalLeads > 0 ? (matrixTotalLeads / totalLeads) * 100 : 0;
-            const dealersShare = totalLeads > 0 ? (dealersTotalLeads / totalLeads) * 100 : 0;
-            
-            const matrixAspiradoShare = matrixTotalLeads > 0 ? (matrixAspiradoLeads / matrixTotalLeads) * 100 : 0;
-            const matrixTurboShare = matrixTotalLeads > 0 ? (matrixTurboLeads / matrixTotalLeads) * 100 : 0;
-            
-            const dealersAspiradoShare = dealersTotalLeads > 0 ? (dealersAspiradoLeads / dealersTotalLeads) * 100 : 0;
-            const dealersTurboShare = dealersTotalLeads > 0 ? (dealersTurboLeads / dealersTotalLeads) * 100 : 0;
-            
-            // Calcular crescimento vs resumo geral
-            const growthVsSummary = summaryData.totalLeads > 0 ? 
-                ((totalLeads / summaryData.totalLeads) * 100) - 100 : 0;
-            
-            // Atualizar interface - Resumo Geral Superior
-            document.getElementById('totalLeads').textContent = totalLeads.toLocaleString();
-            document.getElementById('totalInvestment').textContent = `R$ ${totalBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('averageCPL').textContent = `R$ ${averageCPL.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            
-            // Crescimento
-            const growthElement = document.getElementById('totalGrowth');
-            growthElement.textContent = growthVsSummary >= 0 ? `+${growthVsSummary.toFixed(1)}%` : `${growthVsSummary.toFixed(1)}%`;
-            growthElement.className = growthVsSummary >= 0 ? 'card-percentage positive' : 'card-percentage negative';
-            
-            // Matriz
-            document.getElementById('matrixTotalLeads').textContent = matrixTotalLeads.toLocaleString();
-            document.getElementById('matrixTotalBudget').textContent = `R$ ${matrixTotalBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('matrixShare').textContent = `${matrixShare.toFixed(1)}% do total`;
-            
-            // Dealers
-            document.getElementById('dealersTotalLeads').textContent = dealersTotalLeads.toLocaleString();
-            document.getElementById('dealersTotalBudget').textContent = `R$ ${dealersTotalBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('dealersShare').textContent = `${dealersShare.toFixed(1)}% do total`;
-            
-            // Atualizar Comparação Detalhada
-            document.getElementById('matrixLeads').textContent = matrixTotalLeads.toLocaleString();
-            document.getElementById('matrixAspirado').textContent = matrixAspiradoLeads.toLocaleString();
-            document.getElementById('matrixTurbo').textContent = matrixTurboLeads.toLocaleString();
-            document.getElementById('matrixCPL').textContent = `R$ ${matrixCPL.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('matrixAspiradoShare').textContent = `${matrixAspiradoShare.toFixed(1)}% dos leads`;
-            document.getElementById('matrixTurboShare').textContent = `${matrixTurboShare.toFixed(1)}% dos leads`;
-            
-            document.getElementById('dealersLeads').textContent = dealersTotalLeads.toLocaleString();
-            document.getElementById('dealersAspirado').textContent = dealersAspiradoLeads.toLocaleString();
-            document.getElementById('dealersTurbo').textContent = dealersTurboLeads.toLocaleString();
-            document.getElementById('dealersCPL').textContent = `R$ ${dealersCPL.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('dealersAspiradoShare').textContent = `${dealersAspiradoShare.toFixed(1)}% dos leads`;
-            document.getElementById('dealersTurboShare').textContent = `${dealersTurboShare.toFixed(1)}% dos leads`;
-        }
-
-        function updateTable(data) {
-            const tableBody = document.getElementById('tableBody');
-            const tableTotal = document.getElementById('tableTotal');
-            tableBody.innerHTML = '';
-            
-            // Variáveis para calcular totais da tabela
-            let totals = {
-                totalLeads: 0,
-                totalBudget: 0,
-                matrizAspirado: 0,
-                matrizTurbo: 0,
-                matrizTotal: 0,
-                matrizBudget: 0,
-                dealersAspirado: 0,
-                dealersTurbo: 0,
-                dealersTotal: 0,
-                dealersBudget: 0
-            };
-            
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${formatDisplayDate(row.data)}</td>
-                    <td>${row.totalLeads}</td>
-                    <td>${row.cpl}</td>
-                    <td>${row.totalBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>${row.matrizAspirado}</td>
-                    <td>${row.matrizTurbo}</td>
-                    <td>${row.matrizTotal}</td>
-                    <td>${row.matrizBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>${row.dealersAspirado}</td>
-                    <td>${row.dealersTurbo}</td>
-                    <td>${row.dealersTotal}</td>
-                    <td>${row.dealersBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                `;
-                tableBody.appendChild(tr);
-                
-                // Somar para totais
-                totals.totalLeads += row.totalLeads;
-                totals.totalBudget += row.totalBudget;
-                totals.matrizAspirado += row.matrizAspirado;
-                totals.matrizTurbo += row.matrizTurbo;
-                totals.matrizTotal += row.matrizTotal;
-                totals.matrizBudget += row.matrizBudget;
-                totals.dealersAspirado += row.dealersAspirado;
-                totals.dealersTurbo += row.dealersTurbo;
-                totals.dealersTotal += row.dealersTotal;
-                totals.dealersBudget += row.dealersBudget;
-            });
-            
-            // Calcular CPL médio da tabela
-            const avgCPL = totals.totalLeads > 0 ? totals.totalBudget / totals.totalLeads : 0;
-            
-            // Atualizar linha de totais
-            tableTotal.innerHTML = `
-                <td><strong>TOTAL</strong></td>
-                <td><strong>${totals.totalLeads}</strong></td>
-                <td><strong>${avgCPL.toFixed(2)}</strong></td>
-                <td><strong>${totals.totalBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
-                <td><strong>${totals.matrizAspirado}</strong></td>
-                <td><strong>${totals.matrizTurbo}</strong></td>
-                <td><strong>${totals.matrizTotal}</strong></td>
-                <td><strong>${totals.matrizBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
-                <td><strong>${totals.dealersAspirado}</strong></td>
-                <td><strong>${totals.dealersTurbo}</strong></td>
-                <td><strong>${totals.dealersTotal}</strong></td>
-                <td><strong>${totals.dealersBudget.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
-            `;
-        }
-
-        function updateCharts(data) {
-            // Ordenar dados por data
-            const sortedData = [...data].sort((a, b) => new Date(a.data) - new Date(b.data));
-            
-            // Preparar dados para os gráficos
-            const labels = sortedData.map(item => formatDisplayDate(item.data));
-            const matrixLeadsData = sortedData.map(item => item.matrizTotal);
-            const dealersLeadsData = sortedData.map(item => item.dealersTotal);
-            const matrixBudgetData = sortedData.map(item => item.matrizBudget);
-            const dealersBudgetData = sortedData.map(item => item.dealersBudget);
-            const totalLeadsData = sortedData.map(item => item.totalLeads);
-            
-            // Calcular totais para gráficos de pizza
-            const matrixAspiradoTotal = sortedData.reduce((sum, item) => sum + item.matrizAspirado, 0);
-            const matrixTurboTotal = sortedData.reduce((sum, item) => sum + item.matrizTurbo, 0);
-            const dealersAspiradoTotal = sortedData.reduce((sum, item) => sum + item.dealersAspirado, 0);
-            const dealersTurboTotal = sortedData.reduce((sum, item) => sum + item.dealersTurbo, 0);
-            
-            // Atualizar gráficos
-            updateLeadsComparisonChart(labels, matrixLeadsData, dealersLeadsData);
-            updateBudgetComparisonChart(labels, matrixBudgetData, dealersBudgetData);
-            updateMatrixPieChart(matrixAspiradoTotal, matrixTurboTotal);
-            updateDealersPieChart(dealersAspiradoTotal, dealersTurboTotal);
-            updateLeadsTrendChart(labels, totalLeadsData, matrixLeadsData, dealersLeadsData);
-            updateChannelDistributionChart(matrixAspiradoTotal + matrixTurboTotal, dealersAspiradoTotal + dealersTurboTotal);
-        }
-
-        function updateLeadsComparisonChart(labels, matrixData, dealersData) {
-            const ctx = document.getElementById('leadsComparisonChart').getContext('2d');
-            
-            if (leadsComparisonChart) {
-                leadsComparisonChart.destroy();
-            }
-            
-            leadsComparisonChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Matriz',
-                            data: matrixData,
-                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                            borderColor: '#2ecc71',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Dealers',
-                            data: dealersData,
-                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                            borderColor: '#e74c3c',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Quantidade de Leads'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateBudgetComparisonChart(labels, matrixData, dealersData) {
-            const ctx = document.getElementById('budgetComparisonChart').getContext('2d');
-            
-            if (budgetComparisonChart) {
-                budgetComparisonChart.destroy();
-            }
-            
-            budgetComparisonChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Matriz',
-                            data: matrixData,
-                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                            borderColor: '#2ecc71',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Dealers',
-                            data: dealersData,
-                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                            borderColor: '#e74c3c',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Orçamento (R$)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateMatrixPieChart(aspirado, turbo) {
-            const ctx = document.getElementById('matrixPieChart').getContext('2d');
-            
-            if (matrixPieChart) {
-                matrixPieChart.destroy();
-            }
-            
-            matrixPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Aspirado', 'Turbo'],
-                    datasets: [{
-                        data: [aspirado, turbo],
-                        backgroundColor: ['rgba(52, 152, 219, 0.7)', 'rgba(155, 89, 182, 0.7)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateDealersPieChart(aspirado, turbo) {
-            const ctx = document.getElementById('dealersPieChart').getContext('2d');
-            
-            if (dealersPieChart) {
-                dealersPieChart.destroy();
-            }
-            
-            dealersPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Aspirado', 'Turbo'],
-                    datasets: [{
-                        data: [aspirado, turbo],
-                        backgroundColor: ['rgba(52, 152, 219, 0.7)', 'rgba(155, 89, 182, 0.7)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateLeadsTrendChart(labels, totalData, matrixData, dealersData) {
-            const ctx = document.getElementById('leadsTrendChart').getContext('2d');
-            
-            if (leadsTrendChart) {
-                leadsTrendChart.destroy();
-            }
-            
-            leadsTrendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Total de Leads',
-                            data: totalData,
-                            borderColor: '#3498db',
-                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Leads Matriz',
-                            data: matrixData,
-                            borderColor: '#2ecc71',
-                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Leads Dealers',
-                            data: dealersData,
-                            borderColor: '#e74c3c',
-                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateChannelDistributionChart(matrixTotal, dealersTotal) {
-            const ctx = document.getElementById('channelDistributionChart').getContext('2d');
-            
-            if (channelDistributionChart) {
-                channelDistributionChart.destroy();
-            }
-            
-            channelDistributionChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Matriz', 'Dealers'],
-                    datasets: [{
-                        data: [matrixTotal, dealersTotal],
-                        backgroundColor: ['#2ecc71', '#e74c3c'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        function formatDisplayDate(dateString) {
-            const date = new Date(dateString);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            return `${day}/${month}`;
-        }
-    </script>
-</body>
-</html>
+            // Fevereiro 2026 (28 dias)
+            {data: '2026-02-01', totalLeads: 61, cpl: 5.25, totalBudget: 320.29,
+             matrizAspi
