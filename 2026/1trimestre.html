@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Leads - Comparativo Mensal 2026</title>
+    <style>
+        /* Estilo Global */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fc;
+            margin: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        /* Títulos */
+        h1 {
+            font-size: 2.2em;
+            color: #0f3b5e;
+            margin-top: 0;
+            margin-bottom: 5px;
+            border-left: 8px solid #2563eb;
+            padding-left: 20px;
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: #475569;
+            margin-bottom: 30px;
+            margin-top: 5px;
+            padding-left: 28px;
+        }
+
+        /* Grid para os 3 meses */
+        .mes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Cartão de cada mês */
+        .card-mes {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 27, 58, 0.15);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s;
+        }
+        .card-mes:hover {
+            transform: scale(1.02);
+        }
+
+        /* Cabeçalho do Mês */
+        .cabecalho-mes {
+            padding: 15px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.6em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .mes-jan { background: linear-gradient(145deg, #1e4a7a, #0f3b5e); }
+        .mes-fev { background: linear-gradient(145deg, #2d5f8b, #1e4a7a); }
+        .mes-mar { background: linear-gradient(145deg, #3b6f9e, #2d5f8b); }
+
+        /* Conteúdo interno */
+        .conteudo-mes {
+            padding: 20px;
+        }
+
+        /* KPI Principal */
+        .kpi-principal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #cbd5e1;
+        }
+        .kpi-principal .valor {
+            font-size: 3em;
+            font-weight: 800;
+            color: #0b1f33;
+            line-height: 1;
+        }
+        .kpi-principal .rotulo {
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+        }
+        .variacao {
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-top: 5px;
+        }
+        .variacao.negativa { color: #b91c1c; background-color: #fee2e2; padding: 2px 10px; border-radius: 30px; }
+        .variacao.positiva { color: #047857; background-color: #d1fae5; padding: 2px 10px; border-radius: 30px; }
+        .variacao.neutra { color: #6b7280; background-color: #f3f4f6; padding: 2px 10px; border-radius: 30px; }
+
+        /* Cards de Investimento e Totais */
+        .linha-dupla {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .info-box {
+            background-color: #f8fafc;
+            border-radius: 16px;
+            padding: 15px;
+            flex: 1;
+            border-left: 5px solid;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .info-box .titulo-box {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        .info-box .numero-box {
+            font-size: 1.6em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .info-box .detalhe-box {
+            font-size: 0.85em;
+            color: #334155;
+            margin-top: 5px;
+        }
+        .border-matriz { border-left-color: #2563eb; background-color: #eef2ff; }
+        .border-dealers { border-left-color: #16a34a; background-color: #f0fdf4; }
+        .border-invest { border-left-color: #d97706; background-color: #fffbeb; }
+
+        /* Tabelas de desempenho interno */
+        .desempenho-interno {
+            background-color: #f1f5f9;
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .subtitulo-interno {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .subtitulo-interno.matriz { color: #2563eb; }
+        .subtitulo-interno.dealers { color: #16a34a; }
+
+        .linha-produto {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #d1d9e6;
+        }
+        .linha-produto:last-child { border-bottom: none; }
+        .produto-nome { font-weight: 600; }
+        .produto-qtd { background-color: #d9e2ef; padding: 4px 10px; border-radius: 40px; font-weight: 600; }
+        .porcentagem { font-size: 0.85em; color: #2c3e50; margin-left: 8px; font-weight: 400; }
+        .cpl-final {
+            margin-top: 12px;
+            font-weight: 700;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Comparativo Rodapé */
+        .comparativo-geral {
+            background: linear-gradient(to right, #e9eff7, #dfeaf5);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            border: 1px solid #bdd3eb;
+        }
+        .item-comp {
+            text-align: center;
+        }
+        .item-comp .label {
+            font-size: 0.9em;
+            color: #1e3a5f;
+        }
+        .item-comp .value {
+            font-size: 2em;
+            font-weight: 800;
+        }
+
+        @media print {
+            body { background-color: white; margin: 0.5cm; }
+            .container { box-shadow: none; border: 1px solid #ccc; }
+            .card-mes { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📊 Comparativo Mensal de Leads - 2026</h1>
+    <div class="subtitle">Período: Janeiro a Março • Variação vs mês anterior</div>
+
+    <!-- Grid dos meses -->
+    <div class="mes-grid">
+        <!-- JANEIRO (mês base, sem variação) -->
+        <div class="card-mes">
+            <div class="cabecalho-mes mes-jan">JANEIRO 2026</div>
+            <div class="conteudo-mes">
+                <div class="kpi-principal">
+                    <span class="rotulo">🚀 TOTAL DE LEADS</span>
+                    <span class="valor">2.323</span>
+                    <span class="variacao neutra">● Mês base</span>
+                </div>
+                <div class="linha-dupla">
+                    <div class="info-box border-invest">
+                        <div class="titulo-box">💰 INVESTIMENTO TOTAL</div>
+                        <div class="numero-box">R$ 9.087,20</div>
+                        <div class="detalhe-box">CPL Médio: R$ 3,91</div>
+                        <div class="detalhe-box" style="color:#b91c1c;">Mês base</div>
+                    </div>
+                </div>
+                <div class="linha-dupla">
+                    <div class="info-box border-matriz">
+                        <div class="titulo-box">🏢 MATRIZ - TOTAL</div>
+                        <div class="numero-box">879</div>
+                        <div class="detalhe-box">Orçamento: R$ 3.501,90</div>
+                        <div class="detalhe-box">37,8% do total</div>
+                    </div>
+                    <div class="info-box border-dealers">
+                        <div class="titulo-box">🤝 DEALERS - TOTAL</div>
+                        <div class="numero-box">1.332</div>
+                        <div class="detalhe-box">Orçamento: R$ 5.255,12</div>
+                        <div class="detalhe-box">57,3% do total</div>
+                    </div>
+                </div>
+
+                <!-- Matriz desempenho -->
+                <div class="desempenho-interno">
+                    <div class="subtitulo-interno matriz"><span>🏢 MATRIZ - DESEMPENHO</span></div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Aspirado</span>
+                        <span><span class="produto-qtd">509</span> <span class="porcentagem">(57,9%)</span></span>
+                    </div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Turbo</span>
+                        <span><span class="produto-qtd">370</span> <span class="porcentagem">(42,1%)</span></span>
+                    </div>
+                    <div class="cpl-final">💰 CPL Médio: R$ 3,98</div>
+                </div>
+                <!-- Dealers desempenho -->
+                <div class="desempenho-interno">
+                    <div class="subtitulo-interno dealers"><span>🤝 DEALERS - DESEMPENHO</span></div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Aspirado</span>
+                        <span><span class="produto-qtd">695</span> <span class="porcentagem">(52,2%)</span></span>
+                    </div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Turbo</span>
+                        <span><span class="produto-qtd">637</span> <span class="porcentagem">(47,8%)</span></span>
+                    </div>
+                    <div class="cpl-final">💰 CPL Médio: R$ 3,95</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEVEREIRO (vs Janeiro) -->
+        <div class="card-mes">
+            <div class="cabecalho-mes mes-fev">FEVEREIRO 2026</div>
+            <div class="conteudo-mes">
+                <div class="kpi-principal">
+                    <span class="rotulo">🚀 TOTAL DE LEADS</span>
+                    <span class="valor">2.026</span>
+                    <span class="variacao negativa">▼ -12,8% vs Jan</span>
+                </div>
+                <div class="linha-dupla">
+                    <div class="info-box border-invest">
+                        <div class="titulo-box">💰 INVESTIMENTO TOTAL</div>
+                        <div class="numero-box">R$ 8.140,89</div>
+                        <div class="detalhe-box">CPL Médio: R$ 4,02</div>
+                        <div class="detalhe-box" style="color:#b91c1c;">▼ -10,4% vs Jan</div>
+                    </div>
+                </div>
+                <div class="linha-dupla">
+                    <div class="info-box border-matriz">
+                        <div class="titulo-box">🏢 MATRIZ - TOTAL</div>
+                        <div class="numero-box">883</div>
+                        <div class="detalhe-box">Orçamento: R$ 3.562,32</div>
+                        <div class="detalhe-box">43,6% do total</div>
+                        <div class="detalhe-box" style="color:#2563eb;">▲ +0,5% vs Jan</div>
+                    </div>
+                    <div class="info-box border-dealers">
+                        <div class="titulo-box">🤝 DEALERS - TOTAL</div>
+                        <div class="numero-box">1.005</div>
+                        <div class="detalhe-box">Orçamento: R$ 4.071,25</div>
+                        <div class="detalhe-box">49,6% do total</div>
+                        <div class="detalhe-box" style="color:#b91c1c;">▼ -24,5% vs Jan</div>
+                    </div>
+                </div>
+
+                <div class="desempenho-interno">
+                    <div class="subtitulo-interno matriz"><span>🏢 MATRIZ - DESEMPENHO</span></div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Aspirado</span>
+                        <span><span class="produto-qtd">529</span> <span class="porcentagem">(59,9%)</span></span>
+                    </div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Turbo</span>
+                        <span><span class="produto-qtd">354</span> <span class="porcentagem">(40,1%)</span></span>
+                    </div>
+                    <div class="cpl-final">💰 CPL Médio: R$ 4,03</div>
+                </div>
+                <div class="desempenho-interno">
+                    <div class="subtitulo-interno dealers"><span>🤝 DEALERS - DESEMPENHO</span></div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Aspirado</span>
+                        <span><span class="produto-qtd">551</span> <span class="porcentagem">(54,8%)</span></span>
+                    </div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Turbo</span>
+                        <span><span class="produto-qtd">454</span> <span class="porcentagem">(45,2%)</span></span>
+                    </div>
+                    <div class="cpl-final">💰 CPL Médio: R$ 4,05</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARÇO (vs Fevereiro) -->
+        <div class="card-mes">
+            <div class="cabecalho-mes mes-mar">MARÇO 2026</div>
+            <div class="conteudo-mes">
+                <div class="kpi-principal">
+                    <span class="rotulo">🚀 TOTAL DE LEADS</span>
+                    <span class="valor">583</span>
+                    <span class="variacao negativa">▼ -71,2% vs Fev</span>
+                </div>
+                <div class="linha-dupla">
+                    <div class="info-box border-invest">
+                        <div class="titulo-box">💰 INVESTIMENTO TOTAL</div>
+                        <div class="numero-box">R$ 2.281,07</div>
+                        <div class="detalhe-box">CPL Médio: R$ 3,91</div>
+                        <div class="detalhe-box" style="color:#b91c1c;">▼ -72,0% vs Fev</div>
+                    </div>
+                </div>
+                <div class="linha-dupla">
+                    <div class="info-box border-matriz">
+                        <div class="titulo-box">🏢 MATRIZ - TOTAL</div>
+                        <div class="numero-box">210</div>
+                        <div class="detalhe-box">Orçamento: R$ 831,71</div>
+                        <div class="detalhe-box">36,0% do total</div>
+                        <div class="detalhe-box" style="color:#b91c1c;">▼ -76,2% vs Fev</div>
+                    </div>
+                    <div class="info-box border-dealers">
+                        <div class="titulo-box">🤝 DEALERS - TOTAL</div>
+                        <div class="numero-box">336</div>
+                        <div class="detalhe-box">Orçamento: R$ 1.306,45</div>
+                        <div class="detalhe-box">57,6% do total</div>
+                        <div class="detalhe-box" style="color:#b91c1c;">▼ -66,6% vs Fev</div>
+                    </div>
+                </div>
+
+                <div class="desempenho-interno">
+                    <div class="subtitulo-interno matriz"><span>🏢 MATRIZ - DESEMPENHO</span></div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Aspirado</span>
+                        <span><span class="produto-qtd">138</span> <span class="porcentagem">(65,7%)</span></span>
+                    </div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Turbo</span>
+                        <span><span class="produto-qtd">72</span> <span class="porcentagem">(34,3%)</span></span>
+                    </div>
+                    <div class="cpl-final">💰 CPL Médio: R$ 3,96</div>
+                </div>
+                <div class="desempenho-interno">
+                    <div class="subtitulo-interno dealers"><span>🤝 DEALERS - DESEMPENHO</span></div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Aspirado</span>
+                        <span><span class="produto-qtd">188</span> <span class="porcentagem">(56,0%)</span></span>
+                    </div>
+                    <div class="linha-produto">
+                        <span class="produto-nome">Turbo</span>
+                        <span><span class="produto-qtd">148</span> <span class="porcentagem">(44,0%)</span></span>
+                    </div>
+                    <div class="cpl-final">💰 CPL Médio: R$ 3,89</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparativo Rodapé: Matriz vs Dealers no trimestre (soma) -->
+    <div class="comparativo-geral">
+        <div class="item-comp">
+            <div class="label">🏢 TOTAL LEADS MATRIZ (trimestre)</div>
+            <div class="value">1.972</div>
+            <div>(879+883+210)</div>
+        </div>
+        <div class="item-comp">
+            <div class="label">🤝 TOTAL LEADS DEALERS (trimestre)</div>
+            <div class="value">2.673</div>
+            <div>(1.332+1.005+336)</div>
+        </div>
+        <div class="item-comp">
+            <div class="label">📊 PARTICIPAÇÃO DEALERS</div>
+            <div class="value" style="color:#16a34a;">57,5%</div>
+        </div>
+        <div class="item-comp">
+            <div class="label">💰 CPL MÉDIO GERAL</div>
+            <div class="value">R$ 3,95</div>
+        </div>
+    </div>
+    <p style="font-size:0.8rem; text-align:right; color:#64748b; margin-top:10px;">*Comparativo mensal - Variação calculada sobre o mês anterior • Dados atualizados em 09/03/2026</p>
+</div>
+</body>
+</html>
