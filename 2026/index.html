@@ -32,7 +32,7 @@
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
                     <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Dados Reais
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads (08/03/2026)</p>
+                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads</p>
             </div>
             <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
                 <i class="fas fa-cloud-download-alt text-blue-400"></i>
@@ -205,7 +205,7 @@
             // Inicializa Flatpickr com formato brasileiro
             let datePicker = flatpickr(dateRangeInput, {
                 mode: 'range',
-                dateFormat: 'd/m/Y',  // FORÇA o formato DD/MM/YYYY
+                dateFormat: 'd/m/Y',
                 locale: {
                     firstDayOfWeek: 1,
                     weekdays: {
@@ -219,22 +219,18 @@
                 }
             });
 
-            // Carregar dados do CSV usando PapaParse com configuração especial
             function loadData() {
                 dataStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando...';
                 
-                // Configuração do PapaParse para download direto
                 Papa.parse(CSV_URL, {
                     download: true,
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => {
                         try {
-                            // Mapear os dados - verificar nomes das colunas
                             const firstRow = results.data[0] || {};
                             const keys = Object.keys(firstRow);
                             
-                            // Identificar as colunas (podem ter nomes diferentes)
                             const dataKey = keys.find(k => k.toLowerCase().includes('data')) || 'Data';
                             const dealerKey = keys.find(k => k.toLowerCase().includes('dealer')) || 'Dealer';
                             const origemKey = keys.find(k => k.toLowerCase().includes('origem')) || 'Origem';
@@ -242,10 +238,7 @@
                             const motorKey = keys.find(k => k.toLowerCase().includes('motor')) || 'Motor';
                             
                             masterData = results.data
-                                .filter(row => {
-                                    // Filtrar linhas vazias
-                                    return row[dataKey] && row[dataKey].trim() !== '';
-                                })
+                                .filter(row => row[dataKey] && row[dataKey].trim() !== '')
                                 .map(row => ({
                                     data: row[dataKey] ? row[dataKey].trim() : '',
                                     dealer: row[dealerKey] ? row[dealerKey].trim() : '',
@@ -253,9 +246,7 @@
                                     veiculo: row[veiculoKey] ? row[veiculoKey].trim() : '',
                                     motor: row[motorKey] ? row[motorKey].trim() : ''
                                 }))
-                                .filter(item => 
-                                    item.data && item.dealer && item.origem && item.veiculo && item.motor
-                                );
+                                .filter(item => item.data && item.dealer && item.origem && item.veiculo && item.motor);
                             
                             if (masterData.length === 0) {
                                 throw new Error('Nenhum dado válido encontrado');
@@ -266,31 +257,35 @@
                             applyAllFilters();
                             dataStatus.innerHTML = '<i class="fas fa-check-circle text-green-400 mr-1"></i> Dados carregados: ' + masterData.length + ' registros';
                         } catch (error) {
-                            throw error;
+                            console.error('Erro:', error);
+                            useFallbackData();
                         }
                     },
                     error: (error) => {
-                        tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Erro ao carregar dados: ${error.message || 'Falha no download'}</td></tr>`;
-                        dataStatus.innerHTML = '<i class="fas fa-exclamation-circle text-red-400 mr-1"></i> Erro no carregamento';
                         console.error('Erro PapaParse:', error);
-                        
-                        // Dados de fallback (baseados na sua imagem)
-                        masterData = [
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
-                            {data: '2026-03-08', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'}
-                        ];
-                        filteredData = [...masterData];
-                        populateFilters();
-                        applyAllFilters();
-                        dataStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-400 mr-1"></i> Usando dados de exemplo';
+                        useFallbackData();
                     }
                 });
             }
 
-            // Popular selects com valores únicos
+            function useFallbackData() {
+                masterData = [
+                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
+                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
+                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
+                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
+                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'},
+                    {data: '09/03/2026', dealer: 'Google Ads', origem: 'Google', veiculo: 'Hyundai HB20', motor: 'Turbo'},
+                    {data: '09/03/2026', dealer: 'Google Ads', origem: 'Google', veiculo: 'Fiat Pulse', motor: 'Aspirado'},
+                    {data: '10/03/2026', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Jeep Compass', motor: 'Turbo'},
+                    {data: '10/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Renault Duster', motor: 'Aspirado'}
+                ];
+                filteredData = [...masterData];
+                populateFilters();
+                applyAllFilters();
+                dataStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-400 mr-1"></i> Usando dados de exemplo';
+            }
+
             function populateFilters() {
                 const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
                 const origens = [...new Set(masterData.map(d => d.origem))].sort();
@@ -313,36 +308,43 @@
                 });
             }
 
-            // Aplicar todos os filtros
             function applyAllFilters() {
                 let filtered = [...masterData];
 
-                // Filtro dealer
-                if (filterDealer.value) {
-                    filtered = filtered.filter(item => item.dealer === filterDealer.value);
-                }
-                // Filtro origem
-                if (filterOrigem.value) {
-                    filtered = filtered.filter(item => item.origem === filterOrigem.value);
-                }
-                // Filtro veículo
-                if (filterVeiculo.value) {
-                    filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
-                }
-                // Filtro motor
-                if (filterMotor.value) {
-                    filtered = filtered.filter(item => item.motor === filterMotor.value);
-                }
+                // Filtros de seleção
+                if (filterDealer.value) filtered = filtered.filter(item => item.dealer === filterDealer.value);
+                if (filterOrigem.value) filtered = filtered.filter(item => item.origem === filterOrigem.value);
+                if (filterVeiculo.value) filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
+                if (filterMotor.value) filtered = filtered.filter(item => item.motor === filterMotor.value);
+                
+                // FILTRO DATA RANGE - CORRIGIDO
                 if (dateRangeInput.value) {
                     const dates = dateRangeInput.value.split(' to ');
+                    
                     if (dates.length === 2) {
-                        const start = dates[0];
-                        const end = dates[1];
-                        filtered = filtered.filter(item => item.data >= start && item.data <= end);
+                        const [startDay, startMonth, startYear] = dates[0].split('/');
+                        const [endDay, endMonth, endYear] = dates[1].split('/');
+                        
+                        const startCompare = `${startYear}${startMonth}${startDay}`;
+                        const endCompare = `${endYear}${endMonth}${endDay}`;
+                        
+                        filtered = filtered.filter(item => {
+                            const [itemDay, itemMonth, itemYear] = item.data.split('/');
+                            const itemCompare = `${itemYear}${itemMonth}${itemDay}`;
+                            return itemCompare >= startCompare && itemCompare <= endCompare;
+                        });
                     } else if (dates.length === 1) {
-                        filtered = filtered.filter(item => item.data === dates[0]);
+                        const [day, month, year] = dates[0].split('/');
+                        const filterCompare = `${year}${month}${day}`;
+                        
+                        filtered = filtered.filter(item => {
+                            const [itemDay, itemMonth, itemYear] = item.data.split('/');
+                            const itemCompare = `${itemYear}${itemMonth}${itemDay}`;
+                            return itemCompare === filterCompare;
+                        });
                     }
                 }
+                
                 // Busca global
                 if (globalSearch.value.trim() !== '') {
                     const term = globalSearch.value.toLowerCase();
@@ -356,12 +358,10 @@
                 }
 
                 filteredData = filtered;
-                sortData();
                 renderTable();
                 updateKPIs();
             }
 
-            // Renderizar tabela
             function renderTable() {
                 if (filteredData.length === 0) {
                     tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400"><i class="fas fa-search mr-2"></i>Nenhum registro encontrado</td></tr>`;
@@ -383,7 +383,6 @@
                 tableCount.textContent = `${filteredData.length} registros exibidos`;
             }
 
-            // Atualizar KPIs
             function updateKPIs() {
                 kpiTotal.textContent = filteredData.length;
                 kpiDealers.textContent = new Set(filteredData.map(d => d.dealer)).size;
@@ -397,21 +396,6 @@
             filterVeiculo.addEventListener('change', applyAllFilters);
             filterMotor.addEventListener('change', applyAllFilters);
             globalSearch.addEventListener('input', applyAllFilters);
-
-            // Ordenação nos cabeçalhos
-            document.querySelectorAll('[data-sort]').forEach(th => {
-                th.addEventListener('click', (e) => {
-                    const key = e.currentTarget.dataset.sort;
-                    if (sortConfig.key === key) {
-                        sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        sortConfig.key = key;
-                        sortConfig.direction = 'asc';
-                    }
-                    sortData();
-                    renderTable();
-                });
-            });
 
             // Limpar filtros
             clearBtn.addEventListener('click', () => {
