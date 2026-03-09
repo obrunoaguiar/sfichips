@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Interativo | CRM - Dados Reais</title>
+    <title>Dashboard CRM - Versão Melhorada</title>
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Flatpickr para calendário -->
@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- PapaParse para CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Fonte Inter e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -20,6 +22,7 @@
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .pie-chart-container { height: 200px; position: relative; }
     </style>
 </head>
 <body class="text-slate-700 antialiased">
@@ -30,9 +33,9 @@
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Dados Reais
+                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Versão Melhorada
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Análise interativa de leads</p>
+                <p class="text-sm text-slate-500 mt-1">Análise interativa com gráficos dinâmicos</p>
             </div>
             <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
                 <i class="fas fa-cloud-download-alt text-blue-400"></i>
@@ -40,8 +43,8 @@
             </div>
         </div>
 
-        <!-- Cards de KPI -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-8">
+        <!-- Cards de KPI (apenas Total Registros) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
             <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start">
                     <div>
@@ -54,7 +57,7 @@
             <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Dealers</p>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Dealers Distintos</p>
                         <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-dealers">0</p>
                     </div>
                     <div class="bg-emerald-50 p-3 rounded-lg"><i class="fas fa-store text-emerald-500 text-xl"></i></div>
@@ -63,19 +66,35 @@
             <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Origens</p>
+                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Origens Distintas</p>
                         <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-origens">0</p>
                     </div>
                     <div class="bg-purple-50 p-3 rounded-lg"><i class="fas fa-globe text-purple-500 text-xl"></i></div>
                 </div>
             </div>
-            <div class="kpi-card transition-all bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Veículos</p>
-                        <p class="text-3xl font-bold text-slate-800 mt-2" id="kpi-veiculos">0</p>
-                    </div>
-                    <div class="bg-amber-50 p-3 rounded-lg"><i class="fas fa-car text-amber-500 text-xl"></i></div>
+        </div>
+
+        <!-- Gráficos de Pizza (substituem os cards antigos) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            <!-- Pizza Dealers -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                <h3 class="text-sm font-medium text-slate-500 mb-2 text-center">Distribuição por Dealer</h3>
+                <div class="pie-chart-container">
+                    <canvas id="dealersPieChart"></canvas>
+                </div>
+            </div>
+            <!-- Pizza Origens -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                <h3 class="text-sm font-medium text-slate-500 mb-2 text-center">Distribuição por Origem</h3>
+                <div class="pie-chart-container">
+                    <canvas id="origensPieChart"></canvas>
+                </div>
+            </div>
+            <!-- Pizza Motor -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                <h3 class="text-sm font-medium text-slate-500 mb-2 text-center">Distribuição por Motor</h3>
+                <div class="pie-chart-container">
+                    <canvas id="motorPieChart"></canvas>
                 </div>
             </div>
         </div>
@@ -85,7 +104,7 @@
             <div class="flex flex-wrap items-center gap-2 mb-5">
                 <i class="fas fa-sliders-h text-blue-400"></i>
                 <h2 class="font-semibold text-slate-700">Filtros dinâmicos</h2>
-                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">atualização instantânea</span>
+                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">atualização automática</span>
                 <button id="clear-filters" class="ml-auto text-sm text-slate-500 hover:text-blue-600 transition flex items-center gap-1">
                     <i class="fas fa-undo-alt"></i> Limpar todos
                 </button>
@@ -95,7 +114,12 @@
                 <!-- Data Range -->
                 <div class="lg:col-span-1">
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
-                    <input type="text" id="date-range" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="Selecione as datas">
+                    <div class="flex gap-2">
+                        <input type="text" id="date-range" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="DD/MM/YYYY">
+                        <button id="apply-date-filter" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm flex items-center gap-1">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </div>
                 <!-- Dealer -->
                 <div>
@@ -164,32 +188,30 @@
                         </tr>
                     </thead>
                     <tbody id="table-body" class="bg-white divide-y divide-slate-200 text-sm">
-                        <tr><td colspan="5" class="text-center py-12"><div class="spinner"></div><p class="text-slate-400 mt-2">Carregando dados da planilha...</p></td></tr>
+                        <tr><td colspan="5" class="text-center py-12"><div class="spinner"></div><p class="text-slate-400 mt-2">Carregando dados...</p></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Rodapé -->
-        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Dados carregados via Google Sheets</p>
+        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Clique no botão de busca para aplicar filtro de data</p>
     </div>
 
     <script>
         (function() {
-            // URL do CSV (fornecida por você)
+            // URL do CSV (substitua pelo seu link real)
             const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1421458048&single=true&output=csv';
             
             // Estado global
             let masterData = [];
             let filteredData = [];
-            let sortConfig = { key: 'data', direction: 'asc' };
             
             // Elementos DOM
             const tableBody = document.getElementById('table-body');
             const kpiTotal = document.getElementById('kpi-total');
             const kpiDealers = document.getElementById('kpi-dealers');
             const kpiOrigens = document.getElementById('kpi-origens');
-            const kpiVeiculos = document.getElementById('kpi-veiculos');
             const tableCount = document.getElementById('table-count');
             const dataStatus = document.getElementById('data-status');
             
@@ -201,7 +223,11 @@
             const globalSearch = document.getElementById('global-search');
             const clearBtn = document.getElementById('clear-filters');
             const dateRangeInput = document.getElementById('date-range');
+            const applyDateBtn = document.getElementById('apply-date-filter');
             
+            // Gráficos
+            let dealersPieChart, origensPieChart, motorPieChart;
+
             // Inicializa Flatpickr com formato brasileiro
             let datePicker = flatpickr(dateRangeInput, {
                 mode: 'range',
@@ -216,7 +242,15 @@
                         shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
                         longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
                     }
+                },
+                onClose: function() {
+                    // Não faz nada automaticamente - agora só aplica com botão
                 }
+            });
+
+            // Botão de busca para data
+            applyDateBtn.addEventListener('click', function() {
+                applyAllFilters();
             });
 
             function loadData() {
@@ -270,15 +304,13 @@
 
             function useFallbackData() {
                 masterData = [
-                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Chevrolet Tracker', motor: 'Turbo'},
-                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Volkswagen Saveiro', motor: 'Aspirado'},
-                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Toyota Corolla', motor: 'Aspirado'},
-                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Google', veiculo: 'Honda CR-V', motor: 'Aspirado'},
-                    {data: '08/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Suzuki Swift', motor: 'Aspirado'},
-                    {data: '09/03/2026', dealer: 'Google Ads', origem: 'Google', veiculo: 'Hyundai HB20', motor: 'Turbo'},
-                    {data: '09/03/2026', dealer: 'Google Ads', origem: 'Google', veiculo: 'Fiat Pulse', motor: 'Aspirado'},
-                    {data: '10/03/2026', dealer: 'Meta Ads', origem: 'Instagram', veiculo: 'Jeep Compass', motor: 'Turbo'},
-                    {data: '10/03/2026', dealer: 'Meta Ads', origem: 'Facebook', veiculo: 'Renault Duster', motor: 'Aspirado'}
+                    {data: '08/03/2026', dealer: 'Dealer A', origem: 'Facebook', veiculo: 'Tracker', motor: 'Turbo'},
+                    {data: '08/03/2026', dealer: 'Dealer B', origem: 'Instagram', veiculo: 'Saveiro', motor: 'Aspirado'},
+                    {data: '08/03/2026', dealer: 'Dealer A', origem: 'Google', veiculo: 'Corolla', motor: 'Aspirado'},
+                    {data: '09/03/2026', dealer: 'Dealer C', origem: 'Facebook', veiculo: 'CR-V', motor: 'Aspirado'},
+                    {data: '09/03/2026', dealer: 'Dealer B', origem: 'Instagram', veiculo: 'Swift', motor: 'Aspirado'},
+                    {data: '10/03/2026', dealer: 'Dealer A', origem: 'Google', veiculo: 'HB20', motor: 'Turbo'},
+                    {data: '10/03/2026', dealer: 'Dealer C', origem: 'Facebook', veiculo: 'Pulse', motor: 'Aspirado'}
                 ];
                 filteredData = [...masterData];
                 populateFilters();
@@ -299,7 +331,7 @@
             }
 
             function fillSelect(selectElement, values) {
-                selectElement.innerHTML = `<option value="">Todos ${selectElement.id.replace('filter-', '')}s</option>`;
+                selectElement.innerHTML = `<option value="">Todos</option>`;
                 values.forEach(v => {
                     const option = document.createElement('option');
                     option.value = v;
@@ -311,13 +343,21 @@
             function applyAllFilters() {
                 let filtered = [...masterData];
 
-                // Filtros de seleção
-                if (filterDealer.value) filtered = filtered.filter(item => item.dealer === filterDealer.value);
-                if (filterOrigem.value) filtered = filtered.filter(item => item.origem === filterOrigem.value);
-                if (filterVeiculo.value) filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
-                if (filterMotor.value) filtered = filtered.filter(item => item.motor === filterMotor.value);
+                // Filtros de seleção (atualizam automaticamente)
+                if (filterDealer.value) {
+                    filtered = filtered.filter(item => item.dealer === filterDealer.value);
+                }
+                if (filterOrigem.value) {
+                    filtered = filtered.filter(item => item.origem === filterOrigem.value);
+                }
+                if (filterVeiculo.value) {
+                    filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
+                }
+                if (filterMotor.value) {
+                    filtered = filtered.filter(item => item.motor === filterMotor.value);
+                }
                 
-                // FILTRO DATA RANGE - CORRIGIDO
+                // Filtro de data (agora só aplica com botão)
                 if (dateRangeInput.value) {
                     const dates = dateRangeInput.value.split(' to ');
                     
@@ -360,6 +400,7 @@
                 filteredData = filtered;
                 renderTable();
                 updateKPIs();
+                updatePieCharts();
             }
 
             function renderTable() {
@@ -387,10 +428,86 @@
                 kpiTotal.textContent = filteredData.length;
                 kpiDealers.textContent = new Set(filteredData.map(d => d.dealer)).size;
                 kpiOrigens.textContent = new Set(filteredData.map(d => d.origem)).size;
-                kpiVeiculos.textContent = new Set(filteredData.map(d => d.veiculo)).size;
             }
 
-            // Event listeners
+            function updatePieCharts() {
+                // Gráfico de Dealers
+                const dealerCounts = {};
+                filteredData.forEach(item => {
+                    dealerCounts[item.dealer] = (dealerCounts[item.dealer] || 0) + 1;
+                });
+                
+                if (dealersPieChart) dealersPieChart.destroy();
+                dealersPieChart = new Chart(document.getElementById('dealersPieChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(dealerCounts),
+                        datasets: [{
+                            data: Object.values(dealerCounts),
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+                // Gráfico de Origens
+                const origemCounts = {};
+                filteredData.forEach(item => {
+                    origemCounts[item.origem] = (origemCounts[item.origem] || 0) + 1;
+                });
+                
+                if (origensPieChart) origensPieChart.destroy();
+                origensPieChart = new Chart(document.getElementById('origensPieChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(origemCounts),
+                        datasets: [{
+                            data: Object.values(origemCounts),
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+
+                // Gráfico de Motor
+                const motorCounts = {};
+                filteredData.forEach(item => {
+                    motorCounts[item.motor] = (motorCounts[item.motor] || 0) + 1;
+                });
+                
+                if (motorPieChart) motorPieChart.destroy();
+                motorPieChart = new Chart(document.getElementById('motorPieChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(motorCounts),
+                        datasets: [{
+                            data: Object.values(motorCounts),
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+
+            // Event listeners para filtros automáticos
             filterDealer.addEventListener('change', applyAllFilters);
             filterOrigem.addEventListener('change', applyAllFilters);
             filterVeiculo.addEventListener('change', applyAllFilters);
