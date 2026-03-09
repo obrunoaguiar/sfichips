@@ -22,7 +22,11 @@
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .pie-chart-container { height: 200px; position: relative; }
+        .pie-chart-container { height: 220px; position: relative; cursor: pointer; }
+        .pie-chart-container:hover { opacity: 0.9; }
+        .filter-section { background-color: #f9fafb; border-radius: 8px; padding: 4px; }
+        .date-filter-wrapper { display: flex; gap: 8px; align-items: center; }
+        .date-filter-wrapper .flatpickr-input { flex: 1; }
     </style>
 </head>
 <body class="text-slate-700 antialiased">
@@ -33,9 +37,9 @@
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Versão Melhorada
+                    <i class="fas fa-chart-pie text-blue-500"></i> Dashboard CRM - Análise Interativa
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Análise interativa com gráficos dinâmicos</p>
+                <p class="text-sm text-slate-500 mt-1">Clique nos gráficos para filtrar • Busca automática</p>
             </div>
             <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-sm">
                 <i class="fas fa-cloud-download-alt text-blue-400"></i>
@@ -74,50 +78,53 @@
             </div>
         </div>
 
-        <!-- Gráficos de Pizza (substituem os cards antigos) -->
+        <!-- Gráficos de Pizza (clicáveis) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <!-- Pizza Dealers -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 pie-chart-container" id="dealers-pie-wrapper" title="Clique para filtrar por Dealer">
                 <h3 class="text-sm font-medium text-slate-500 mb-2 text-center">Distribuição por Dealer</h3>
-                <div class="pie-chart-container">
+                <div class="pie-chart-container-inner" style="height: 180px;">
                     <canvas id="dealersPieChart"></canvas>
                 </div>
+                <p class="text-xs text-center text-blue-500 mt-2">Clique no gráfico para filtrar</p>
             </div>
             <!-- Pizza Origens -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 pie-chart-container" id="origens-pie-wrapper" title="Clique para filtrar por Origem">
                 <h3 class="text-sm font-medium text-slate-500 mb-2 text-center">Distribuição por Origem</h3>
-                <div class="pie-chart-container">
+                <div class="pie-chart-container-inner" style="height: 180px;">
                     <canvas id="origensPieChart"></canvas>
                 </div>
+                <p class="text-xs text-center text-blue-500 mt-2">Clique no gráfico para filtrar</p>
             </div>
             <!-- Pizza Motor -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 pie-chart-container" id="motor-pie-wrapper" title="Clique para filtrar por Motor">
                 <h3 class="text-sm font-medium text-slate-500 mb-2 text-center">Distribuição por Motor</h3>
-                <div class="pie-chart-container">
+                <div class="pie-chart-container-inner" style="height: 180px;">
                     <canvas id="motorPieChart"></canvas>
                 </div>
+                <p class="text-xs text-center text-blue-500 mt-2">Clique no gráfico para filtrar</p>
             </div>
         </div>
 
-        <!-- Filtros Avançados -->
+        <!-- Filtros Avançados (sem Veículo) -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-8">
             <div class="flex flex-wrap items-center gap-2 mb-5">
                 <i class="fas fa-sliders-h text-blue-400"></i>
                 <h2 class="font-semibold text-slate-700">Filtros dinâmicos</h2>
-                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">atualização automática</span>
+                <span class="text-xs bg-slate-100 px-2 py-1 rounded-full ml-2 text-slate-600">clique nos gráficos ou use os menus</span>
                 <button id="clear-filters" class="ml-auto text-sm text-slate-500 hover:text-blue-600 transition flex items-center gap-1">
                     <i class="fas fa-undo-alt"></i> Limpar todos
                 </button>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <!-- Data Range -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Data Range - CORRIGIDO: botão não sobrepõe -->
                 <div class="lg:col-span-1">
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Período</label>
-                    <div class="flex gap-2">
+                    <div class="date-filter-wrapper flex gap-2">
                         <input type="text" id="date-range" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm" placeholder="DD/MM/YYYY">
-                        <button id="apply-date-filter" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm flex items-center gap-1">
-                            <i class="fas fa-search"></i>
+                        <button id="apply-date-filter" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm whitespace-nowrap flex items-center gap-1">
+                            <i class="fas fa-search"></i> Buscar
                         </button>
                     </div>
                 </div>
@@ -135,20 +142,18 @@
                         <option value="">Todas as Origens</option>
                     </select>
                 </div>
-                <!-- Veículo -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Veículo</label>
-                    <select id="filter-veiculo" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
-                        <option value="">Todos os Veículos</option>
-                    </select>
-                </div>
-                <!-- Motor -->
+                <!-- Motor (Veículo removido) -->
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Motor</label>
                     <select id="filter-motor" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none transition text-sm">
                         <option value="">Todos os Motores</option>
                     </select>
                 </div>
+            </div>
+            
+            <!-- Indicador de filtros ativos -->
+            <div id="active-filters" class="mt-3 text-xs text-slate-500 flex flex-wrap gap-2 min-h-6">
+                <!-- Será preenchido via JavaScript -->
             </div>
         </div>
 
@@ -179,23 +184,20 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="origem">
                                 Origem <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="veiculo">
-                                Veículo <i class="fas fa-sort ml-1 text-slate-400"></i>
-                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition" data-sort="motor">
                                 Motor <i class="fas fa-sort ml-1 text-slate-400"></i>
                             </th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="bg-white divide-y divide-slate-200 text-sm">
-                        <tr><td colspan="5" class="text-center py-12"><div class="spinner"></div><p class="text-slate-400 mt-2">Carregando dados...</p></td></tr>
+                        <tr><td colspan="4" class="text-center py-12"><div class="spinner"></div><p class="text-slate-400 mt-2">Carregando dados...</p></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Rodapé -->
-        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Clique no botão de busca para aplicar filtro de data</p>
+        <p class="text-xs text-slate-400 text-center mt-6">Dashboard interativo • Clique nos gráficos para filtrar • Busca automática nos menus</p>
     </div>
 
     <script>
@@ -206,6 +208,7 @@
             // Estado global
             let masterData = [];
             let filteredData = [];
+            let activeFilters = {};
             
             // Elementos DOM
             const tableBody = document.getElementById('table-body');
@@ -214,11 +217,11 @@
             const kpiOrigens = document.getElementById('kpi-origens');
             const tableCount = document.getElementById('table-count');
             const dataStatus = document.getElementById('data-status');
+            const activeFiltersEl = document.getElementById('active-filters');
             
-            // Filtros
+            // Filtros (Veículo removido)
             const filterDealer = document.getElementById('filter-dealer');
             const filterOrigem = document.getElementById('filter-origem');
-            const filterVeiculo = document.getElementById('filter-veiculo');
             const filterMotor = document.getElementById('filter-motor');
             const globalSearch = document.getElementById('global-search');
             const clearBtn = document.getElementById('clear-filters');
@@ -242,9 +245,6 @@
                         shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
                         longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
                     }
-                },
-                onClose: function() {
-                    // Não faz nada automaticamente - agora só aplica com botão
                 }
             });
 
@@ -252,6 +252,28 @@
             applyDateBtn.addEventListener('click', function() {
                 applyAllFilters();
             });
+
+            // Função para atualizar indicador de filtros ativos
+            function updateActiveFilters() {
+                let filters = [];
+                if (filterDealer.value) filters.push(`Dealer: ${filterDealer.value}`);
+                if (filterOrigem.value) filters.push(`Origem: ${filterOrigem.value}`);
+                if (filterMotor.value) filters.push(`Motor: ${filterMotor.value}`);
+                if (dateRangeInput.value) {
+                    const dates = dateRangeInput.value.split(' to ');
+                    if (dates.length === 2) filters.push(`Período: ${dates[0]} até ${dates[1]}`);
+                    else if (dates.length === 1) filters.push(`Data: ${dates[0]}`);
+                }
+                if (globalSearch.value) filters.push(`Busca: "${globalSearch.value}"`);
+                
+                if (filters.length === 0) {
+                    activeFiltersEl.innerHTML = '';
+                } else {
+                    activeFiltersEl.innerHTML = filters.map(f => 
+                        `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${f}</span>`
+                    ).join(' ');
+                }
+            }
 
             function loadData() {
                 dataStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando...';
@@ -268,7 +290,6 @@
                             const dataKey = keys.find(k => k.toLowerCase().includes('data')) || 'Data';
                             const dealerKey = keys.find(k => k.toLowerCase().includes('dealer')) || 'Dealer';
                             const origemKey = keys.find(k => k.toLowerCase().includes('origem')) || 'Origem';
-                            const veiculoKey = keys.find(k => k.toLowerCase().includes('veículo') || k.toLowerCase().includes('veiculo')) || 'Veículo';
                             const motorKey = keys.find(k => k.toLowerCase().includes('motor')) || 'Motor';
                             
                             masterData = results.data
@@ -277,10 +298,9 @@
                                     data: row[dataKey] ? row[dataKey].trim() : '',
                                     dealer: row[dealerKey] ? row[dealerKey].trim() : '',
                                     origem: row[origemKey] ? row[origemKey].trim() : '',
-                                    veiculo: row[veiculoKey] ? row[veiculoKey].trim() : '',
                                     motor: row[motorKey] ? row[motorKey].trim() : ''
                                 }))
-                                .filter(item => item.data && item.dealer && item.origem && item.veiculo && item.motor);
+                                .filter(item => item.data && item.dealer && item.origem && item.motor);
                             
                             if (masterData.length === 0) {
                                 throw new Error('Nenhum dado válido encontrado');
@@ -304,13 +324,13 @@
 
             function useFallbackData() {
                 masterData = [
-                    {data: '08/03/2026', dealer: 'Dealer A', origem: 'Facebook', veiculo: 'Tracker', motor: 'Turbo'},
-                    {data: '08/03/2026', dealer: 'Dealer B', origem: 'Instagram', veiculo: 'Saveiro', motor: 'Aspirado'},
-                    {data: '08/03/2026', dealer: 'Dealer A', origem: 'Google', veiculo: 'Corolla', motor: 'Aspirado'},
-                    {data: '09/03/2026', dealer: 'Dealer C', origem: 'Facebook', veiculo: 'CR-V', motor: 'Aspirado'},
-                    {data: '09/03/2026', dealer: 'Dealer B', origem: 'Instagram', veiculo: 'Swift', motor: 'Aspirado'},
-                    {data: '10/03/2026', dealer: 'Dealer A', origem: 'Google', veiculo: 'HB20', motor: 'Turbo'},
-                    {data: '10/03/2026', dealer: 'Dealer C', origem: 'Facebook', veiculo: 'Pulse', motor: 'Aspirado'}
+                    {data: '08/03/2026', dealer: 'Dealer A', origem: 'Facebook', motor: 'Turbo'},
+                    {data: '08/03/2026', dealer: 'Dealer B', origem: 'Instagram', motor: 'Aspirado'},
+                    {data: '08/03/2026', dealer: 'Dealer A', origem: 'Google', motor: 'Aspirado'},
+                    {data: '09/03/2026', dealer: 'Dealer C', origem: 'Facebook', motor: 'Aspirado'},
+                    {data: '09/03/2026', dealer: 'Dealer B', origem: 'Instagram', motor: 'Aspirado'},
+                    {data: '10/03/2026', dealer: 'Dealer A', origem: 'Google', motor: 'Turbo'},
+                    {data: '10/03/2026', dealer: 'Dealer C', origem: 'Facebook', motor: 'Aspirado'}
                 ];
                 filteredData = [...masterData];
                 populateFilters();
@@ -321,12 +341,10 @@
             function populateFilters() {
                 const dealers = [...new Set(masterData.map(d => d.dealer))].sort();
                 const origens = [...new Set(masterData.map(d => d.origem))].sort();
-                const veiculos = [...new Set(masterData.map(d => d.veiculo))].sort();
                 const motores = [...new Set(masterData.map(d => d.motor))].sort();
 
                 fillSelect(filterDealer, dealers);
                 fillSelect(filterOrigem, origens);
-                fillSelect(filterVeiculo, veiculos);
                 fillSelect(filterMotor, motores);
             }
 
@@ -340,24 +358,37 @@
                 });
             }
 
+            // Função para aplicar filtro vindo do gráfico
+            function setFilter(filterType, value) {
+                switch(filterType) {
+                    case 'dealer':
+                        filterDealer.value = value;
+                        break;
+                    case 'origem':
+                        filterOrigem.value = value;
+                        break;
+                    case 'motor':
+                        filterMotor.value = value;
+                        break;
+                }
+                applyAllFilters();
+            }
+
             function applyAllFilters() {
                 let filtered = [...masterData];
 
-                // Filtros de seleção (atualizam automaticamente)
+                // Filtros de seleção
                 if (filterDealer.value) {
                     filtered = filtered.filter(item => item.dealer === filterDealer.value);
                 }
                 if (filterOrigem.value) {
                     filtered = filtered.filter(item => item.origem === filterOrigem.value);
                 }
-                if (filterVeiculo.value) {
-                    filtered = filtered.filter(item => item.veiculo === filterVeiculo.value);
-                }
                 if (filterMotor.value) {
                     filtered = filtered.filter(item => item.motor === filterMotor.value);
                 }
                 
-                // Filtro de data (agora só aplica com botão)
+                // Filtro de data
                 if (dateRangeInput.value) {
                     const dates = dateRangeInput.value.split(' to ');
                     
@@ -392,7 +423,6 @@
                         item.data.toLowerCase().includes(term) ||
                         item.dealer.toLowerCase().includes(term) ||
                         item.origem.toLowerCase().includes(term) ||
-                        item.veiculo.toLowerCase().includes(term) ||
                         item.motor.toLowerCase().includes(term)
                     );
                 }
@@ -401,11 +431,12 @@
                 renderTable();
                 updateKPIs();
                 updatePieCharts();
+                updateActiveFilters();
             }
 
             function renderTable() {
                 if (filteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400"><i class="fas fa-search mr-2"></i>Nenhum registro encontrado</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-400"><i class="fas fa-search mr-2"></i>Nenhum registro encontrado</td></tr>`;
                     tableCount.textContent = '0 registros exibidos';
                     return;
                 }
@@ -416,7 +447,6 @@
                         <td class="px-6 py-3 whitespace-nowrap">${item.data}</td>
                         <td class="px-6 py-3 whitespace-nowrap">${item.dealer}</td>
                         <td class="px-6 py-3 whitespace-nowrap">${item.origem}</td>
-                        <td class="px-6 py-3 whitespace-nowrap">${item.veiculo}</td>
                         <td class="px-6 py-3 whitespace-nowrap">${item.motor}</td>
                     </tr>`;
                 });
@@ -444,14 +474,32 @@
                         labels: Object.keys(dealerCounts),
                         datasets: [{
                             data: Object.values(dealerCounts),
-                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'bottom' }
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, item) => {
+                            if (item && item.length > 0) {
+                                const index = item[0].dataIndex;
+                                const label = dealersPieChart.data.labels[index];
+                                setFilter('dealer', label);
+                            }
                         }
                     }
                 });
@@ -469,14 +517,32 @@
                         labels: Object.keys(origemCounts),
                         datasets: [{
                             data: Object.values(origemCounts),
-                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'bottom' }
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, item) => {
+                            if (item && item.length > 0) {
+                                const index = item[0].dataIndex;
+                                const label = origensPieChart.data.labels[index];
+                                setFilter('origem', label);
+                            }
                         }
                     }
                 });
@@ -501,7 +567,25 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'bottom' }
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, item) => {
+                            if (item && item.length > 0) {
+                                const index = item[0].dataIndex;
+                                const label = motorPieChart.data.labels[index];
+                                setFilter('motor', label);
+                            }
                         }
                     }
                 });
@@ -510,7 +594,6 @@
             // Event listeners para filtros automáticos
             filterDealer.addEventListener('change', applyAllFilters);
             filterOrigem.addEventListener('change', applyAllFilters);
-            filterVeiculo.addEventListener('change', applyAllFilters);
             filterMotor.addEventListener('change', applyAllFilters);
             globalSearch.addEventListener('input', applyAllFilters);
 
@@ -518,7 +601,6 @@
             clearBtn.addEventListener('click', () => {
                 filterDealer.value = '';
                 filterOrigem.value = '';
-                filterVeiculo.value = '';
                 filterMotor.value = '';
                 globalSearch.value = '';
                 datePicker.clear();
