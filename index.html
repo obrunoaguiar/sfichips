@@ -3,272 +3,606 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>SFICHIPS · HUB de Gestão</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <title>SFICHIPS · Hub de Gestão</title>
+    
+    <!-- FONTES E ICONES -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
+    
+    <!-- CHART.JS PARA GRÁFICOS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Tailwind (para agilizar) -->
+    
+    <!-- TAILWIND CSS (para estilos rápidos) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        body { background: #f1f5f9; }
-        /* Animações de transição entre telas */
-        .screen { display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .screen.active { display: block; opacity: 1; }
-        /* Barra de progresso animada */
-        .progress-bar { transition: width 0.5s ease-in-out; }
-        /* Cards com hover suave */
-        .kpi-card { transition: transform 0.2s, box-shadow 0.2s; }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        /* Menu inferior estilo app */
-        .bottom-nav {
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(203, 213, 225, 0.4);
+        * {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .nav-item.active .nav-icon { color: #2563eb; transform: scale(1.1); }
-        .nav-item.active .nav-label { color: #2563eb; font-weight: 600; }
-        .nav-icon { transition: all 0.2s; }
-        /* Estilo para conquistas/badges */
-        .badge-earned { animation: pop 0.5s ease-out; }
+        
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        
+        /* TRANSIÇÃO ENTRE TELAS */
+        .screen {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .screen.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* BARRA DE PROGRESSO ANIMADA */
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        
+        /* CARDS COM EFEITO HOVER */
+        .kpi-card {
+            transition: all 0.2s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* MENU INFERIOR ESTILO APP */
+        .bottom-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(203, 213, 225, 0.5);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-item.active .nav-icon {
+            color: #2563eb;
+            transform: scale(1.1);
+        }
+        
+        .nav-item.active .nav-label {
+            color: #2563eb;
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            transition: all 0.2s;
+        }
+        
+        /* ANIMAÇÃO DE CONQUISTA */
         @keyframes pop {
             0% { transform: scale(0.8); opacity: 0; }
             80% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
-        /* Scroll suave */
-        .scrollable-content { max-height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 20px; }
+        
+        .badge-earned {
+            animation: pop 0.5s ease-out;
+        }
+        
+        /* CORES PERSONALIZADAS */
+        .bg-gradient-leads {
+            background: linear-gradient(145deg, #1e4a7a, #0f3b5e);
+        }
+        
+        .bg-gradient-budget {
+            background: linear-gradient(145deg, #2d5f8b, #1e4a7a);
+        }
+        
+        .bg-gradient-crm {
+            background: linear-gradient(145deg, #3b6f9e, #2d5f8b);
+        }
+        
+        /* BOTÃO FLUTUANTE */
+        .fab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: #2563eb;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 40;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            background: #1d4ed8;
+        }
+        
+        /* TABELA RESPONSIVA */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* VARIACAO DE CORES */
+        .positivo {
+            color: #047857;
+            background-color: #d1fae5;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .negativo {
+            color: #b91c1c;
+            background-color: #fee2e2;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body class="text-slate-700 antialiased">
+<body>
 
-    <!-- Container Principal com padding inferior para o menu -->
-    <div class="max-w-7xl mx-auto px-4 pb-24 pt-6 sm:px-6 lg:px-8">
+    <!-- BOTÃO FLUTUANTE PARA RELATÓRIO RÁPIDO -->
+    <div class="fab" id="fab-button" title="Gerar Relatório Rápido">
+        <i class="fa-solid fa-file-pdf text-xl"></i>
+    </div>
 
-        <!-- HEADER GAMIFICADO -->
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="max-w-7xl mx-auto px-4 pb-28 pt-6 sm:px-6 lg:px-8">
+
+        <!-- CABEÇALHO GAMIFICADO -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-3">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> SFICHIPS HUB
-                </h1>
-                <p class="text-sm text-slate-500 mt-1 flex items-center gap-2">
-                    <i class="fa-regular fa-calendar"></i> 1º Trimestre 2026 
-                    <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-                    <i class="fa-regular fa-clock"></i> Atualizado 09/03
-                </p>
-            </div>
-            <!-- Badges de conquista / nível -->
-            <div class="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-sm">
-                <div class="flex items-center gap-1">
-                    <i class="fa-solid fa-bolt text-yellow-400"></i>
-                    <span class="font-semibold">Nível 3</span>
-                </div>
-                <div class="w-px h-6 bg-slate-200"></div>
-                <div class="flex -space-x-2">
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full border-2 border-white" title="Meta de Leads"><i class="fa-solid fa-trophy text-xs"></i></span>
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full border-2 border-white" title="Dealers Ativos"><i class="fa-solid fa-store text-xs"></i></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- BARRA DE PROGRESSO GLOBAL (Gamificação) -->
-        <div class="bg-white rounded-2xl p-5 shadow-sm mb-8 border border-slate-100">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-sm font-medium text-slate-500"><i class="fa-regular fa-star mr-1"></i> Progresso Trimestral</span>
-                <span class="text-sm font-bold text-blue-600" id="global-progress-text">0%</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-3">
-                <div id="global-progress-bar" class="progress-bar bg-gradient-to-r from-blue-500 to-cyan-400 h-3 rounded-full" style="width:0%"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-2 mt-4 text-center text-xs">
-                <div><span class="font-semibold text-blue-600" id="meta-leads">0</span> <span class="text-slate-400">/ 5000 leads</span></div>
-                <div><span class="font-semibold text-green-600" id="meta-invest">R$ 0</span> <span class="text-slate-400">/ R$ 20k</span></div>
-                <div><span class="font-semibold text-purple-600" id="taxa-cpl">R$ 0</span> <span class="text-slate-400">CPL médio</span></div>
-            </div>
-        </div>
-
-        <!-- ========== TELAS (SCREENS) ========== -->
-        <!-- Tela 1: Visão Geral (Dashboard Inicial) -->
-        <div id="screen-overview" class="screen active">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-gauge-high text-blue-500"></i> Visão Geral</h2>
-            <!-- Cards rápidos -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-start">
-                        <i class="fa-solid fa-users text-slate-300 text-2xl"></i>
-                        <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">+0.4%</span>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-chart-pie text-white text-2xl"></i>
                     </div>
-                    <p class="text-2xl font-bold mt-2" id="overview-leads">4.932</p>
-                    <p class="text-xs text-slate-400">Total Leads</p>
-                </div>
-                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                    <i class="fa-solid fa-dollar-sign text-slate-300 text-2xl"></i>
-                    <p class="text-2xl font-bold mt-2" id="overview-budget">R$ 19,5k</p>
-                    <p class="text-xs text-slate-400">Investimento</p>
-                </div>
-                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                    <i class="fa-solid fa-building text-slate-300 text-2xl"></i>
-                    <p class="text-2xl font-bold mt-2" id="overview-matrix">1.972</p>
-                    <p class="text-xs text-slate-400">Matriz</p>
-                </div>
-                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                    <i class="fa-solid fa-store text-slate-300 text-2xl"></i>
-                    <p class="text-2xl font-bold mt-2" id="overview-dealers">2.673</p>
-                    <p class="text-xs text-slate-400">Dealers</p>
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-800">SFICHIPS HUB</h1>
+                        <p class="text-sm text-slate-500 flex items-center gap-2 mt-1">
+                            <i class="fa-regular fa-calendar"></i> 1º Trimestre 2026
+                            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                            <i class="fa-regular fa-clock"></i> Atualizado 09/03
+                        </p>
+                    </div>
                 </div>
             </div>
-
-            <!-- Mini gráfico de pizza (distribuição) e últimos registros -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-2xl p-5 border border-slate-100">
-                    <h3 class="font-semibold mb-3 text-sm">Distribuição de Leads</h3>
-                    <div style="height:200px"><canvas id="miniDonutChart"></canvas></div>
+            
+            <!-- NÍVEL E PONTOS -->
+            <div class="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-yellow-500"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400">Nível</span>
+                        <p class="font-bold text-sm">3 · Gerente</p>
+                    </div>
                 </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-100">
-                    <h3 class="font-semibold mb-3 text-sm">Últimos atendimentos</h3>
-                    <ul class="text-sm space-y-3" id="recent-list">
-                        <li class="flex justify-between"><span>Dealer A <span class="text-slate-400">· Facebook</span></span> <span class="font-medium">Turbo</span></li>
-                        <li class="flex justify-between"><span>Dealer B <span class="text-slate-400">· Instagram</span></span> <span class="font-medium">Aspirado</span></li>
-                        <li class="flex justify-between"><span>Dealer C <span class="text-slate-400">· Google</span></span> <span class="font-medium">Aspirado</span></li>
-                    </ul>
+                <div class="w-px h-8 bg-slate-200"></div>
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full border-2 border-white flex items-center justify-center" title="Meta Leads">
+                        <i class="fa-solid fa-trophy text-xs text-blue-600"></i>
+                    </div>
+                    <div class="w-8 h-8 bg-green-100 rounded-full border-2 border-white flex items-center justify-center" title="Dealers Ativos">
+                        <i class="fa-solid fa-store text-xs text-green-600"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tela 2: Comparativo de Leads (baseado no 1trimestre.html) -->
+        <!-- BARRA DE PROGRESSO GLOBAL -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-8 border border-slate-100">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-medium text-slate-500">
+                    <i class="fa-regular fa-star mr-1 text-yellow-400"></i> Progresso Trimestral
+                </span>
+                <span class="text-sm font-bold text-blue-600" id="global-progress-text">72%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-4">
+                <div id="global-progress-bar" class="progress-bar bg-gradient-to-r from-blue-500 to-cyan-400 h-4 rounded-full" style="width:72%"></div>
+            </div>
+            
+            <!-- METAS -->
+            <div class="grid grid-cols-3 gap-2 mt-5">
+                <div class="text-center">
+                    <span class="text-xs text-slate-400">Leads</span>
+                    <p class="font-bold text-blue-600">4.932 <span class="text-xs text-slate-400">/5k</span></p>
+                </div>
+                <div class="text-center">
+                    <span class="text-xs text-slate-400">Investimento</span>
+                    <p class="font-bold text-green-600">R$ 19,5k <span class="text-xs text-slate-400">/20k</span></p>
+                </div>
+                <div class="text-center">
+                    <span class="text-xs text-slate-400">CPL Médio</span>
+                    <p class="font-bold text-purple-600">R$ 3,96</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TELAS ===== -->
+        
+        <!-- TELA 1: VISÃO GERAL -->
+        <div id="screen-overview" class="screen active">
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-gauge-high text-blue-500"></i> Visão Geral do Negócio
+            </h2>
+            
+            <!-- CARDS DE KPI -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-users text-blue-500"></i>
+                        </div>
+                        <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full">+0.4%</span>
+                    </div>
+                    <p class="text-2xl font-bold" id="overview-leads">4.932</p>
+                    <p class="text-xs text-slate-400">Total de Leads</p>
+                </div>
+                
+                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-dollar-sign text-green-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold">R$ 19.509</p>
+                    <p class="text-xs text-slate-400">Investimento Total</p>
+                </div>
+                
+                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-building text-purple-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold">1.972</p>
+                    <p class="text-xs text-slate-400">Leads Matriz</p>
+                </div>
+                
+                <div class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-store text-orange-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold">2.673</p>
+                    <p class="text-xs text-slate-400">Leads Dealers</p>
+                </div>
+            </div>
+
+            <!-- GRÁFICO E ÚLTIMOS REGISTROS -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- GRÁFICO DE DISTRIBUIÇÃO -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-100">
+                    <h3 class="font-semibold mb-3 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-blue-400"></i> Distribuição Matriz vs Dealers
+                    </h3>
+                    <div style="height: 200px;">
+                        <canvas id="donutChartOverview"></canvas>
+                    </div>
+                    <div class="flex justify-center gap-6 mt-3 text-xs">
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-500 rounded-full"></span> Matriz 42%</div>
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded-full"></span> Dealers 58%</div>
+                    </div>
+                </div>
+                
+                <!-- ÚLTIMOS ATENDIMENTOS -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-100">
+                    <h3 class="font-semibold mb-3 text-sm flex items-center gap-2">
+                        <i class="fa-regular fa-clock text-blue-400"></i> Últimos Atendimentos
+                    </h3>
+                    <div class="space-y-3" id="recent-list">
+                        <!-- Preenchido via JS -->
+                    </div>
+                    <button class="w-full mt-3 text-sm text-blue-600 bg-blue-50 py-2 rounded-xl hover:bg-blue-100 transition" id="view-all-crm">
+                        Ver todos no CRM
+                    </button>
+                </div>
+            </div>
+
+            <!-- MÊS EM DESTAQUE -->
+            <div class="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-calendar-star text-blue-500"></i>
+                    <span class="font-semibold">Mês em Destaque: Janeiro/2026</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                        <span class="text-xs text-slate-500">Leads</span>
+                        <p class="text-xl font-bold text-slate-800">2.323</p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500">Matriz</span>
+                        <p class="text-xl font-bold text-slate-800">879</p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500">Dealers</span>
+                        <p class="text-xl font-bold text-slate-800">1.332</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 2: LEADS (COMPARATIVO MENSAL) -->
         <div id="screen-leads" class="screen">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-simple text-blue-500"></i> Comparativo Mensal de Leads</h2>
-            <!-- Grid dos meses (extraído e adaptado do 1trimestre) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="leads-month-grid">
-                <!-- Janeiro -->
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-blue-500"></i> Comparativo Mensal de Leads
+            </h2>
+
+            <!-- CARDS DOS MESES -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- JANEIRO -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white p-4 font-bold text-lg">JANEIRO 2026</div>
+                    <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white p-4">
+                        <h3 class="font-bold text-lg">JANEIRO 2026</h3>
+                    </div>
                     <div class="p-4">
-                        <div class="text-center border-b pb-2 mb-2">
-                            <span class="text-slate-400 text-xs">🚀 TOTAL LEADS</span>
-                            <div class="text-3xl font-bold text-slate-800">2.323</div>
+                        <div class="text-center pb-3 mb-2 border-b border-slate-100">
+                            <span class="text-xs text-slate-400">TOTAL DE LEADS</span>
+                            <p class="text-3xl font-bold text-slate-800">2.323</p>
                             <span class="inline-block bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs mt-1">Mês base</span>
                         </div>
-                        <div class="flex justify-between text-sm"><span>Matriz:</span> <span class="font-semibold">879</span></div>
-                        <div class="flex justify-between text-sm"><span>Dealers:</span> <span class="font-semibold">1.332</span></div>
-                        <div class="flex justify-between text-sm mt-2"><span>Investimento:</span> <span class="font-semibold">R$ 9.087</span></div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Matriz:</span>
+                                <span class="font-semibold">879</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Dealers:</span>
+                                <span class="font-semibold">1.332</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-slate-100">
+                                <span class="text-slate-500">Investimento:</span>
+                                <span class="font-semibold">R$ 9.087</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Fevereiro -->
+
+                <!-- FEVEREIRO -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-4 font-bold text-lg">FEVEREIRO 2026</div>
+                    <div class="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-4">
+                        <h3 class="font-bold text-lg">FEVEREIRO 2026</h3>
+                    </div>
                     <div class="p-4">
-                        <div class="text-center border-b pb-2 mb-2">
-                            <span class="text-slate-400 text-xs">🚀 TOTAL LEADS</span>
-                            <div class="text-3xl font-bold text-slate-800">2.026</div>
+                        <div class="text-center pb-3 mb-2 border-b border-slate-100">
+                            <span class="text-xs text-slate-400">TOTAL DE LEADS</span>
+                            <p class="text-3xl font-bold text-slate-800">2.026</p>
                             <span class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs mt-1">▼ -12,8%</span>
                         </div>
-                        <div class="flex justify-between text-sm"><span>Matriz:</span> <span class="font-semibold">883</span></div>
-                        <div class="flex justify-between text-sm"><span>Dealers:</span> <span class="font-semibold">1.005</span></div>
-                        <div class="flex justify-between text-sm mt-2"><span>Investimento:</span> <span class="font-semibold">R$ 8.141</span></div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Matriz:</span>
+                                <span class="font-semibold">883</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Dealers:</span>
+                                <span class="font-semibold">1.005</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-slate-100">
+                                <span class="text-slate-500">Investimento:</span>
+                                <span class="font-semibold">R$ 8.141</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Março -->
+
+                <!-- MARÇO -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 font-bold text-lg">MARÇO 2026</div>
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
+                        <h3 class="font-bold text-lg">MARÇO 2026</h3>
+                    </div>
                     <div class="p-4">
-                        <div class="text-center border-b pb-2 mb-2">
-                            <span class="text-slate-400 text-xs">🚀 TOTAL LEADS</span>
-                            <div class="text-3xl font-bold text-slate-800">583</div>
+                        <div class="text-center pb-3 mb-2 border-b border-slate-100">
+                            <span class="text-xs text-slate-400">TOTAL DE LEADS</span>
+                            <p class="text-3xl font-bold text-slate-800">583</p>
                             <span class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs mt-1">▼ -71,2%</span>
                         </div>
-                        <div class="flex justify-between text-sm"><span>Matriz:</span> <span class="font-semibold">210</span></div>
-                        <div class="flex justify-between text-sm"><span>Dealers:</span> <span class="font-semibold">336</span></div>
-                        <div class="flex justify-between text-sm mt-2"><span>Investimento:</span> <span class="font-semibold">R$ 2.281</span></div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Matriz:</span>
+                                <span class="font-semibold">210</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Dealers:</span>
+                                <span class="font-semibold">336</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-slate-100">
+                                <span class="text-slate-500">Investimento:</span>
+                                <span class="font-semibold">R$ 2.281</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- Total trimestre -->
-            <div class="mt-6 bg-slate-100 p-4 rounded-2xl flex justify-around">
-                <div><span class="text-xs text-slate-500">Total Matriz</span><div class="text-xl font-bold">1.972</div></div>
-                <div><span class="text-xs text-slate-500">Total Dealers</span><div class="text-xl font-bold">2.673</div></div>
-                <div><span class="text-xs text-slate-500">CPL médio</span><div class="text-xl font-bold">R$ 3,95</div></div>
+
+            <!-- RESUMO DO TRIMESTRE -->
+            <div class="mt-6 bg-slate-100 p-5 rounded-2xl">
+                <h4 class="font-semibold text-sm mb-3 text-slate-600">RESUMO DO TRIMESTRE</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-white p-3 rounded-xl text-center">
+                        <span class="text-xs text-slate-400">Total Matriz</span>
+                        <p class="text-xl font-bold text-blue-600">1.972</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl text-center">
+                        <span class="text-xs text-slate-400">Total Dealers</span>
+                        <p class="text-xl font-bold text-green-600">2.673</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl text-center">
+                        <span class="text-xs text-slate-400">Total Leads</span>
+                        <p class="text-xl font-bold text-purple-600">4.932</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl text-center">
+                        <span class="text-xs text-slate-400">CPL Médio</span>
+                        <p class="text-xl font-bold text-orange-600">R$ 3,95</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Tela 3: Orçamento Detalhado (baseado no orcamento.html) -->
+        <!-- TELA 3: ORÇAMENTO -->
         <div id="screen-budget" class="screen">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-coins text-blue-500"></i> Orçamento & Performance</h2>
-            <!-- Cards resumo -->
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-wallet text-blue-500"></i> Orçamento e Performance
+            </h2>
+
+            <!-- CARDS DE ORÇAMENTO -->
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-2xl border border-slate-100">
-                    <p class="text-xs text-slate-400">Investimento Total</p>
-                    <p class="text-2xl font-bold text-slate-800">R$ 19.509</p>
+                <div class="bg-white p-5 rounded-2xl border border-slate-100">
+                    <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-chart-line text-blue-500"></i>
+                    </div>
+                    <span class="text-xs text-slate-400">Investimento Total</span>
+                    <p class="text-2xl font-bold">R$ 19.509</p>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-100">
-                    <p class="text-xs text-slate-400">CPL Médio</p>
-                    <p class="text-2xl font-bold text-slate-800">R$ 3,96</p>
+                <div class="bg-white p-5 rounded-2xl border border-slate-100">
+                    <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-tag text-green-500"></i>
+                    </div>
+                    <span class="text-xs text-slate-400">CPL Médio</span>
+                    <p class="text-2xl font-bold">R$ 3,96</p>
                 </div>
             </div>
-            <!-- Distribuição por canal (simples) -->
+
+            <!-- DISTRIBUIÇÃO DE INVESTIMENTO -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 mb-6">
+                <h3 class="font-semibold text-sm mb-4">Distribuição do Investimento</h3>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Matriz</span>
+                        <span class="font-semibold">R$ 7.896</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full">
+                        <div class="bg-green-400 h-2 rounded-full" style="width:40.5%"></div>
+                    </div>
+                    <span class="text-xs text-slate-400">40,5% do total</span>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Dealers</span>
+                        <span class="font-semibold">R$ 10.633</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full">
+                        <div class="bg-red-400 h-2 rounded-full" style="width:54.5%"></div>
+                    </div>
+                    <span class="text-xs text-slate-400">54,5% do total</span>
+                </div>
+            </div>
+
+            <!-- TABELA DE CPL POR PRODUTO -->
             <div class="bg-white p-5 rounded-2xl border border-slate-100">
-                <h3 class="font-semibold text-sm mb-4">Distribuição Matriz vs Dealers</h3>
+                <h3 class="font-semibold text-sm mb-3">CPL por Produto</h3>
                 <div class="space-y-3">
-                    <div><div class="flex justify-between text-sm"><span>Matriz</span><span>R$ 7.896</span></div><div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-green-400 h-2 rounded-full" style="width:40.5%"></div></div></div>
-                    <div><div class="flex justify-between text-sm"><span>Dealers</span><span>R$ 10.633</span></div><div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-red-400 h-2 rounded-full" style="width:54.5%"></div></div></div>
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-wind text-blue-500 text-xs"></i>
+                            </div>
+                            <span class="font-medium">Aspirado</span>
+                        </div>
+                        <span class="font-bold">R$ 3,92</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-bolt text-purple-500 text-xs"></i>
+                            </div>
+                            <span class="font-medium">Turbo</span>
+                        </div>
+                        <span class="font-bold">R$ 4,01</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tela 4: Atendimento (CRM) - Versão simplificada do atendimento.html -->
+        <!-- TELA 4: CRM (ATENDIMENTO) -->
         <div id="screen-crm" class="screen">
-            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><i class="fa-solid fa-headset text-blue-500"></i> Atendimento (CRM)</h2>
-            <!-- Filtro e busca compactos -->
+            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-headset text-blue-500"></i> Atendimento (CRM)
+            </h2>
+
+            <!-- FILTROS -->
             <div class="bg-white p-4 rounded-2xl shadow-sm mb-5 border border-slate-100">
-                <div class="flex gap-2">
-                    <select id="crm-dealer-filter" class="text-sm border border-slate-200 rounded-xl px-3 py-2 flex-1">
-                        <option value="">Dealer: Todos</option>
-                    </select>
-                    <select id="crm-origem-filter" class="text-sm border border-slate-200 rounded-xl px-3 py-2 flex-1">
-                        <option value="">Origem: Todas</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">Dealer</label>
+                        <select id="crm-dealer-filter" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 bg-white">
+                            <option value="">Todos</option>
+                            <option value="Dealer A">Dealer A</option>
+                            <option value="Dealer B">Dealer B</option>
+                            <option value="Dealer C">Dealer C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">Origem</label>
+                        <select id="crm-origem-filter" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 bg-white">
+                            <option value="">Todas</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Google">Google</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <!-- Tabela resumo -->
-            <div class="bg-white rounded-2xl border border-slate-100 overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-slate-50 text-slate-500 text-xs">
-                        <tr><th class="px-4 py-3">Data</th><th class="px-4 py-3">Dealer</th><th class="px-4 py-3">Origem</th><th class="px-4 py-3">Motor</th></tr>
-                    </thead>
-                    <tbody id="crm-table-body" class="divide-y divide-slate-100">
-                        <!-- preenchido via js -->
-                    </tbody>
-                </table>
+
+            <!-- TABELA DE ATENDIMENTOS -->
+            <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                <div class="table-scroll">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-xs">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Data</th>
+                                <th class="px-4 py-3 text-left">Dealer</th>
+                                <th class="px-4 py-3 text-left">Origem</th>
+                                <th class="px-4 py-3 text-left">Motor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crm-table-body" class="divide-y divide-slate-100">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- TOTAL DE REGISTROS -->
+            <div class="mt-3 text-xs text-slate-400 text-right" id="crm-total">
+                7 registros encontrados
             </div>
         </div>
-    </div> <!-- fim container -->
+    </div>
 
-    <!-- MENU INFERIOR (TAB BAR) - UX estilo app -->
-    <nav class="bottom-nav fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 px-2 py-2 flex justify-around items-center z-50">
-        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl transition-all active" data-screen="overview">
+    <!-- MENU INFERIOR (NAVEGAÇÃO ESTILO APP) -->
+    <nav class="bottom-nav fixed bottom-0 left-0 w-full px-2 py-1 flex justify-around items-center z-50">
+        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl active" data-screen="overview">
             <i class="nav-icon fa-solid fa-house text-xl text-slate-400"></i>
             <span class="nav-label text-xs mt-1 text-slate-400">Início</span>
         </button>
-        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl transition-all" data-screen="leads">
+        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl" data-screen="leads">
             <i class="nav-icon fa-solid fa-chart-line text-xl text-slate-400"></i>
             <span class="nav-label text-xs mt-1 text-slate-400">Leads</span>
         </button>
-        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl transition-all" data-screen="budget">
+        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl" data-screen="budget">
             <i class="nav-icon fa-solid fa-wallet text-xl text-slate-400"></i>
             <span class="nav-label text-xs mt-1 text-slate-400">Orçamento</span>
         </button>
-        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl transition-all" data-screen="crm">
+        <button class="nav-item flex flex-col items-center p-2 flex-1 rounded-xl" data-screen="crm">
             <i class="nav-icon fa-solid fa-message text-xl text-slate-400"></i>
-            <span class="nav-label text-xs mt-1 text-slate-400">Atend.</span>
+            <span class="nav-label text-xs mt-1 text-slate-400">CRM</span>
         </button>
     </nav>
 
-    <!-- SCRIPTS -->
     <script>
         (function() {
-            // ----- Dados simulados para o CRM e visão geral -----
+            // ==================== DADOS ====================
             const crmData = [
                 { data: '08/03', dealer: 'Dealer A', origem: 'Facebook', motor: 'Turbo' },
                 { data: '08/03', dealer: 'Dealer B', origem: 'Instagram', motor: 'Aspirado' },
@@ -279,78 +613,106 @@
                 { data: '10/03', dealer: 'Dealer C', origem: 'Facebook', motor: 'Aspirado' }
             ];
 
-            // ----- Variáveis de gamificação -----
-            const totalLeads = 4932; // dos dados
-            const metaLeads = 5000;
-            const totalInvest = 19509;
-            const metaInvest = 20000;
-            const progress = ((totalLeads / metaLeads) * 0.6 + (totalInvest / metaInvest) * 0.4) * 100;
+            // ==================== GRÁFICO DONUT ====================
+            const ctx = document.getElementById('donutChartOverview')?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Matriz', 'Dealers'],
+                        datasets: [{
+                            data: [1972, 2673],
+                            backgroundColor: ['#3b82f6', '#10b981'],
+                            borderWidth: 0,
+                            borderRadius: 10
+                        }]
+                    },
+                    options: {
+                        cutout: '70%',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+            }
 
-            // Atualizar barra global
-            document.getElementById('global-progress-bar').style.width = Math.min(progress, 100) + '%';
-            document.getElementById('global-progress-text').innerText = Math.round(progress) + '%';
-            document.getElementById('meta-leads').innerText = totalLeads;
-            document.getElementById('meta-invest').innerText = 'R$ 19,5k';
-            document.getElementById('taxa-cpl').innerText = 'R$ 3,96';
+            // ==================== ÚLTIMOS ATENDIMENTOS ====================
+            const recentList = document.getElementById('recent-list');
+            if (recentList) {
+                recentList.innerHTML = crmData.slice(0, 4).map(item => `
+                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">${item.data}</span>
+                            <span class="font-medium text-sm">${item.dealer}</span>
+                        </div>
+                        <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">${item.motor}</span>
+                    </div>
+                `).join('');
+            }
 
-            // Visão geral números
-            document.getElementById('overview-leads').innerText = totalLeads;
-            document.getElementById('overview-budget').innerText = 'R$ 19,5k';
-            document.getElementById('overview-matrix').innerText = '1972';
-            document.getElementById('overview-dealers').innerText = '2673';
-
-            // Mini donut chart (visão geral)
-            new Chart(document.getElementById('miniDonutChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Matriz', 'Dealers'],
-                    datasets: [{
-                        data: [1972, 2673],
-                        backgroundColor: ['#3b82f6', '#10b981'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '70%', plugins: { legend: { display: false } } }
-            });
-
-            // ----- Populate CRM filters & table -----
-            const dealerSet = [...new Set(crmData.map(d => d.dealer))];
-            const origemSet = [...new Set(crmData.map(d => d.origem))];
+            // ==================== TABELA CRM ====================
             const dealerFilter = document.getElementById('crm-dealer-filter');
             const origemFilter = document.getElementById('crm-origem-filter');
-            const crmTbody = document.getElementById('crm-table-body');
-
-            dealerSet.forEach(d => { dealerFilter.innerHTML += `<option value="${d}">${d}</option>`; });
-            origemSet.forEach(o => { origemFilter.innerHTML += `<option value="${o}">${o}</option>`; });
+            const tableBody = document.getElementById('crm-table-body');
+            const totalSpan = document.getElementById('crm-total');
 
             function renderCrmTable() {
-                const dealerVal = dealerFilter.value;
-                const origemVal = origemFilter.value;
-                const filtered = crmData.filter(row => 
-                    (dealerVal === '' || row.dealer === dealerVal) &&
-                    (origemVal === '' || row.origem === origemVal)
+                const dealer = dealerFilter?.value || '';
+                const origem = origemFilter?.value || '';
+                
+                const filtered = crmData.filter(item => 
+                    (dealer === '' || item.dealer === dealer) &&
+                    (origem === '' || item.origem === origem)
                 );
-                crmTbody.innerHTML = filtered.map(r => `<tr><td class="px-4 py-2">${r.data}</td><td class="px-4 py-2">${r.dealer}</td><td class="px-4 py-2">${r.origem}</td><td class="px-4 py-2">${r.motor}</td></tr>`).join('');
+                
+                if (tableBody) {
+                    tableBody.innerHTML = filtered.map(item => `
+                        <tr>
+                            <td class="px-4 py-3">${item.data}</td>
+                            <td class="px-4 py-3">${item.dealer}</td>
+                            <td class="px-4 py-3">${item.origem}</td>
+                            <td class="px-4 py-3">
+                                <span class="bg-${item.motor === 'Turbo' ? 'purple' : 'blue'}-50 text-${item.motor === 'Turbo' ? 'purple' : 'blue'}-600 px-2 py-1 rounded-full text-xs">${item.motor}</span>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+                if (totalSpan) totalSpan.textContent = `${filtered.length} registros encontrados`;
             }
-            dealerFilter.addEventListener('change', renderCrmTable);
-            origemFilter.addEventListener('change', renderCrmTable);
+
+            if (dealerFilter) dealerFilter.addEventListener('change', renderCrmTable);
+            if (origemFilter) origemFilter.addEventListener('change', renderCrmTable);
             renderCrmTable();
 
-            // ----- Navegação entre telas (Menu inferior) -----
+            // ==================== NAVEGAÇÃO ====================
             const screens = {
                 overview: document.getElementById('screen-overview'),
                 leads: document.getElementById('screen-leads'),
                 budget: document.getElementById('screen-budget'),
                 crm: document.getElementById('screen-crm')
             };
+            
             const navItems = document.querySelectorAll('.nav-item');
 
             function activateScreen(screenId) {
-                Object.values(screens).forEach(s => s.classList.remove('active'));
-                screens[screenId].classList.add('active');
+                // Esconde todas as telas
+                Object.values(screens).forEach(screen => {
+                    if (screen) screen.classList.remove('active');
+                });
+                
+                // Mostra a tela selecionada
+                if (screens[screenId]) screens[screenId].classList.add('active');
+                
+                // Atualiza o menu
                 navItems.forEach(item => {
                     item.classList.remove('active');
-                    if (item.dataset.screen === screenId) item.classList.add('active');
+                    if (item.dataset.screen === screenId) {
+                        item.classList.add('active');
+                    }
                 });
             }
 
@@ -362,17 +724,37 @@
                 });
             });
 
-            // Ativar primeira tela por padrão (overview)
-            activateScreen('overview');
-
-            // Gamificação extra: ao bater a meta, disparar badge (simulação)
-            if (totalLeads >= metaLeads) {
-                const badge = document.createElement('div');
-                badge.className = 'fixed top-20 right-4 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 badge-earned z-50';
-                badge.innerHTML = '<i class="fa-solid fa-crown"></i> Meta de Leads alcançada!';
-                document.body.appendChild(badge);
-                setTimeout(() => badge.remove(), 4000);
+            // ==================== BOTÃO "VER TODOS NO CRM" ====================
+            const viewAllBtn = document.getElementById('view-all-crm');
+            if (viewAllBtn) {
+                viewAllBtn.addEventListener('click', () => activateScreen('crm'));
             }
+
+            // ==================== BOTÃO FLUTUANTE ====================
+            const fab = document.getElementById('fab-button');
+            if (fab) {
+                fab.addEventListener('click', () => {
+                    alert('Relatório gerado com sucesso!\nPeríodo: 01/01/2026 - 09/03/2026');
+                });
+            }
+
+            // ==================== GAMIFICAÇÃO ====================
+            // Mostra badge se meta foi atingida
+            setTimeout(() => {
+                if (4932 >= 5000) {
+                    const badge = document.createElement('div');
+                    badge.className = 'fixed top-24 right-4 bg-yellow-100 text-yellow-800 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 badge-earned z-50 border-l-4 border-yellow-500';
+                    badge.innerHTML = `
+                        <i class="fa-solid fa-trophy text-yellow-500 text-xl"></i>
+                        <div>
+                            <p class="font-bold text-sm">Meta de Leads Alcançada!</p>
+                            <p class="text-xs">4.932 de 5.000 leads</p>
+                        </div>
+                    `;
+                    document.body.appendChild(badge);
+                    setTimeout(() => badge.remove(), 5000);
+                }
+            }, 1000);
         })();
     </script>
 </body>
