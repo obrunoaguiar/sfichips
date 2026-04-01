@@ -34,7 +34,6 @@
             flex-direction: column;
         }
 
-        /* Header com logo */
         .header {
             background: #000000;
             padding: 24px 24px 20px;
@@ -49,7 +48,6 @@
             display: block;
         }
 
-        /* Área de Resumo */
         .summary-section {
             padding: 20px 24px;
             background: #fafafa;
@@ -92,14 +90,12 @@
             font-weight: 500;
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             padding: 32px 24px;
             position: relative;
         }
 
-        /* Camadas */
         .selection-layer {
             animation: fadeIn 0.3s ease;
         }
@@ -154,7 +150,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Inputs */
         .input-field {
             width: 100%;
             padding: 14px 0;
@@ -175,7 +170,6 @@
             color: #bbb;
         }
 
-        /* Problemas */
         .problems-grid {
             display: grid;
             gap: 12px;
@@ -246,7 +240,6 @@
             color: #888;
         }
 
-        /* Botões */
         .btn-next {
             background: #000000;
             color: white;
@@ -316,7 +309,6 @@
             color: #000000;
         }
 
-        /* Botões do Resultado - Invertidos */
         .result-buttons {
             display: flex;
             flex-direction: column;
@@ -369,7 +361,6 @@
             color: #000000;
         }
 
-        /* Resultado */
         .result-card {
             text-align: center;
             padding: 24px 0;
@@ -439,7 +430,6 @@
             text-align: left;
         }
 
-        /* Loading Animado */
         .loading-container {
             text-align: center;
             padding: 48px 0;
@@ -557,7 +547,7 @@
 
         <div class="summary-section">
             <div id="summaryContent" class="choice-breadcrumb">
-                <span class="empty-summary"> Escolha a marca do seu veículo 👇</span>
+                <span class="empty-summary">👆 Escolha a marca do seu veículo</span>
             </div>
         </div>
 
@@ -583,7 +573,23 @@
                 </button>
             </div>
 
-            <!-- Camada 4: Nome e WhatsApp com botão Avançar -->
+            <!-- Camada 4: Motor -->
+            <div id="layerEngine" class="selection-layer" style="display: none;">
+                <div class="options-grid" id="engineGrid"></div>
+                <button class="back-link" id="backToYearsBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para anos
+                </button>
+            </div>
+
+            <!-- Camada 5: Combustível -->
+            <div id="layerFuel" class="selection-layer" style="display: none;">
+                <div class="options-grid" id="fuelGrid"></div>
+                <button class="back-link" id="backToEngineBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para motor
+                </button>
+            </div>
+
+            <!-- Camada 6: Nome e WhatsApp -->
             <div id="layerContact" class="selection-layer" style="display: none;">
                 <input type="text" id="nameInput" class="input-field" placeholder="seu nome completo" autocomplete="off">
                 <div style="margin-top: 32px;">
@@ -592,12 +598,12 @@
                 <button class="btn-next" id="nextToProblem" disabled>
                     avançar <i class="fas fa-arrow-right"></i>
                 </button>
-                <button class="back-link" id="backToYearsBtn">
-                    <i class="fas fa-chevron-left"></i> voltar para anos
+                <button class="back-link" id="backToFuelBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para combustível
                 </button>
             </div>
 
-            <!-- Camada 5: Problema com botão Qualificar -->
+            <!-- Camada 7: Problema -->
             <div id="layerProblem" class="selection-layer" style="display: none;">
                 <div class="problems-grid" id="problemsGrid">
                     <div class="problem-card" data-problem="performance">
@@ -630,7 +636,7 @@
                 </button>
             </div>
 
-            <!-- Camada 6: Resultado -->
+            <!-- Camada 8: Resultado -->
             <div id="layerResult" class="selection-layer" style="display: none;">
                 <div id="resultContent"></div>
             </div>
@@ -659,10 +665,24 @@
         };
 
         const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
+        
+        // Opções de Motor
+        const engineOptions = [
+            "1.0", "1.0 Turbo", "1.3", "1.3 Turbo", "1.4", "1.4 Turbo", 
+            "1.5", "1.5 Turbo", "1.6", "1.6 Turbo", "1.8", "1.8 Turbo", 
+            "2.0", "2.0 Turbo", "2.5", "3.0", "3.0 Turbo", "V6", "V8"
+        ];
+        
+        // Opções de Combustível
+        const fuelOptions = [
+            "Gasolina", "Etanol", "Flex", "Diesel", "Híbrido", "Elétrico"
+        ];
 
         let selectedBrand = "";
         let selectedModel = "";
         let selectedYear = "";
+        let selectedEngine = "";
+        let selectedFuel = "";
         let selectedProblem = "";
         let qualificationResult = null;
 
@@ -685,10 +705,16 @@
                     html += `<div class="choice-item"><span class="choice-label">Modelo:</span> <span class="choice-value">${selectedModel}</span></div>`;
                     if (selectedYear) {
                         html += `<div class="choice-item"><span class="choice-label">Ano:</span> <span class="choice-value">${selectedYear}</span></div>`;
+                        if (selectedEngine) {
+                            html += `<div class="choice-item"><span class="choice-label">Motor:</span> <span class="choice-value">${selectedEngine}</span></div>`;
+                            if (selectedFuel) {
+                                html += `<div class="choice-item"><span class="choice-label">Combustível:</span> <span class="choice-value">${selectedFuel}</span></div>`;
+                            }
+                        }
                     }
                 }
             } else {
-                html += '<span class="empty-summary"> Escolha a marca do seu veículo 👇</span>';
+                html += '<span class="empty-summary">👆 Escolha a marca do seu veículo</span>';
             }
             
             html += '</div>';
@@ -696,7 +722,7 @@
         }
 
         function showLayer(layerId) {
-            const layers = ['layerBrands', 'layerModels', 'layerYears', 'layerContact', 'layerProblem', 'layerResult'];
+            const layers = ['layerBrands', 'layerModels', 'layerYears', 'layerEngine', 'layerFuel', 'layerContact', 'layerProblem', 'layerResult'];
             layers.forEach(layer => {
                 const element = document.getElementById(layer);
                 if (element) element.style.display = 'none';
@@ -722,11 +748,6 @@
         }
 
         async function sendToWebhook(data) {
-            if (!WEBHOOK_URL || WEBHOOK_URL === "https://webhook.site/your-webhook-url-here") {
-                console.log("⚠️ Webhook não configurado. Dados:", data);
-                return false;
-            }
-
             try {
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
@@ -757,18 +778,21 @@
         function qualifyVehicle() {
             const model = selectedModel.toLowerCase();
             const year = parseInt(selectedYear);
+            const engine = selectedEngine.toLowerCase();
+            const fuel = selectedFuel.toLowerCase();
             
-            const turboModels = ["nivus", "taos", "t-cross", "virtus", "amarok", "rampage", "commander", 
-                                 "tiguan", "jetta", "bronco", "maverick", "fastback", "pulse", "toro", 
-                                 "ranger", "hilux", "sw4", "frontier", "haval", "dolphin", "seal"];
+            const isTurboByEngine = engine.includes("turbo");
+            const isTurboByModel = ["nivus", "taos", "t-cross", "virtus", "amarok", "rampage", "commander", 
+                                     "tiguan", "jetta", "bronco", "maverick", "fastback", "pulse", "toro", 
+                                     "ranger", "hilux", "sw4", "frontier", "haval", "dolphin", "seal"].includes(model);
             
-            const aspiradoModels = ["gol", "voyage", "saveiro", "polo", "onix", "prisma", "joy", "spin", 
-                                    "cobalt", "hb20", "mobi", "argo", "cronos", "uno", "palio", "sandero", 
-                                    "logan", "kwid", "ka", "fiesta", "ecosport", "civic", "city", "corolla", 
-                                    "etios", "yaris", "kicks", "versa"];
+            const isAspiradoByModel = ["gol", "voyage", "saveiro", "polo", "onix", "prisma", "joy", "spin", 
+                                        "cobalt", "hb20", "mobi", "argo", "cronos", "uno", "palio", "sandero", 
+                                        "logan", "kwid", "ka", "fiesta", "ecosport", "civic", "city", "corolla", 
+                                        "etios", "yaris", "kicks", "versa"].includes(model);
             
-            if (turboModels.includes(model)) return "Turbo";
-            if (aspiradoModels.includes(model)) return "Aspirado";
+            if (isTurboByEngine || isTurboByModel) return "Turbo";
+            if (isAspiradoByModel) return "Aspirado";
             if (year >= 2018) return "Turbo";
             return "Aspirado";
         }
@@ -795,7 +819,9 @@
                 marca: selectedBrand,
                 modelo: selectedModel,
                 ano: selectedYear,
-                motor: motorType,
+                motor: selectedEngine,
+                combustivel: selectedFuel,
+                classificacao_motor: motorType,
                 problema: selectedProblem,
                 problema_descricao: problemText[selectedProblem],
                 atende_solucao: atende,
@@ -814,24 +840,24 @@
                 title = "🎉 SOLUÇÃO DISPONÍVEL! 🎉";
                 icon = "🚀";
                 if (selectedProblem === "performance") {
-                    message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} com motor ${motorType} é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪`;
+                    message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} ${selectedEngine} ${selectedFuel} é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪`;
                 } else if (selectedProblem === "economy") {
-                    message = `EXCELENTE! Seu ${selectedBrand} ${selectedModel} ${selectedYear} com motor ${motorType} pode economizar até 20% de combustível! Nossas soluções vão transformar seu consumo! 💰✨`;
+                    message = `EXCELENTE! Seu ${selectedBrand} ${selectedModel} ${selectedYear} ${selectedEngine} pode economizar até 20% de combustível! Nossas soluções vão transformar seu consumo! 💰✨`;
                 } else {
-                    message = `Seu ${selectedBrand} ${selectedModel} com motor ${motorType} é um candidato ideal! Nossos técnicos podem ajudar com soluções específicas! 🔧🎯`;
+                    message = `Seu ${selectedBrand} ${selectedModel} com motor ${selectedEngine} é um candidato ideal! Nossos técnicos podem ajudar com soluções específicas! 🔧🎯`;
                 }
             } else {
                 title = "🔍 ANÁLISE CONCLUÍDA";
                 icon = "📋";
                 
                 if (motorType === "Aspirado") {
-                    explanation = `Seu ${selectedBrand} ${selectedModel} ${selectedYear} possui motor ASPIRADO. Nossas soluções são desenvolvidas especialmente para veículos com motor TURBO, que oferecem maior potencial de ganhos de performance e economia.`;
+                    explanation = `Seu ${selectedBrand} ${selectedModel} ${selectedYear} possui motor ASPIRADO (${selectedEngine}). Nossas soluções são desenvolvidas especialmente para veículos com motor TURBO, que oferecem maior potencial de ganhos de performance e economia.`;
                     message = `Infelizmente, seu veículo não se enquadra no perfil ideal para nossas soluções atuais. Mas não se preocupe! Podemos indicar um caminho alternativo ou você pode tentar com outro veículo.`;
                 } else if (motorType === "Turbo" && selectedProblem === "electronic") {
-                    explanation = `Seu veículo é TURBO, mas seu interesse é em problemas elétricos. Nossa especialidade é reprogramação eletrônica para performance e economia, não diagnóstico elétrico convencional.`;
+                    explanation = `Seu veículo é TURBO (${selectedEngine}), mas seu interesse é em problemas elétricos. Nossa especialidade é reprogramação eletrônica para performance e economia, não diagnóstico elétrico convencional.`;
                     message = `Embora seu veículo seja compatível com nossas tecnologias, o problema que você deseja resolver foge do nosso escopo principal. Podemos te ajudar com outras soluções ou você pode tentar com outro objetivo.`;
                 } else {
-                    explanation = `Seu veículo possui motor ${motorType}. Nossas soluções são focadas em veículos TURBO com objetivo de performance ou economia.`;
+                    explanation = `Seu veículo possui motor ${selectedEngine} (${motorType}). Nossas soluções são focadas em veículos TURBO com objetivo de performance ou economia.`;
                     message = `Seu perfil não se enquadra perfeitamente no nosso público-alvo no momento. Gostaríamos de te ajudar da melhor forma possível!`;
                 }
             }
@@ -839,7 +865,8 @@
             const vehicleInfoHtml = `
                 <div class="vehicle-info">
                     <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
-                    🔧 Motor: ${motorType} • 🎯 Foco: ${problemText[selectedProblem]}
+                    🔧 Motor: ${selectedEngine} • ⛽ Combustível: ${selectedFuel}<br>
+                    🎯 Classificação: ${motorType} • Foco: ${problemText[selectedProblem]}
                 </div>
             `;
             
@@ -884,7 +911,7 @@
 
         function redirectToWhatsApp() {
             const name = document.getElementById("nameInput").value;
-            const message = `🚗 *Olá! Vim pelo formulário da SFI Chips!*\n\n*Nome:* ${name}\n*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}\n*Problema:* ${selectedProblem === "performance" ? "Performance/Potência ⚡" : selectedProblem === "economy" ? "Economia/Consumo 💰" : "Problemas Elétricos 🔌"}\n*Qualificação:* ${qualificationResult?.atende_solucao ? "✅ Veículo qualificado para soluções" : "🔄 Necessita análise especializada"}\n\n*Quero saber mais sobre as soluções!*`;
+            const message = `🚗 *Olá! Vim pelo formulário da SFI Chips!*\n\n*Nome:* ${name}\n*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}\n*Motor:* ${selectedEngine}\n*Combustível:* ${selectedFuel}\n*Problema:* ${selectedProblem === "performance" ? "Performance/Potência ⚡" : selectedProblem === "economy" ? "Economia/Consumo 💰" : "Problemas Elétricos 🔌"}\n*Qualificação:* ${qualificationResult?.atende_solucao ? "✅ Veículo qualificado para soluções" : "🔄 Necessita análise especializada"}\n\n*Quero saber mais sobre as soluções!*`;
             
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/27999833095?text=${encodedMessage}`, "_blank");
@@ -904,6 +931,8 @@
                     selectedBrand = btn.getAttribute("data-brand");
                     selectedModel = "";
                     selectedYear = "";
+                    selectedEngine = "";
+                    selectedFuel = "";
                     updateSummary();
                     showLayer('layerModels');
                     renderModels();
@@ -948,6 +977,42 @@
                         return;
                     }
                     
+                    showLayer('layerEngine');
+                    renderEngine();
+                });
+            });
+        }
+
+        function renderEngine() {
+            const engineGrid = document.getElementById("engineGrid");
+            engineGrid.innerHTML = engineOptions.map(engine => `
+                <div class="option-btn" data-engine="${engine}">${engine}</div>
+            `).join("");
+            
+            document.querySelectorAll("[data-engine]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll("[data-engine]").forEach(e => e.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selectedEngine = btn.getAttribute("data-engine");
+                    updateSummary();
+                    showLayer('layerFuel');
+                    renderFuel();
+                });
+            });
+        }
+
+        function renderFuel() {
+            const fuelGrid = document.getElementById("fuelGrid");
+            fuelGrid.innerHTML = fuelOptions.map(fuel => `
+                <div class="option-btn" data-fuel="${fuel}">${fuel}</div>
+            `).join("");
+            
+            document.querySelectorAll("[data-fuel]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll("[data-fuel]").forEach(f => f.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selectedFuel = btn.getAttribute("data-fuel");
+                    updateSummary();
                     showLayer('layerContact');
                 });
             });
@@ -1006,6 +1071,8 @@
                 selectedBrand = "";
                 selectedModel = "";
                 selectedYear = "";
+                selectedEngine = "";
+                selectedFuel = "";
                 updateSummary();
                 renderBrands();
                 showLayer('layerBrands');
@@ -1014,6 +1081,8 @@
             document.getElementById("backToModelsBtn").addEventListener("click", () => {
                 selectedModel = "";
                 selectedYear = "";
+                selectedEngine = "";
+                selectedFuel = "";
                 updateSummary();
                 renderModels();
                 showLayer('layerModels');
@@ -1021,9 +1090,26 @@
             
             document.getElementById("backToYearsBtn").addEventListener("click", () => {
                 selectedYear = "";
+                selectedEngine = "";
+                selectedFuel = "";
                 updateSummary();
                 renderYears();
                 showLayer('layerYears');
+            });
+            
+            document.getElementById("backToEngineBtn").addEventListener("click", () => {
+                selectedEngine = "";
+                selectedFuel = "";
+                updateSummary();
+                renderEngine();
+                showLayer('layerEngine');
+            });
+            
+            document.getElementById("backToFuelBtn").addEventListener("click", () => {
+                selectedFuel = "";
+                updateSummary();
+                renderFuel();
+                showLayer('layerFuel');
             });
             
             document.getElementById("backToContactBtn").addEventListener("click", () => {
@@ -1035,6 +1121,8 @@
             selectedBrand = "";
             selectedModel = "";
             selectedYear = "";
+            selectedEngine = "";
+            selectedFuel = "";
             selectedProblem = "";
             qualificationResult = null;
             
@@ -1059,6 +1147,7 @@
             updateSummary();
             
             console.log("🚀 SFI Chips Form inicializado!");
+            console.log("📡 Webhook configurado:", WEBHOOK_URL);
         }
         
         init();
