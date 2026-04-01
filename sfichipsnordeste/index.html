@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>SFI Chips - Qualificação de Leads</title>
+    <title>SFICHIPS NORDESTE - FUNIL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -523,6 +523,17 @@
             }
         }
 
+        .score-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
         @media (max-width: 480px) {
             .options-grid {
                 grid-template-columns: 1fr;
@@ -547,7 +558,7 @@
 
         <div class="summary-section">
             <div id="summaryContent" class="choice-breadcrumb">
-                <span class="empty-summary">👆 Escolha a marca do seu veículo</span>
+                <span class="empty-summary"> Escolha a marca do seu veículo 👇</span>
             </div>
         </div>
 
@@ -647,7 +658,7 @@
         // ==================== CONFIGURAÇÃO DO WEBHOOK ====================
         const WEBHOOK_URL = "https://hook.us1.make.com/gojqj74k9mioj8zg7mratyf4qlkl4pqi";
         
-        // ==================== BASE DE DADOS ====================
+        // ==================== BASE DE DADOS REFINADA ====================
         const vehiclesData = {
             "Chevrolet": ["Onix", "Prisma", "Tracker", "Cruze", "Spin", "S10", "Montana", "Cobalt"],
             "Fiat": ["Argo", "Cronos", "Mobi", "Strada", "Toro", "Pulse", "Fastback", "Palio"],
@@ -666,7 +677,7 @@
 
         const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
         
-        // Opções de Motor
+        // Opções de Motor refinadas
         const engineOptions = [
             "1.0", "1.0 Turbo", "1.3", "1.3 Turbo", "1.4", "1.4 Turbo", 
             "1.5", "1.5 Turbo", "1.6", "1.6 Turbo", "1.8", "1.8 Turbo", 
@@ -678,6 +689,68 @@
             "Gasolina", "Etanol", "Flex", "Diesel", "Híbrido", "Elétrico"
         ];
 
+        // ==================== BASES DE CONHECIMENTO REFINADAS ====================
+        
+        // Modelos que são originalmente turbo (de fábrica)
+        const modelosOriginalmenteTurbo = new Set([
+            // Volkswagen
+            "nivus", "taos", "t-cross", "virtus", "amarok", "jetta", "tiguan",
+            // Fiat
+            "fastback", "pulse", "toro", 
+            // Jeep
+            "compass", "commander", "renegade",
+            // Ford
+            "ranger", "maverick", "bronco", "mustang",
+            // Chevrolet
+            "cruze", "tracker", "s10",
+            // Toyota
+            "hilux", "sw4", "corolla",
+            // Nissan
+            "frontier",
+            // RAM
+            "rampage", "ram",
+            // GWM
+            "haval",
+            // BYD
+            "dolphin", "seal", "song", "han",
+            // Hyundai
+            "tucson", "creta",
+            // Honda
+            "hr-v", "cr-v"
+        ]);
+        
+        // Modelos aspirados confirmados (não turbo)
+        const modelosAspiradosConfirmados = new Set([
+            // Volkswagen
+            "gol", "voyage", "saveiro", "polo", "up",
+            // Chevrolet
+            "onix", "prisma", "joy", "spin", "cobalt", "celta", "classic",
+            // Fiat
+            "mobi", "argo", "cronos", "uno", "palio", "siena",
+            // Ford
+            "ka", "fiesta", "ecosport",
+            // Hyundai
+            "hb20",
+            // Renault
+            "sandero", "logan", "kwid", "duster",
+            // Toyota
+            "etios", "yaris",
+            // Honda
+            "civic", "city", "fit",
+            // Nissan
+            "kicks", "versa"
+        ]);
+        
+        // Motores que são explicitamente turbo
+        const motoresTurbo = new Set([
+            "1.0 turbo", "1.3 turbo", "1.4 turbo", "1.5 turbo", "1.6 turbo", "1.8 turbo", "2.0 turbo", "3.0 turbo"
+        ]);
+        
+        // Motores que são explicitamente aspirados
+        const motoresAspirados = new Set([
+            "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", "2.0", "2.5", "3.0", "v6", "v8"
+        ]);
+
         let selectedBrand = "";
         let selectedModel = "";
         let selectedYear = "";
@@ -685,6 +758,7 @@
         let selectedFuel = "";
         let selectedProblem = "";
         let qualificationResult = null;
+        let leadScore = 0;
 
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
@@ -714,7 +788,7 @@
                     }
                 }
             } else {
-                html += '<span class="empty-summary">👆 Escolha a marca do seu veículo</span>';
+                html += '<span class="empty-summary"> Escolha a marca do seu veículo 👇</span>';
             }
             
             html += '</div>';
@@ -741,10 +815,124 @@
                         analisando seu veículo<span class="loading-dots"></span>
                     </div>
                     <div style="margin-top: 16px; font-size: 13px; color: #999;">
-                        🔍 verificando compatibilidade
+                        🔍 verificando compatibilidade e potencial
                     </div>
                 </div>
             `;
+        }
+
+        // ==================== NOVA LÓGICA DE CLASSIFICAÇÃO REFINADA ====================
+        
+        function classifyVehicle() {
+            const model = selectedModel.toLowerCase().trim();
+            const engine = selectedEngine.toLowerCase().trim();
+            const year = parseInt(selectedYear);
+            
+            // Nível 1: Verificação por motor (mais precisa)
+            if (motoresTurbo.has(engine)) {
+                return { 
+                    type: "Turbo", 
+                    confidence: "Alta",
+                    reason: `Motor ${selectedEngine} originalmente turbo`
+                };
+            }
+            
+            // Nível 2: Verificação por modelo (confiável)
+            if (modelosOriginalmenteTurbo.has(model)) {
+                return { 
+                    type: "Turbo", 
+                    confidence: "Alta",
+                    reason: `Modelo ${selectedModel} é originalmente turbo`
+                };
+            }
+            
+            // Nível 3: Verificação por motor aspirado
+            if (motoresAspirados.has(engine)) {
+                return { 
+                    type: "Aspirado", 
+                    confidence: "Alta",
+                    reason: `Motor ${selectedEngine} aspirado`
+                };
+            }
+            
+            // Nível 4: Verificação por modelo aspirado
+            if (modelosAspiradosConfirmados.has(model)) {
+                return { 
+                    type: "Aspirado", 
+                    confidence: "Média",
+                    reason: `Modelo ${selectedModel} é aspirado`
+                };
+            }
+            
+            // Nível 5: Verificação por ano (apenas como fallback, com menor confiança)
+            if (year >= 2020) {
+                return { 
+                    type: "Turbo", 
+                    confidence: "Baixa",
+                    reason: `Veículo moderno (${year}), provável tecnologia turbo (confirmação necessária)`
+                };
+            }
+            
+            if (year <= 2015) {
+                return { 
+                    type: "Aspirado", 
+                    confidence: "Baixa",
+                    reason: `Veículo mais antigo (${year}), provavelmente aspirado`
+                };
+            }
+            
+            // Caso não classificado
+            return { 
+                type: "Indefinido", 
+                confidence: "Baixa",
+                reason: "Não foi possível classificar automaticamente, análise manual necessária"
+            };
+        }
+        
+        function calculateLeadScore(motorClassification, problem) {
+            let score = 0;
+            const motorType = motorClassification.type;
+            const motorConfidence = motorClassification.confidence;
+            
+            // Pontuação base por tipo de motor
+            if (motorType === "Turbo") {
+                score += 50;
+                // Bônus por confiança na classificação
+                if (motorConfidence === "Alta") score += 20;
+                if (motorConfidence === "Média") score += 10;
+            } else if (motorType === "Aspirado") {
+                score += 20;
+            } else {
+                score += 10;
+            }
+            
+            // Pontuação por problema
+            if (problem === "performance") {
+                score += 35;
+            } else if (problem === "economy") {
+                score += 30;
+            } else if (problem === "electronic") {
+                score += 10;
+            }
+            
+            // Pontuação por ano do veículo
+            const year = parseInt(selectedYear);
+            if (year >= 2022) {
+                score += 15;
+            } else if (year >= 2019) {
+                score += 10;
+            } else if (year >= 2016) {
+                score += 5;
+            }
+            
+            // Bônus por combustível (diesel e híbrido têm bom potencial)
+            if (selectedFuel === "Diesel" && motorType === "Turbo") {
+                score += 15;
+            } else if (selectedFuel === "Híbrido") {
+                score += 10;
+            }
+            
+            return Math.min(score, 100); // Limita a 100 pontos
         }
 
         async function sendToWebhook(data) {
@@ -757,7 +945,7 @@
                     body: JSON.stringify({
                         ...data,
                         timestamp: new Date().toISOString(),
-                        source: "SFI_Chips_Form",
+                        source: "SFI_Chips_Form_Refinado",
                         userAgent: navigator.userAgent
                     })
                 });
@@ -775,28 +963,6 @@
             }
         }
 
-        function qualifyVehicle() {
-            const model = selectedModel.toLowerCase();
-            const year = parseInt(selectedYear);
-            const engine = selectedEngine.toLowerCase();
-            const fuel = selectedFuel.toLowerCase();
-            
-            const isTurboByEngine = engine.includes("turbo");
-            const isTurboByModel = ["nivus", "taos", "t-cross", "virtus", "amarok", "rampage", "commander", 
-                                     "tiguan", "jetta", "bronco", "maverick", "fastback", "pulse", "toro", 
-                                     "ranger", "hilux", "sw4", "frontier", "haval", "dolphin", "seal"].includes(model);
-            
-            const isAspiradoByModel = ["gol", "voyage", "saveiro", "polo", "onix", "prisma", "joy", "spin", 
-                                        "cobalt", "hb20", "mobi", "argo", "cronos", "uno", "palio", "sandero", 
-                                        "logan", "kwid", "ka", "fiesta", "ecosport", "civic", "city", "corolla", 
-                                        "etios", "yaris", "kicks", "versa"].includes(model);
-            
-            if (isTurboByEngine || isTurboByModel) return "Turbo";
-            if (isAspiradoByModel) return "Aspirado";
-            if (year >= 2018) return "Turbo";
-            return "Aspirado";
-        }
-
         async function processQualification() {
             if (!selectedProblem) return;
             
@@ -804,8 +970,42 @@
             const whatsapp = document.getElementById("whatsappInput").value.trim();
             const whatsappClean = whatsapp.replace(/\D/g, '');
             
-            const motorType = qualifyVehicle();
-            const atende = (motorType === "Turbo" && (selectedProblem === "performance" || selectedProblem === "economy"));
+            // Classificação refinada do veículo
+            const motorClassification = classifyVehicle();
+            const motorType = motorClassification.type;
+            const confidence = motorClassification.confidence;
+            const reason = motorClassification.reason;
+            
+            // Cálculo do score do lead
+            leadScore = calculateLeadScore(motorClassification, selectedProblem);
+            
+            // Decisão de qualificação com base no score e tipo
+            let atende = false;
+            let qualificacaoLevel = "";
+            
+            if (motorType === "Turbo" && (selectedProblem === "performance" || selectedProblem === "economy")) {
+                atende = true;
+                if (leadScore >= 80) {
+                    qualificacaoLevel = "Hot Lead - Altamente Qualificado";
+                } else if (leadScore >= 60) {
+                    qualificacaoLevel = "Warm Lead - Qualificado";
+                } else {
+                    qualificacaoLevel = "Cold Lead - Potencial Baixo";
+                }
+            } else if (motorType === "Turbo" && selectedProblem === "electronic") {
+                atende = false;
+                qualificacaoLevel = "Não Qualificado - Problema fora do escopo";
+            } else if (motorType === "Aspirado") {
+                atende = false;
+                if (leadScore >= 40) {
+                    qualificacaoLevel = "Potencial Futuro - Acompanhar";
+                } else {
+                    qualificacaoLevel = "Não Qualificado - Perfil Inadequado";
+                }
+            } else {
+                atende = false;
+                qualificacaoLevel = "Necessita Análise Manual";
+            }
             
             const problemText = {
                 "performance": "Performance/Potência",
@@ -822,8 +1022,12 @@
                 motor: selectedEngine,
                 combustivel: selectedFuel,
                 classificacao_motor: motorType,
+                confianca_classificacao: confidence,
+                razao_classificacao: reason,
                 problema: selectedProblem,
                 problema_descricao: problemText[selectedProblem],
+                lead_score: leadScore,
+                nivel_qualificacao: qualificacaoLevel,
                 atende_solucao: atende,
                 qualificacao: atende ? "Qualificado" : "Não Qualificado"
             };
@@ -836,29 +1040,34 @@
             let icon = "";
             let explanation = "";
             
+            // Gerar mensagem personalizada baseada no score e qualificação
             if (atende) {
                 title = "🎉 SOLUÇÃO DISPONÍVEL! 🎉";
                 icon = "🚀";
-                if (selectedProblem === "performance") {
-                    message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} ${selectedEngine} ${selectedFuel} é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪`;
-                } else if (selectedProblem === "economy") {
-                    message = `EXCELENTE! Seu ${selectedBrand} ${selectedModel} ${selectedYear} ${selectedEngine} pode economizar até 20% de combustível! Nossas soluções vão transformar seu consumo! 💰✨`;
+                
+                if (leadScore >= 80) {
+                    message = `PERFEITO! Seu ${selectedBrand} ${selectedModel} ${selectedYear} (${selectedEngine}) é ABSOLUTAMENTE IDEAL para nossas soluções! Com pontuação ${leadScore}/100, você está no perfil perfeito para transformar seu veículo! ⚡💪✨`;
+                } else if (leadScore >= 60) {
+                    message = `EXCELENTE! Seu ${selectedBrand} ${selectedModel} ${selectedYear} é um ótimo candidato! Com ${selectedEngine}, temos soluções específicas que vão atender perfeitamente sua necessidade! 🚀🎯`;
                 } else {
-                    message = `Seu ${selectedBrand} ${selectedModel} com motor ${selectedEngine} é um candidato ideal! Nossos técnicos podem ajudar com soluções específicas! 🔧🎯`;
+                    message = `BOM! Seu ${selectedBrand} ${selectedModel} ${selectedYear} apresenta potencial para nossas soluções! Vamos analisar detalhadamente e encontrar a melhor opção para você! 💪🔧`;
                 }
+                
+                explanation = `✅ **Classificação:** ${motorType} (${confidence})\n✅ **Score:** ${leadScore}/100\n✅ **Perfil:** ${qualificacaoLevel}\n📌 **Motivo:** ${reason}`;
+                
             } else {
-                title = "🔍 ANÁLISE CONCLUÍDA";
+                title = "🔍 ANÁLISE DETALHADA CONCLUÍDA";
                 icon = "📋";
                 
                 if (motorType === "Aspirado") {
-                    explanation = `Seu ${selectedBrand} ${selectedModel} ${selectedYear} possui motor ASPIRADO (${selectedEngine}). Nossas soluções são desenvolvidas especialmente para veículos com motor TURBO, que oferecem maior potencial de ganhos de performance e economia.`;
-                    message = `Infelizmente, seu veículo não se enquadra no perfil ideal para nossas soluções atuais. Mas não se preocupe! Podemos indicar um caminho alternativo ou você pode tentar com outro veículo.`;
+                    explanation = `📊 **Análise Técnica:**\n• Motor: ${selectedEngine} (Aspirado)\n• Score: ${leadScore}/100\n• Classificação: ${qualificacaoLevel}\n\n⚠️ Seu veículo não possui motor turbo, que é o perfil ideal para ganhos significativos com reprogramação.`;
+                    message = `Identificamos que seu ${selectedBrand} ${selectedModel} possui motor aspirado. Embora não seja o perfil ideal para nossas soluções atuais, podemos oferecer orientações personalizadas ou aguardar novos produtos.`;
                 } else if (motorType === "Turbo" && selectedProblem === "electronic") {
-                    explanation = `Seu veículo é TURBO (${selectedEngine}), mas seu interesse é em problemas elétricos. Nossa especialidade é reprogramação eletrônica para performance e economia, não diagnóstico elétrico convencional.`;
-                    message = `Embora seu veículo seja compatível com nossas tecnologias, o problema que você deseja resolver foge do nosso escopo principal. Podemos te ajudar com outras soluções ou você pode tentar com outro objetivo.`;
+                    explanation = `📊 **Análise Técnica:**\n• Motor: ${selectedEngine} (Turbo)\n• Score: ${leadScore}/100\n• Problema: Elétrico\n\n⚠️ Nossa especialidade é reprogramação para performance/economia, não diagnóstico elétrico convencional.`;
+                    message = `Seu veículo é turbo e tem grande potencial! Porém, para problemas elétricos, recomendamos uma avaliação especializada em diagnóstico automotivo primeiro.`;
                 } else {
-                    explanation = `Seu veículo possui motor ${selectedEngine} (${motorType}). Nossas soluções são focadas em veículos TURBO com objetivo de performance ou economia.`;
-                    message = `Seu perfil não se enquadra perfeitamente no nosso público-alvo no momento. Gostaríamos de te ajudar da melhor forma possível!`;
+                    explanation = `📊 **Análise Técnica:**\n• Classificação: ${motorType}\n• Score: ${leadScore}/100\n• Status: ${qualificacaoLevel}\n\n🔍 Recomendamos uma análise mais detalhada do seu caso.`;
+                    message = `Seu perfil requer uma avaliação mais aprofundada. Nossos especialistas podem analisar seu caso específico e encontrar a melhor solução.`;
                 }
             }
             
@@ -866,7 +1075,9 @@
                 <div class="vehicle-info">
                     <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
                     🔧 Motor: ${selectedEngine} • ⛽ Combustível: ${selectedFuel}<br>
-                    🎯 Classificação: ${motorType} • Foco: ${problemText[selectedProblem]}
+                    🎯 Classificação: ${motorType} <span class="score-badge">Score: ${leadScore}/100</span><br>
+                    📌 Foco: ${problemText[selectedProblem]}<br>
+                    🔍 ${reason}
                 </div>
             `;
             
@@ -875,7 +1086,7 @@
                     <div class="result-icon">${icon}</div>
                     <div class="result-title">${title}</div>
                     <div class="result-message">${message}</div>
-                    ${!atende ? `<div style="background: #fff4e5; padding: 16px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #856404;"><i class="fas fa-info-circle"></i> ${explanation}</div>` : ''}
+                    ${!atende ? `<div style="background: #fff4e5; padding: 16px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #856404; white-space: pre-line;"><i class="fas fa-info-circle"></i> ${explanation}</div>` : `<div style="background: #e8f5e9; padding: 16px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #2e7d32; white-space: pre-line;"><i class="fas fa-check-circle"></i> ${explanation}</div>`}
                     ${vehicleInfoHtml}
                 </div>
             `;
@@ -911,7 +1122,7 @@
 
         function redirectToWhatsApp() {
             const name = document.getElementById("nameInput").value;
-            const message = `🚗 *Olá! Vim pelo formulário da SFI Chips!*\n\n*Nome:* ${name}\n*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}\n*Motor:* ${selectedEngine}\n*Combustível:* ${selectedFuel}\n*Problema:* ${selectedProblem === "performance" ? "Performance/Potência ⚡" : selectedProblem === "economy" ? "Economia/Consumo 💰" : "Problemas Elétricos 🔌"}\n*Qualificação:* ${qualificationResult?.atende_solucao ? "✅ Veículo qualificado para soluções" : "🔄 Necessita análise especializada"}\n\n*Quero saber mais sobre as soluções!*`;
+            const message = `🚗 *Olá! Vim pelo formulário da SFI Chips!*\n\n*Nome:* ${name}\n*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}\n*Motor:* ${selectedEngine}\n*Combustível:* ${selectedFuel}\n*Problema:* ${selectedProblem === "performance" ? "Performance/Potência ⚡" : selectedProblem === "economy" ? "Economia/Consumo 💰" : "Problemas Elétricos 🔌"}\n*Qualificação:* ${qualificationResult?.atende_solucao ? `✅ Qualificado (Score: ${qualificationResult?.lead_score}/100)` : "🔄 Necessita análise especializada"}\n\n*Quero saber mais sobre as soluções!*`;
             
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/27999833095?text=${encodedMessage}`, "_blank");
@@ -1125,6 +1336,7 @@
             selectedFuel = "";
             selectedProblem = "";
             qualificationResult = null;
+            leadScore = 0;
             
             document.getElementById("nameInput").value = "";
             document.getElementById("whatsappInput").value = "";
@@ -1146,8 +1358,9 @@
             setupBackNavigation();
             updateSummary();
             
-            console.log("🚀 SFI Chips Form inicializado!");
+            console.log("🚀 SFI Chips Form Refinado inicializado!");
             console.log("📡 Webhook configurado:", WEBHOOK_URL);
+            console.log("🎯 Nova lógica de classificação ativa!");
         }
         
         init();
