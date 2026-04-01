@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>SFI Chips - Qualificação de Leads</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header com logo */
+        .header {
+            background: #000000;
+            padding: 24px 24px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            max-width: 180px;
+            height: auto;
+            display: block;
+        }
+
+        /* Área de Resumo */
+        .summary-section {
+            padding: 16px 24px;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .choice-breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .choice-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #666;
+        }
+
+        .choice-value {
+            font-weight: 600;
+            color: #1a1a1a;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .empty-summary {
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px 24px;
+            position: relative;
+        }
+
+        /* Camadas */
+        .selection-layer {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .layer-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 16px;
+            letter-spacing: -0.2px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 14px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .option-btn:hover {
+            background: #000000;
+            border-color: #000000;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .option-btn.selected {
+            background: #000000;
+            border-color: #000000;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Inputs */
+        .input-field {
+            width: 100%;
+            padding: 14px 0;
+            border: none;
+            border-bottom: 2px solid #e5e5e5;
+            font-size: 17px;
+            transition: all 0.2s ease;
+            background: transparent;
+            outline: none;
+            font-weight: 400;
+        }
+
+        .input-field:focus {
+            border-bottom-color: #000000;
+        }
+
+        .input-field::placeholder {
+            color: #bbb;
+        }
+
+        /* Problemas */
+        .problems-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .problem-card {
+            background: white;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .problem-card:hover {
+            background: #f8f8f8;
+            border-color: #000000;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .problem-card.selected {
+            background: #f5f5f5;
+            border-color: #000000;
+            border-width: 2px;
+        }
+
+        .problem-icon {
+            width: 48px;
+            height: 48px;
+            background: #f0f0f0;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s;
+        }
+
+        .problem-card.selected .problem-icon {
+            background: #000000;
+            color: white;
+        }
+
+        .problem-card:hover .problem-icon {
+            background: #000000;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .problem-info {
+            flex: 1;
+        }
+
+        .problem-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .problem-desc {
+            font-size: 13px;
+            color: #888;
+        }
+
+        /* Botões */
+        .btn-next {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #2c2c2c;
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: none;
+            padding: 12px;
+            color: #999;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            color: #000000;
+        }
+
+        .back-link {
+            background: transparent;
+            border: none;
+            padding: 12px;
+            color: #999;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: #000000;
+        }
+
+        /* Resultado */
+        .result-card {
+            text-align: center;
+            padding: 24px 0;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+            animation: pulse 0.8s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .result-message {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .vehicle-info {
+            background: #f8f8f8;
+            padding: 16px;
+            border-radius: 16px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            transform: scale(0.98);
+        }
+
+        /* Loading Animado */
+        .loading-container {
+            text-align: center;
+            padding: 48px 0;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animated-car {
+            font-size: 48px;
+            display: inline-block;
+            animation: drive 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes drive {
+            0% {
+                transform: translateX(-10px);
+            }
+            50% {
+                transform: translateX(10px);
+            }
+            100% {
+                transform: translateX(-10px);
+            }
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #e5e5e5;
+            border-top-color: #000000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: #666;
+            margin-top: 16px;
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000000;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .main-content {
+                padding: 24px 20px;
+            }
+            .logo {
+                max-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <img src="https://sfi-chips.herokuapp.com/assets/logo-5a9ffe3bbcd2731076016413b7fa35296f86ff15a273ddc9f8041175831d4a55.png" 
+                 alt="SFI Chips" 
+                 class="logo"
+                 onerror="this.src='https://via.placeholder.com/180x60?text=SFI+Chips'; this.style.background='white'; this.style.padding='8px'; this.style.borderRadius='8px';">
+        </div>
+
+        <div class="summary-section">
+            <div id="summaryContent" class="choice-breadcrumb">
+                <span class="empty-summary">👆 escolha a marca do seu veículo</span>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <!-- Camada 1: Marcas -->
+            <div id="layerBrands" class="selection-layer">
+                <div class="layer-title">qual a marca?</div>
+                <div class="options-grid" id="brandsGrid"></div>
+            </div>
+
+            <!-- Camada 2: Modelos -->
+            <div id="layerModels" class="selection-layer" style="display: none;">
+                <div class="layer-title">qual o modelo?</div>
+                <div class="options-grid" id="modelsGrid"></div>
+                <button class="back-link" id="backToBrandsBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para marcas
+                </button>
+            </div>
+
+            <!-- Camada 3: Anos -->
+            <div id="layerYears" class="selection-layer" style="display: none;">
+                <div class="layer-title">qual o ano?</div>
+                <div class="options-grid" id="yearsGrid"></div>
+                <button class="back-link" id="backToModelsBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para modelos
+                </button>
+            </div>
+
+            <!-- Camada 4: Nome e WhatsApp com botão Avançar -->
+            <div id="layerContact" class="selection-layer" style="display: none;">
+                <div class="layer-title">seu contato</div>
+                <input type="text" id="nameInput" class="input-field" placeholder="seu nome completo" autocomplete="off">
+                <div style="margin-top: 32px;">
+                    <input type="tel" id="whatsappInput" class="input-field" placeholder="seu whatsapp" autocomplete="off">
+                </div>
+                <button class="btn-next" id="nextToProblem" disabled>
+                    avançar <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="back-link" id="backToYearsBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para anos
+                </button>
+            </div>
+
+            <!-- Camada 5: Problema com botão Qualificar -->
+            <div id="layerProblem" class="selection-layer" style="display: none;">
+                <div class="layer-title">como podemos ajudar?</div>
+                <div class="problems-grid" id="problemsGrid">
+                    <div class="problem-card" data-problem="performance">
+                        <div class="problem-icon">⚡</div>
+                        <div class="problem-info">
+                            <div class="problem-title">Performance</div>
+                            <div class="problem-desc">Força e potência</div>
+                        </div>
+                    </div>
+                    <div class="problem-card" data-problem="economy">
+                        <div class="problem-icon">💰</div>
+                        <div class="problem-info">
+                            <div class="problem-title">Economia</div>
+                            <div class="problem-desc">Consumo de combustível</div>
+                        </div>
+                    </div>
+                    <div class="problem-card" data-problem="electronic">
+                        <div class="problem-icon">🔌</div>
+                        <div class="problem-info">
+                            <div class="problem-title">Problemas Elétricos</div>
+                            <div class="problem-desc">Falhas eletrônicas</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-next" id="qualifyButton" disabled>
+                    qualificar <i class="fas fa-chart-line"></i>
+                </button>
+                <button class="back-link" id="backToContactBtn">
+                    <i class="fas fa-chevron-left"></i> voltar para contato
+                </button>
+            </div>
+
+            <!-- Camada 6: Resultado -->
+            <div id="layerResult" class="selection-layer" style="display: none;">
+                <div id="resultContent"></div>
+                <button class="btn-reset" id="resetButton">
+                    <i class="fas fa-redo"></i> começar novo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURAÇÃO DO WEBHOOK ====================
+        const WEBHOOK_URL = "https://webhook.site/your-webhook-url-here";
+        
+        // ==================== BASE DE DADOS ====================
+        const vehiclesData = {
+            "Chevrolet": ["Onix", "Prisma", "Tracker", "Cruze", "Spin", "S10", "Montana", "Cobalt"],
+            "Fiat": ["Argo", "Cronos", "Mobi", "Strada", "Toro", "Pulse", "Fastback", "Palio"],
+            "Volkswagen": ["Gol", "Polo", "Virtus", "Nivus", "T-Cross", "Taos", "Saveiro", "Amarok"],
+            "Ford": ["Ka", "Fiesta", "EcoSport", "Ranger", "Maverick", "Bronco"],
+            "Toyota": ["Corolla", "Hilux", "SW4", "Yaris", "Etios", "RAV4"],
+            "Honda": ["Civic", "HR-V", "CR-V", "City", "Fit"],
+            "Hyundai": ["HB20", "Creta", "Tucson", "Azera"],
+            "Nissan": ["Kicks", "Versa", "Sentra", "Frontier"],
+            "Renault": ["Kwid", "Sandero", "Logan", "Duster"],
+            "Jeep": ["Renegade", "Compass", "Commander"],
+            "BYD": ["Dolphin", "Seal", "Song", "Han"],
+            "GWM": ["Haval H6", "Ora 03"],
+            "RAM": ["Rampage"]
+        };
+
+        const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
+
+        let selectedBrand = "";
+        let selectedModel = "";
+        let selectedYear = "";
+        let selectedProblem = "";
+        let qualificationResult = null;
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.background = isError ? '#e74c3c' : '#000000';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById("summaryContent");
+            let html = '<div class="choice-breadcrumb">';
+            
+            if (selectedBrand) {
+                html += `<div class="choice-item">🚗 <span class="choice-value">${selectedBrand}</span></div>`;
+                if (selectedModel) {
+                    html += `<span class="choice-separator">→</span>`;
+                    html += `<div class="choice-item">🚙 <span class="choice-value">${selectedModel}</span></div>`;
+                    if (selectedYear) {
+                        html += `<span class="choice-separator">→</span>`;
+                        html += `<div class="choice-item">📅 <span class="choice-value">${selectedYear}</span></div>`;
+                    }
+                }
+            } else {
+                html += '<span class="empty-summary">👆 escolha a marca do seu veículo</span>';
+            }
+            
+            html += '</div>';
+            summaryDiv.innerHTML = html;
+        }
+
+        function showLayer(layerId) {
+            const layers = ['layerBrands', 'layerModels', 'layerYears', 'layerContact', 'layerProblem', 'layerResult'];
+            layers.forEach(layer => {
+                const element = document.getElementById(layer);
+                if (element) element.style.display = 'none';
+            });
+            document.getElementById(layerId).style.display = 'block';
+        }
+
+        function showAnalyzingAnimation() {
+            return `
+                <div class="loading-container">
+                    <div class="animated-car">
+                        🚗💨
+                    </div>
+                    <div class="spinner"></div>
+                    <div class="loading-text">
+                        analisando seu veículo<span class="loading-dots"></span>
+                    </div>
+                    <div style="margin-top: 16px; font-size: 13px; color: #999;">
+                        🔍 verificando compatibilidade
+                    </div>
+                </div>
+            `;
+        }
+
+        async function sendToWebhook(data) {
+            if (!WEBHOOK_URL || WEBHOOK_URL === "https://webhook.site/your-webhook-url-here") {
+                console.log("⚠️ Webhook não configurado. Dados:", data);
+                return false;
+            }
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...data,
+                        timestamp: new Date().toISOString(),
+                        source: "SFI_Chips_Form",
+                        userAgent: navigator.userAgent
+                    })
+                });
+
+                if (response.ok) {
+                    console.log("✅ Dados enviados para webhook:", data);
+                    return true;
+                } else {
+                    console.error("❌ Erro no webhook:", response.status);
+                    return false;
+                }
+            } catch (error) {
+                console.error("❌ Erro na requisição:", error);
+                return false;
+            }
+        }
+
+        function qualifyVehicle() {
+            const model = selectedModel.toLowerCase();
+            const year = parseInt(selectedYear);
+            
+            const turboModels = ["nivus", "taos", "t-cross", "virtus", "amarok", "rampage", "commander", 
+                                 "tiguan", "jetta", "bronco", "maverick", "fastback", "pulse", "toro", 
+                                 "ranger", "hilux", "sw4", "frontier", "haval", "dolphin", "seal"];
+            
+            const aspiradoModels = ["gol", "voyage", "saveiro", "polo", "onix", "prisma", "joy", "spin", 
+                                    "cobalt", "hb20", "mobi", "argo", "cronos", "uno", "palio", "sandero", 
+                                    "logan", "kwid", "ka", "fiesta", "ecosport", "civic", "city", "corolla", 
+                                    "etios", "yaris", "kicks", "versa"];
+            
+            if (turboModels.includes(model)) return "Turbo";
+            if (aspiradoModels.includes(model)) return "Aspirado";
+            if (year >= 2018) return "Turbo";
+            return "Aspirado";
+        }
+
+        async function processQualification() {
+            if (!selectedProblem) return;
+            
+            const name = document.getElementById("nameInput").value.trim();
+            const whatsapp = document.getElementById("whatsappInput").value.trim();
+            const whatsappClean = whatsapp.replace(/\D/g, '');
+            
+            const motorType = qualifyVehicle();
+            const atende = (motorType === "Turbo" && (selectedProblem === "performance" || selectedProblem === "economy"));
+            
+            const problemText = {
+                "performance": "Performance/Potência",
+                "economy": "Economia/Consumo",
+                "electronic": "Problemas Elétricos"
+            };
+            
+            const leadData = {
+                nome: name,
+                whatsapp: whatsappClean,
+                marca: selectedBrand,
+                modelo: selectedModel,
+                ano: selectedYear,
+                motor: motorType,
+                problema: selectedProblem,
+                problema_descricao: problemText[selectedProblem],
+                atende_solucao: atende,
+                qualificacao: atende ? "Qualificado" : "Não Qualificado"
+            };
+            
+            await sendToWebhook(leadData);
+            qualificationResult = leadData;
+            
+            let message = "";
+            let title = "";
+            let icon = "";
+            
+            if (atende) {
+                title = "🎉 SOLUÇÃO DISPONÍVEL! 🎉";
+                icon = "🚀";
+                if (selectedProblem === "performance") {
+                    message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} com motor ${motorType} é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪`;
+                } else if (selectedProblem === "economy") {
+                    message = `EXCELENTE! Seu ${selectedBrand} ${selectedModel} ${selectedYear} com motor ${motorType} pode economizar até 20% de combustível! Nossas soluções vão transformar seu consumo! 💰✨`;
+                } else {
+                    message = `Seu ${selectedBrand} ${selectedModel} com motor ${motorType} é um candidato ideal! Nossos técnicos podem ajudar com soluções específicas! 🔧🎯`;
+                }
+            } else {
+                title = "🔍 ANÁLISE CONCLUÍDA!";
+                icon = "✨";
+                if (motorType === "Aspirado") {
+                    message = `Seu ${selectedBrand} ${selectedModel} ${selectedYear} possui motor aspirado. Embora nossas soluções sejam focadas em motores turbo, temos tecnologias que podem te ajudar! Nossos especialistas vão adorar analisar seu caso! 🚗💨`;
+                } else if (selectedProblem === "electronic") {
+                    message = `Seu ${selectedBrand} ${selectedModel} com motor ${motorType} apresenta desafios elétricos. Temos ferramentas especiais de diagnóstico! Nossos técnicos vão resolver isso pra você! 🔌🔧`;
+                } else {
+                    message = `Que legal! Seu ${selectedBrand} ${selectedModel} ${selectedYear} nos chamou atenção! Mesmo com motor ${motorType}, nossos especialistas podem encontrar a melhor solução pra você! 🌟🎯`;
+                }
+            }
+            
+            const resultHTML = `
+                <div class="result-card">
+                    <div class="result-icon">
+                        ${icon}
+                    </div>
+                    <div class="result-title">${title}</div>
+                    <div class="result-message">${message}</div>
+                    <div class="vehicle-info">
+                        <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
+                        🔧 Motor: ${motorType} • 🎯 Foco: ${problemText[selectedProblem]}<br>
+                        📊 Status: ${atende ? "✅ Veículo qualificado" : "🔄 Análise especializada"}
+                    </div>
+                </div>
+                <button class="btn-whatsapp" onclick="redirectToWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> falar com técnico agora
+                </button>
+            `;
+            
+            const resultDiv = document.getElementById("resultContent");
+            resultDiv.innerHTML = resultHTML;
+            showLayer('layerResult');
+        }
+
+        function redirectToWhatsApp() {
+            const name = document.getElementById("nameInput").value;
+            const message = `🚗 *Olá! Vim pelo formulário da SFI Chips!*\n\n*Nome:* ${name}\n*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}\n*Problema:* ${selectedProblem === "performance" ? "Performance/Potência ⚡" : selectedProblem === "economy" ? "Economia/Consumo 💰" : "Problemas Elétricos 🔌"}\n*Qualificação:* ${qualificationResult?.atende_solucao ? "✅ Veículo qualificado para soluções" : "🔄 Necessita análise especializada"}\n\n*Quero saber mais sobre as soluções!*`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/27999833095?text=${encodedMessage}`, "_blank");
+        }
+
+        // ==================== RENDERIZAÇÃO ====================
+        function renderBrands() {
+            const brandsGrid = document.getElementById("brandsGrid");
+            brandsGrid.innerHTML = Object.keys(vehiclesData).sort().map(brand => `
+                <div class="option-btn" data-brand="${brand}">${brand}</div>
+            `).join("");
+
+            document.querySelectorAll("[data-brand]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll("[data-brand]").forEach(b => b.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selectedBrand = btn.getAttribute("data-brand");
+                    selectedModel = "";
+                    selectedYear = "";
+                    updateSummary();
+                    showLayer('layerModels');
+                    renderModels();
+                });
+            });
+        }
+
+        function renderModels() {
+            const modelsGrid = document.getElementById("modelsGrid");
+            const models = vehiclesData[selectedBrand] || [];
+            modelsGrid.innerHTML = models.map(model => `
+                <div class="option-btn" data-model="${model}">${model}</div>
+            `).join("");
+
+            document.querySelectorAll("[data-model]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll("[data-model]").forEach(m => m.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selectedModel = btn.getAttribute("data-model");
+                    updateSummary();
+                    showLayer('layerYears');
+                    renderYears();
+                });
+            });
+        }
+
+        function renderYears() {
+            const yearsGrid = document.getElementById("yearsGrid");
+            yearsGrid.innerHTML = years.map(year => `
+                <div class="option-btn" data-year="${year}">${year}</div>
+            `).join("");
+
+            document.querySelectorAll("[data-year]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll("[data-year]").forEach(y => y.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selectedYear = btn.getAttribute("data-year");
+                    updateSummary();
+                    
+                    if (parseInt(selectedYear) < 2015) {
+                        showToast("⚠️ Trabalhamos com veículos a partir de 2015", true);
+                        return;
+                    }
+                    
+                    showLayer('layerContact');
+                });
+            });
+        }
+
+        function setupValidations() {
+            const nameInput = document.getElementById("nameInput");
+            const whatsappInput = document.getElementById("whatsappInput");
+            const nextButton = document.getElementById("nextToProblem");
+            
+            function validateContact() {
+                const name = nameInput.value.trim();
+                const whatsapp = whatsappInput.value.trim();
+                const whatsappClean = whatsapp.replace(/\D/g, '');
+                
+                if (name && whatsappClean.length >= 10 && whatsappClean.length <= 11) {
+                    nextButton.disabled = false;
+                } else {
+                    nextButton.disabled = true;
+                }
+            }
+            
+            nameInput.addEventListener("input", validateContact);
+            whatsappInput.addEventListener("input", validateContact);
+            
+            nextButton.addEventListener("click", () => {
+                showLayer('layerProblem');
+            });
+        }
+        
+        function setupProblemSelection() {
+            const qualifyButton = document.getElementById("qualifyButton");
+            
+            document.querySelectorAll(".problem-card").forEach(card => {
+                card.addEventListener("click", function() {
+                    document.querySelectorAll(".problem-card").forEach(c => c.classList.remove("selected"));
+                    this.classList.add("selected");
+                    selectedProblem = this.getAttribute("data-problem");
+                    qualifyButton.disabled = false;
+                });
+            });
+            
+            qualifyButton.addEventListener("click", async () => {
+                if (selectedProblem) {
+                    const resultDiv = document.getElementById("resultContent");
+                    resultDiv.innerHTML = showAnalyzingAnimation();
+                    showLayer('layerResult');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await processQualification();
+                }
+            });
+        }
+
+        function setupBackNavigation() {
+            document.getElementById("backToBrandsBtn").addEventListener("click", () => {
+                selectedBrand = "";
+                selectedModel = "";
+                selectedYear = "";
+                updateSummary();
+                renderBrands();
+                showLayer('layerBrands');
+            });
+            
+            document.getElementById("backToModelsBtn").addEventListener("click", () => {
+                selectedModel = "";
+                selectedYear = "";
+                updateSummary();
+                renderModels();
+                showLayer('layerModels');
+            });
+            
+            document.getElementById("backToYearsBtn").addEventListener("click", () => {
+                selectedYear = "";
+                updateSummary();
+                renderYears();
+                showLayer('layerYears');
+            });
+            
+            document.getElementById("backToContactBtn").addEventListener("click", () => {
+                showLayer('layerContact');
+            });
+            
+            document.getElementById("resetButton").addEventListener("click", resetForm);
+        }
+        
+        function resetForm() {
+            selectedBrand = "";
+            selectedModel = "";
+            selectedYear = "";
+            selectedProblem = "";
+            qualificationResult = null;
+            
+            document.getElementById("nameInput").value = "";
+            document.getElementById("whatsappInput").value = "";
+            document.getElementById("nextToProblem").disabled = true;
+            document.getElementById("qualifyButton").disabled = true;
+            
+            document.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
+            document.querySelectorAll(".problem-card").forEach(card => card.classList.remove("selected"));
+            
+            updateSummary();
+            renderBrands();
+            showLayer('layerBrands');
+        }
+
+        function init() {
+            renderBrands();
+            setupValidations();
+            setupProblemSelection();
+            setupBackNavigation();
+            updateSummary();
+            
+            console.log("🚀 SFI Chips Form inicializado!");
+        }
+        
+        init();
+    </script>
+</body>
+</html>
