@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>SFICHIPS Nordeste - Funil </title>
+    <title>SFI Chips - Qualificação de Leads</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -51,7 +51,7 @@
 
         /* Área de Resumo */
         .summary-section {
-            padding: 16px 24px;
+            padding: 20px 24px;
             background: #fafafa;
             border-bottom: 1px solid #f0f0f0;
         }
@@ -60,15 +60,21 @@
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
-            font-size: 14px;
+            gap: 12px;
+            font-size: 15px;
         }
 
         .choice-item {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             color: #666;
+        }
+
+        .choice-label {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 15px;
         }
 
         .choice-value {
@@ -77,12 +83,13 @@
             background: white;
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .empty-summary {
-            color: #999;
-            font-size: 13px;
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
         }
 
         /* Main Content */
@@ -109,11 +116,7 @@
         }
 
         .layer-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: #666;
-            margin-bottom: 16px;
-            letter-spacing: -0.2px;
+            display: none;
         }
 
         .options-grid {
@@ -313,6 +316,59 @@
             color: #000000;
         }
 
+        /* Botões do Resultado - Invertidos */
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-primary-result {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary-result:hover {
+            background: #2c2c2c;
+            transform: scale(0.98);
+        }
+
+        .btn-secondary-result {
+            background: transparent;
+            border: 1.5px solid #e5e5e5;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secondary-result:hover {
+            border-color: #000000;
+            background: #fafafa;
+            color: #000000;
+        }
+
         /* Resultado */
         .result-card {
             text-align: center;
@@ -381,28 +437,6 @@
             font-size: 14px;
             color: #666;
             text-align: left;
-        }
-
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-whatsapp:hover {
-            background: #128C7E;
-            transform: scale(0.98);
         }
 
         /* Loading Animado */
@@ -523,7 +557,7 @@
 
         <div class="summary-section">
             <div id="summaryContent" class="choice-breadcrumb">
-                <span class="empty-summary"> Escolha a marca do seu veículo! 👇</span>
+                <span class="empty-summary">👆 Escolha a marca do seu veículo</span>
             </div>
         </div>
 
@@ -535,7 +569,6 @@
 
             <!-- Camada 2: Modelos -->
             <div id="layerModels" class="selection-layer" style="display: none;">
-                <div class="layer-title">qual o modelo?</div>
                 <div class="options-grid" id="modelsGrid"></div>
                 <button class="back-link" id="backToBrandsBtn">
                     <i class="fas fa-chevron-left"></i> voltar para marcas
@@ -544,7 +577,6 @@
 
             <!-- Camada 3: Anos -->
             <div id="layerYears" class="selection-layer" style="display: none;">
-                <div class="layer-title">qual o ano?</div>
                 <div class="options-grid" id="yearsGrid"></div>
                 <button class="back-link" id="backToModelsBtn">
                     <i class="fas fa-chevron-left"></i> voltar para modelos
@@ -553,7 +585,6 @@
 
             <!-- Camada 4: Nome e WhatsApp com botão Avançar -->
             <div id="layerContact" class="selection-layer" style="display: none;">
-                <div class="layer-title">seu contato</div>
                 <input type="text" id="nameInput" class="input-field" placeholder="seu nome completo" autocomplete="off">
                 <div style="margin-top: 32px;">
                     <input type="tel" id="whatsappInput" class="input-field" placeholder="seu whatsapp" autocomplete="off">
@@ -568,7 +599,6 @@
 
             <!-- Camada 5: Problema com botão Qualificar -->
             <div id="layerProblem" class="selection-layer" style="display: none;">
-                <div class="layer-title">como podemos ajudar?</div>
                 <div class="problems-grid" id="problemsGrid">
                     <div class="problem-card" data-problem="performance">
                         <div class="problem-icon">⚡</div>
@@ -603,9 +633,6 @@
             <!-- Camada 6: Resultado -->
             <div id="layerResult" class="selection-layer" style="display: none;">
                 <div id="resultContent"></div>
-                <button class="btn-reset" id="resetButton">
-                    <i class="fas fa-redo"></i> começar novo
-                </button>
             </div>
         </div>
     </div>
@@ -653,17 +680,15 @@
             let html = '<div class="choice-breadcrumb">';
             
             if (selectedBrand) {
-                html += `<div class="choice-item">🚗 <span class="choice-value">${selectedBrand}</span></div>`;
+                html += `<div class="choice-item"><span class="choice-label">Marca:</span> <span class="choice-value">${selectedBrand}</span></div>`;
                 if (selectedModel) {
-                    html += `<span class="choice-separator">→</span>`;
-                    html += `<div class="choice-item">🚙 <span class="choice-value">${selectedModel}</span></div>`;
+                    html += `<div class="choice-item"><span class="choice-label">Modelo:</span> <span class="choice-value">${selectedModel}</span></div>`;
                     if (selectedYear) {
-                        html += `<span class="choice-separator">→</span>`;
-                        html += `<div class="choice-item">📅 <span class="choice-value">${selectedYear}</span></div>`;
+                        html += `<div class="choice-item"><span class="choice-label">Ano:</span> <span class="choice-value">${selectedYear}</span></div>`;
                     }
                 }
             } else {
-                html += '<span class="empty-summary"> Escolha a marca do seu veículo! 👇</span>';
+                html += '<span class="empty-summary">👆 Escolha a marca do seu veículo</span>';
             }
             
             html += '</div>';
@@ -783,6 +808,7 @@
             let message = "";
             let title = "";
             let icon = "";
+            let explanation = "";
             
             if (atende) {
                 title = "🎉 SOLUÇÃO DISPONÍVEL! 🎉";
@@ -795,37 +821,64 @@
                     message = `Seu ${selectedBrand} ${selectedModel} com motor ${motorType} é um candidato ideal! Nossos técnicos podem ajudar com soluções específicas! 🔧🎯`;
                 }
             } else {
-                title = "🔍 ANÁLISE CONCLUÍDA!";
-                icon = "✨";
+                title = "🔍 ANÁLISE CONCLUÍDA";
+                icon = "📋";
+                
                 if (motorType === "Aspirado") {
-                    message = `Seu ${selectedBrand} ${selectedModel} ${selectedYear} possui motor aspirado. Embora nossas soluções sejam focadas em motores turbo, temos tecnologias que podem te ajudar! Nossos especialistas vão adorar analisar seu caso! 🚗💨`;
-                } else if (selectedProblem === "electronic") {
-                    message = `Seu ${selectedBrand} ${selectedModel} com motor ${motorType} apresenta desafios elétricos. Temos ferramentas especiais de diagnóstico! Nossos técnicos vão resolver isso pra você! 🔌🔧`;
+                    explanation = `Seu ${selectedBrand} ${selectedModel} ${selectedYear} possui motor ASPIRADO. Nossas soluções são desenvolvidas especialmente para veículos com motor TURBO, que oferecem maior potencial de ganhos de performance e economia.`;
+                    message = `Infelizmente, seu veículo não se enquadra no perfil ideal para nossas soluções atuais. Mas não se preocupe! Podemos indicar um caminho alternativo ou você pode tentar com outro veículo.`;
+                } else if (motorType === "Turbo" && selectedProblem === "electronic") {
+                    explanation = `Seu veículo é TURBO, mas seu interesse é em problemas elétricos. Nossa especialidade é reprogramação eletrônica para performance e economia, não diagnóstico elétrico convencional.`;
+                    message = `Embora seu veículo seja compatível com nossas tecnologias, o problema que você deseja resolver foge do nosso escopo principal. Podemos te ajudar com outras soluções ou você pode tentar com outro objetivo.`;
                 } else {
-                    message = `Que legal! Seu ${selectedBrand} ${selectedModel} ${selectedYear} nos chamou atenção! Mesmo com motor ${motorType}, nossos especialistas podem encontrar a melhor solução pra você! 🌟🎯`;
+                    explanation = `Seu veículo possui motor ${motorType}. Nossas soluções são focadas em veículos TURBO com objetivo de performance ou economia.`;
+                    message = `Seu perfil não se enquadra perfeitamente no nosso público-alvo no momento. Gostaríamos de te ajudar da melhor forma possível!`;
                 }
             }
             
+            const vehicleInfoHtml = `
+                <div class="vehicle-info">
+                    <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
+                    🔧 Motor: ${motorType} • 🎯 Foco: ${problemText[selectedProblem]}
+                </div>
+            `;
+            
             const resultHTML = `
                 <div class="result-card">
-                    <div class="result-icon">
-                        ${icon}
-                    </div>
+                    <div class="result-icon">${icon}</div>
                     <div class="result-title">${title}</div>
                     <div class="result-message">${message}</div>
-                    <div class="vehicle-info">
-                        <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
-                        🔧 Motor: ${motorType} • 🎯 Foco: ${problemText[selectedProblem]}<br>
-                        📊 Status: ${atende ? "✅ Veículo qualificado" : "🔄 Análise especializada"}
-                    </div>
+                    ${!atende ? `<div style="background: #fff4e5; padding: 16px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #856404;"><i class="fas fa-info-circle"></i> ${explanation}</div>` : ''}
+                    ${vehicleInfoHtml}
                 </div>
-                <button class="btn-whatsapp" onclick="redirectToWhatsApp()">
-                    <i class="fab fa-whatsapp"></i> falar com técnico agora
-                </button>
             `;
             
             const resultDiv = document.getElementById("resultContent");
-            resultDiv.innerHTML = resultHTML;
+            
+            if (atende) {
+                resultDiv.innerHTML = resultHTML + `
+                    <div class="result-buttons">
+                        <button class="btn-primary-result" onclick="redirectToWhatsApp()">
+                            <i class="fab fa-whatsapp"></i> falar com técnico agora
+                        </button>
+                        <button class="btn-secondary-result" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> refazer com outro veículo
+                        </button>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = resultHTML + `
+                    <div class="result-buttons">
+                        <button class="btn-primary-result" onclick="resetForm()">
+                            <i class="fas fa-redo"></i> refazer com outro veículo
+                        </button>
+                        <button class="btn-secondary-result" onclick="redirectToWhatsApp()">
+                            <i class="fab fa-whatsapp"></i> falar com técnico mesmo assim
+                        </button>
+                    </div>
+                `;
+            }
+            
             showLayer('layerResult');
         }
 
@@ -976,8 +1029,6 @@
             document.getElementById("backToContactBtn").addEventListener("click", () => {
                 showLayer('layerContact');
             });
-            
-            document.getElementById("resetButton").addEventListener("click", resetForm);
         }
         
         function resetForm() {
