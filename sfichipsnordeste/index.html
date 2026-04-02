@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>SFICHIPS NORDESTE - FUNIL</title>
+    <title>SFICHIPS - Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -333,9 +333,34 @@
             gap: 8px;
         }
 
+        /* Botão WhatsApp quando a solução estiver disponível */
+        .btn-whatsapp-result {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-whatsapp-result:hover {
+            background: #128C7E;
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+
         .btn-primary-result:hover {
             background: #2c2c2c;
             transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         .btn-secondary-result {
@@ -523,15 +548,14 @@
             }
         }
 
-        .score-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
+        /* Esconde a mensagem que será enviada para o WhatsApp */
+        .hidden-whatsapp-message {
+            display: none;
+        }
+
+        /* Remove a mensagem de análise técnica */
+        .tech-analysis-message {
+            display: none;
         }
 
         @media (max-width: 480px) {
@@ -558,7 +582,7 @@
 
         <div class="summary-section">
             <div id="summaryContent" class="choice-breadcrumb">
-                <span class="empty-summary"> Escolha a marca do seu veículo 👇</span>
+                <span class="empty-summary">👆 Escolha a marca do seu veículo</span>
             </div>
         </div>
 
@@ -653,6 +677,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Elemento escondido para armazenar a mensagem do WhatsApp -->
+    <div id="whatsappMessageContainer" class="hidden-whatsapp-message"></div>
 
     <script>
         // ==================== CONFIGURAÇÃO DO WEBHOOK ====================
@@ -758,7 +785,6 @@
         let selectedFuel = "";
         let selectedProblem = "";
         let qualificationResult = null;
-        let leadScore = 0;
 
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
@@ -788,7 +814,7 @@
                     }
                 }
             } else {
-                html += '<span class="empty-summary"> Escolha a marca do seu veículo 👇</span>';
+                html += '<span class="empty-summary">👆 Escolha a marca do seu veículo</span>';
             }
             
             html += '</div>';
@@ -821,7 +847,7 @@
             `;
         }
 
-        // ==================== NOVA LÓGICA DE CLASSIFICAÇÃO REFINADA ====================
+        // ==================== LÓGICA DE CLASSIFICAÇÃO REFINADA ====================
         
         function classifyVehicle() {
             const model = selectedModel.toLowerCase().trim();
@@ -888,52 +914,6 @@
                 reason: "Não foi possível classificar automaticamente, análise manual necessária"
             };
         }
-        
-        function calculateLeadScore(motorClassification, problem) {
-            let score = 0;
-            const motorType = motorClassification.type;
-            const motorConfidence = motorClassification.confidence;
-            
-            // Pontuação base por tipo de motor
-            if (motorType === "Turbo") {
-                score += 50;
-                // Bônus por confiança na classificação
-                if (motorConfidence === "Alta") score += 20;
-                if (motorConfidence === "Média") score += 10;
-            } else if (motorType === "Aspirado") {
-                score += 20;
-            } else {
-                score += 10;
-            }
-            
-            // Pontuação por problema
-            if (problem === "performance") {
-                score += 35;
-            } else if (problem === "economy") {
-                score += 30;
-            } else if (problem === "electronic") {
-                score += 10;
-            }
-            
-            // Pontuação por ano do veículo
-            const year = parseInt(selectedYear);
-            if (year >= 2022) {
-                score += 15;
-            } else if (year >= 2019) {
-                score += 10;
-            } else if (year >= 2016) {
-                score += 5;
-            }
-            
-            // Bônus por combustível (diesel e híbrido têm bom potencial)
-            if (selectedFuel === "Diesel" && motorType === "Turbo") {
-                score += 15;
-            } else if (selectedFuel === "Híbrido") {
-                score += 10;
-            }
-            
-            return Math.min(score, 100); // Limita a 100 pontos
-        }
 
         async function sendToWebhook(data) {
             try {
@@ -976,32 +956,19 @@
             const confidence = motorClassification.confidence;
             const reason = motorClassification.reason;
             
-            // Cálculo do score do lead
-            leadScore = calculateLeadScore(motorClassification, selectedProblem);
-            
-            // Decisão de qualificação com base no score e tipo
+            // Decisão de qualificação
             let atende = false;
             let qualificacaoLevel = "";
             
             if (motorType === "Turbo" && (selectedProblem === "performance" || selectedProblem === "economy")) {
                 atende = true;
-                if (leadScore >= 80) {
-                    qualificacaoLevel = "Hot Lead - Altamente Qualificado";
-                } else if (leadScore >= 60) {
-                    qualificacaoLevel = "Warm Lead - Qualificado";
-                } else {
-                    qualificacaoLevel = "Cold Lead - Potencial Baixo";
-                }
+                qualificacaoLevel = "Qualificado";
             } else if (motorType === "Turbo" && selectedProblem === "electronic") {
                 atende = false;
                 qualificacaoLevel = "Não Qualificado - Problema fora do escopo";
             } else if (motorType === "Aspirado") {
                 atende = false;
-                if (leadScore >= 40) {
-                    qualificacaoLevel = "Potencial Futuro - Acompanhar";
-                } else {
-                    qualificacaoLevel = "Não Qualificado - Perfil Inadequado";
-                }
+                qualificacaoLevel = "Não Qualificado - Perfil Inadequado";
             } else {
                 atende = false;
                 qualificacaoLevel = "Necessita Análise Manual";
@@ -1026,7 +993,6 @@
                 razao_classificacao: reason,
                 problema: selectedProblem,
                 problema_descricao: problemText[selectedProblem],
-                lead_score: leadScore,
                 nivel_qualificacao: qualificacaoLevel,
                 atende_solucao: atende,
                 qualificacao: atende ? "Qualificado" : "Não Qualificado"
@@ -1035,38 +1001,38 @@
             await sendToWebhook(leadData);
             qualificationResult = leadData;
             
+            // Prepara a mensagem oculta para o WhatsApp
+            const whatsappMessage = `🚗 *Olá! Vim pelo formulário da SFI Chips!*
+
+*Nome:* ${name}
+*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}
+*Motor:* ${selectedEngine}
+*Combustível:* ${selectedFuel}
+*Solução:* ${problemText[selectedProblem]}
+
+*Quero saber mais sobre as soluções!*`;
+            
+            // Armazena a mensagem no elemento escondido
+            document.getElementById("whatsappMessageContainer").innerHTML = whatsappMessage;
+            
             let message = "";
             let title = "";
             let icon = "";
-            let explanation = "";
             
-            // Gerar mensagem personalizada baseada no score e qualificação
+            // Gerar mensagem personalizada baseada na qualificação (sem a mensagem técnica em verde)
             if (atende) {
                 title = "🎉 SOLUÇÃO DISPONÍVEL! 🎉";
                 icon = "🚀";
-                
-                if (leadScore >= 80) {
-                    message = `PERFEITO! Seu ${selectedBrand} ${selectedModel} ${selectedYear} (${selectedEngine}) é ABSOLUTAMENTE IDEAL para nossas soluções! Com pontuação ${leadScore}/100, você está no perfil perfeito para transformar seu veículo! ⚡💪✨`;
-                } else if (leadScore >= 60) {
-                    message = `EXCELENTE! Seu ${selectedBrand} ${selectedModel} ${selectedYear} é um ótimo candidato! Com ${selectedEngine}, temos soluções específicas que vão atender perfeitamente sua necessidade! 🚀🎯`;
-                } else {
-                    message = `BOM! Seu ${selectedBrand} ${selectedModel} ${selectedYear} apresenta potencial para nossas soluções! Vamos analisar detalhadamente e encontrar a melhor opção para você! 💪🔧`;
-                }
-                
-                explanation = `✅ **Classificação:** ${motorType} (${confidence})\n✅ **Score:** ${leadScore}/100\n✅ **Perfil:** ${qualificacaoLevel}\n📌 **Motivo:** ${reason}`;
-                
+                message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} (${selectedEngine}) é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪✨`;
             } else {
                 title = "🔍 ANÁLISE DETALHADA CONCLUÍDA";
                 icon = "📋";
                 
                 if (motorType === "Aspirado") {
-                    explanation = `📊 **Análise Técnica:**\n• Motor: ${selectedEngine} (Aspirado)\n• Score: ${leadScore}/100\n• Classificação: ${qualificacaoLevel}\n\n⚠️ Seu veículo não possui motor turbo, que é o perfil ideal para ganhos significativos com reprogramação.`;
                     message = `Identificamos que seu ${selectedBrand} ${selectedModel} possui motor aspirado. Embora não seja o perfil ideal para nossas soluções atuais, podemos oferecer orientações personalizadas ou aguardar novos produtos.`;
                 } else if (motorType === "Turbo" && selectedProblem === "electronic") {
-                    explanation = `📊 **Análise Técnica:**\n• Motor: ${selectedEngine} (Turbo)\n• Score: ${leadScore}/100\n• Problema: Elétrico\n\n⚠️ Nossa especialidade é reprogramação para performance/economia, não diagnóstico elétrico convencional.`;
                     message = `Seu veículo é turbo e tem grande potencial! Porém, para problemas elétricos, recomendamos uma avaliação especializada em diagnóstico automotivo primeiro.`;
                 } else {
-                    explanation = `📊 **Análise Técnica:**\n• Classificação: ${motorType}\n• Score: ${leadScore}/100\n• Status: ${qualificacaoLevel}\n\n🔍 Recomendamos uma análise mais detalhada do seu caso.`;
                     message = `Seu perfil requer uma avaliação mais aprofundada. Nossos especialistas podem analisar seu caso específico e encontrar a melhor solução.`;
                 }
             }
@@ -1075,9 +1041,8 @@
                 <div class="vehicle-info">
                     <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
                     🔧 Motor: ${selectedEngine} • ⛽ Combustível: ${selectedFuel}<br>
-                    🎯 Classificação: ${motorType} <span class="score-badge">Score: ${leadScore}/100</span><br>
-                    📌 Foco: ${problemText[selectedProblem]}<br>
-                    🔍 ${reason}
+                    🎯 Classificação: ${motorType}<br>
+                    📌 Foco: ${problemText[selectedProblem]}
                 </div>
             `;
             
@@ -1086,7 +1051,6 @@
                     <div class="result-icon">${icon}</div>
                     <div class="result-title">${title}</div>
                     <div class="result-message">${message}</div>
-                    ${!atende ? `<div style="background: #fff4e5; padding: 16px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #856404; white-space: pre-line;"><i class="fas fa-info-circle"></i> ${explanation}</div>` : `<div style="background: #e8f5e9; padding: 16px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: 14px; color: #2e7d32; white-space: pre-line;"><i class="fas fa-check-circle"></i> ${explanation}</div>`}
                     ${vehicleInfoHtml}
                 </div>
             `;
@@ -1096,7 +1060,7 @@
             if (atende) {
                 resultDiv.innerHTML = resultHTML + `
                     <div class="result-buttons">
-                        <button class="btn-primary-result" onclick="redirectToWhatsApp()">
+                        <button class="btn-whatsapp-result" onclick="redirectToWhatsApp()">
                             <i class="fab fa-whatsapp"></i> falar com técnico agora
                         </button>
                         <button class="btn-secondary-result" onclick="resetForm()">
@@ -1121,11 +1085,10 @@
         }
 
         function redirectToWhatsApp() {
-            const name = document.getElementById("nameInput").value;
-            const message = `🚗 *Olá! Vim pelo formulário da SFI Chips!*\n\n*Nome:* ${name}\n*Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}\n*Motor:* ${selectedEngine}\n*Combustível:* ${selectedFuel}\n*Problema:* ${selectedProblem === "performance" ? "Performance/Potência ⚡" : selectedProblem === "economy" ? "Economia/Consumo 💰" : "Problemas Elétricos 🔌"}\n*Qualificação:* ${qualificationResult?.atende_solucao ? `✅ Qualificado (Score: ${qualificationResult?.lead_score}/100)` : "🔄 Necessita análise especializada"}\n\n*Quero saber mais sobre as soluções!*`;
-            
+            // Recupera a mensagem armazenada no elemento escondido
+            const message = document.getElementById("whatsappMessageContainer").innerHTML;
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/27999833095?text=${encodedMessage}`, "_blank");
+            window.open(`https://wa.me/8182003636?text=${encodedMessage}`, "_blank");
         }
 
         // ==================== RENDERIZAÇÃO ====================
@@ -1336,12 +1299,12 @@
             selectedFuel = "";
             selectedProblem = "";
             qualificationResult = null;
-            leadScore = 0;
             
             document.getElementById("nameInput").value = "";
             document.getElementById("whatsappInput").value = "";
             document.getElementById("nextToProblem").disabled = true;
             document.getElementById("qualifyButton").disabled = true;
+            document.getElementById("whatsappMessageContainer").innerHTML = "";
             
             document.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
             document.querySelectorAll(".problem-card").forEach(card => card.classList.remove("selected"));
@@ -1360,7 +1323,7 @@
             
             console.log("🚀 SFI Chips Form Refinado inicializado!");
             console.log("📡 Webhook configurado:", WEBHOOK_URL);
-            console.log("🎯 Nova lógica de classificação ativa!");
+            console.log("🎯 Nova lógica de classificação ativa - Score removido!");
         }
         
         init();
