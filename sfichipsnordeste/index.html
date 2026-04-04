@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>SFICHIPS - Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '3305329689628007');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=3305329689628007&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+    
     <style>
         * {
             margin: 0;
@@ -847,6 +866,32 @@
             `;
         }
 
+        // ==================== FUNÇÃO PARA DISPARAR O META PIXEL ====================
+        function trackFacebookLead(leadData) {
+            if (typeof fbq !== 'undefined') {
+                // Dispara o evento de Lead com os dados do lead qualificado
+                fbq('track', 'Lead', {
+                    content_name: 'Lead Qualificado SFI Chips',
+                    content_category: 'Qualificação de Veículo',
+                    vehicle_brand: leadData.marca,
+                    vehicle_model: leadData.modelo,
+                    vehicle_year: leadData.ano,
+                    vehicle_engine: leadData.motor,
+                    vehicle_fuel: leadData.combustivel,
+                    problem_type: leadData.problema_descricao,
+                    qualification_status: leadData.qualificacao
+                });
+                
+                console.log("✅ Meta Pixel - Evento Lead disparado com sucesso!");
+                console.log("📊 Dados do Lead:", {
+                    veiculo: `${leadData.marca} ${leadData.modelo}`,
+                    qualificacao: leadData.qualificacao
+                });
+            } else {
+                console.warn("⚠️ Meta Pixel não encontrado (fbq não definido)");
+            }
+        }
+
         // ==================== LÓGICA DE CLASSIFICAÇÃO REFINADA ====================
         
         function classifyVehicle() {
@@ -1000,6 +1045,11 @@
             
             await sendToWebhook(leadData);
             qualificationResult = leadData;
+            
+            // ==================== DISPARA O META PIXEL SE O LEAD FOR QUALIFICADO ====================
+            if (atende) {
+                trackFacebookLead(leadData);
+            }
             
             // Prepara a mensagem oculta para o WhatsApp
             const whatsappMessage = `🚗 *Olá! Vim pelo formulário da SFI Chips!*
@@ -1324,6 +1374,7 @@
             console.log("🚀 SFI Chips Form Refinado inicializado!");
             console.log("📡 Webhook configurado:", WEBHOOK_URL);
             console.log("🎯 Nova lógica de classificação ativa - Score removido!");
+            console.log("📊 Meta Pixel configurado - Evento Lead será disparado para leads qualificados!");
         }
         
         init();
