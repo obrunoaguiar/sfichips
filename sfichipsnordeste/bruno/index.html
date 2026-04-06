@@ -857,6 +857,7 @@
     
     <script>
         const WEBHOOK_URL = "https://hook.us1.make.com/gojqj74k9mioj8zg7mratyf4qlkl4pqi";
+        const DESTINATARIO_WHATSAPP = "27999833095"; // WhatsApp do técnico/empresa
         
         const vehiclesData = {
             "Chevrolet": ["Onix", "Prisma", "Tracker", "Cruze", "Spin", "S10", "Montana", "Cobalt"],
@@ -919,7 +920,7 @@
         let qualificationResult = null;
         let isCustomCity = false;
 
-        // ==================== LISTA DE MUNICÍPIOS ATUALIZADA ====================
+        // ==================== LISTA DE MUNICÍPIOS ====================
         const municipiosList = [
             // Paraíba
             "Água Branca - PB", "Aguiar - PB", "Alagoa Grande - PB", "Alagoa Nova - PB", "Alagoinha - PB", "Alcantil - PB", "Algodão de Jurema - PB", "Alhandra - PB", "Amparo - PB", "Aparecida - PB", "Araçagi - PB", "Arara - PB", "Araruna - PB", "Areia - PB", "Areia de Baraúnas - PB", "Areial - PB", "Aroeiras - PB", "Assunção - PB", "Baía da Traição - PB", "Bananeiras - PB", "Baraúna - PB", "Barra de Santa Rosa - PB", "Barra de Santana - PB", "Barra de São Miguel - PB", "Bayeux - PB", "Belém - PB", "Belém do Brejo do Cruz - PB", "Bernardino Batista - PB", "Boa Ventura - PB", "Boa Vista - PB", "Bom Jesus - PB", "Bom Sucesso - PB", "Bonito de Santa Fé - PB", "Boqueirão - PB", "Borborema - PB", "Brejo do Cruz - PB", "Brejo dos Santos - PB", "Caaporã - PB", "Cabaceiras - PB", "Cabedelo - PB", "Cachoeira dos Índios - PB", "Cacimba de Areia - PB", "Cacimba de Dentro - PB", "Cacimbas - PB", "Caiçara - PB", "Cajazeiras - PB", "Cajazeirinhas - PB", "Caldas Brandão - PB", "Camalaú - PB", "Campina Grande - PB", "Capim - PB", "Caraúbas - PB", "Carrapateira - PB", "Casserengue - PB", "Catingueira - PB", "Catolé do Rocha - PB", "Caturité - PB", "Conceição - PB", "Condado - PB", "Conde - PB", "Congo - PB", "Coremas - PB", "Coxixola - PB", "Cruz do Espírito Santo - PB", "Cubati - PB", "Cuité - PB", "Cuité de Mamanguape - PB", "Cuitegi - PB", "Curral de Cima - PB", "Curral Velho - PB", "Damião - PB", "Desterro - PB", "Diamante - PB", "Dona Inês - PB", "Duas Estradas - PB", "Emas - PB", "Esperança - PB", "Fagundes - PB", "Frei Martinho - PB", "Gado Bravo - PB", "Guarabira - PB", "Gurinhém - PB", "Gurjão - PB", "Ibiara - PB", "Igaracy - PB", "Imaculada - PB", "Ingá - PB", "Itabaiana - PB", "Itaporanga - PB", "Itapororoca - PB", "Itatuba - PB", "Jacaraú - PB", "Jericó - PB", "João Pessoa - PB", "Joca Claudino - PB", "Juarez Távora - PB", "Juazeirinho - PB", "Junco do Seridó - PB", "Juripiranga - PB", "Juru - PB", "Lagoa - PB", "Lagoa de Dentro - PB", "Lagoa Seca - PB", "Lastro - PB", "Livramento - PB", "Logradouro - PB", "Lucena - PB", "Mãe d'Água - PB", "Malta - PB", "Mamanguape - PB", "Manaíra - PB", "Marcação - PB", "Mari - PB", "Marizópolis - PB", "Massaranduba - PB", "Mataraca - PB", "Matinhas - PB", "Mato Grosso - PB", "Maturéia - PB", "Mogeiro - PB", "Montadas - PB", "Monte Horebe - PB", "Monteiro - PB", "Mulungu - PB", "Natuba - PB", "Nazarezinho - PB", "Nova Floresta - PB", "Nova Olinda - PB", "Nova Palmeira - PB", "Olho d'Água - PB", "Olivedos - PB", "Ouro Velho - PB", "Parari - PB", "Passagem - PB", "Patos - PB", "Paulista - PB", "Pedra Branca - PB", "Pedra Lavrada - PB", "Pedras de Fogo - PB", "Pedro Régis - PB", "Piancó - PB", "Picuí - PB", "Pilar - PB", "Pilões - PB", "Pilõezinhos - PB", "Pirpirituba - PB", "Pitimbu - PB", "Pocinhos - PB", "Poço Dantas - PB", "Poço de José de Moura - PB", "Pombal - PB", "Prata - PB", "Princesa Isabel - PB", "Puxinanã - PB", "Queimadas - PB", "Quixabá - PB", "Remígio - PB", "Riachão - PB", "Riachão do Bacamarte - PB", "Riachão do Poço - PB", "Riacho de Santo Antônio - PB", "Riacho dos Cavalos - PB", "Rio Tinto - PB", "Salgadinho - PB", "Salgado de São Félix - PB", "Santa Cecília - PB", "Santa Cruz - PB", "Santa Helena - PB", "Santa Inês - PB", "Santa Luzia - PB", "Santa Rita - PB", "Santa Teresinha - PB", "Santana de Mangueira - PB", "Santana dos Garrotes - PB", "Santo André - PB", "São Bento - PB", "São Bentinho - PB", "São Domingos - PB", "São Domingos do Cariri - PB", "São Francisco - PB", "São João do Cariri - PB", "São João do Rio do Peixe - PB", "São João do Tigre - PB", "São José da Lagoa Tapada - PB", "São José de Caiana - PB", "São José de Espinharas - PB", "São José de Piranhas - PB", "São José de Princesa - PB", "São José do Bonfim - PB", "São José do Brejo do Cruz - PB", "São José do Sabugi - PB", "São José dos Cordeiros - PB", "São José dos Ramos - PB", "São Mamede - PB", "São Miguel de Taipu - PB", "São Sebastião de Lagoa de Roça - PB", "São Sebastião do Umbuzeiro - PB", "São Vicente do Seridó - PB", "Sapé - PB", "Serra Branca - PB", "Serra da Raiz - PB", "Serra Grande - PB", "Serra Redonda - PB", "Serraria - PB", "Sertãozinho - PB", "Sobrado - PB", "Solânea - PB", "Soledade - PB", "Sossêgo - PB", "Sousa - PB", "Sumé - PB", "Tacima - PB", "Taperoá - PB", "Tavares - PB", "Teixeira - PB", "Tenório - PB", "Triunfo - PB", "Uiraúna - PB", "Umbuzeiro - PB", "Várzea - PB", "Vieirópolis - PB", "Vista Serrana - PB", "Zabelê - PB",
@@ -934,7 +935,6 @@
         let citiesList = [];
 
         async function loadCities() {
-            // Usar a lista de municípios fornecida
             citiesList = municipiosList.map(city => ({
                 label: city,
                 value: city.split(' - ')[0],
@@ -1138,7 +1138,6 @@
             const name = document.getElementById("nameInput").value.trim();
             const whatsapp = document.getElementById("whatsappInput").value.trim();
             const whatsappClean = whatsapp.replace(/\D/g, '');
-            const destinatario = whatsappClean; // Número do WhatsApp como destinatario
             
             const motorClassification = classifyVehicle();
             const motorType = motorClassification.type;
@@ -1171,7 +1170,7 @@
             const leadData = {
                 nome: name,
                 whatsapp: whatsappClean,
-                destinatario: destinatario,
+                destinatario: DESTINATARIO_WHATSAPP,
                 cidade: selectedCity,
                 is_custom_city: isCustomCity,
                 marca: selectedBrand,
@@ -1281,7 +1280,7 @@
         function redirectToWhatsApp() {
             const message = document.getElementById("whatsappMessageContainer").innerHTML;
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/27999833095?text=${encodedMessage}`, "_blank");
+            window.open(`https://wa.me/${DESTINATARIO_WHATSAPP}?text=${encodedMessage}`, "_blank");
         }
 
         function validateContact() {
@@ -1541,6 +1540,7 @@
             
             console.log("🚀 SFI Chips Form inicializado!");
             console.log(`📍 ${citiesList.length} municípios carregados!`);
+            console.log(`📱 WhatsApp do destinatário: ${DESTINATARIO_WHATSAPP}`);
         }
         
         init();
