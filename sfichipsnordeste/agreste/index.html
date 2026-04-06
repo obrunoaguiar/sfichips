@@ -215,6 +215,19 @@
             box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
         }
 
+        /* Loading indicator para cidades */
+        .city-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #000000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
         /* Estilo para o autocomplete do jQuery UI */
         .ui-autocomplete {
             max-height: 250px;
@@ -695,6 +708,7 @@
                     <label class="city-label">📍 Cidade onde gostaria de ser atendido <sup style="color: #e74c3c;">*</sup></label>
                     <input type="text" id="cityInput" class="city-input" placeholder="Digite o nome da sua cidade" autocomplete="off">
                     <div id="cityError" style="color: #e74c3c; font-size: 12px; margin-top: 8px; display: none;"></div>
+                    <div id="cityStatus" style="color: #666; font-size: 12px; margin-top: 8px;"></div>
                 </div>
                 <button class="btn-next" id="nextToProblem" disabled>
                     avançar <i class="fas fa-arrow-right"></i>
@@ -787,7 +801,6 @@
 
         // ==================== BASES DE CONHECIMENTO REFINADAS ====================
         
-        // Modelos que são originalmente turbo (de fábrica)
         const modelosOriginalmenteTurbo = new Set([
             "nivus", "taos", "t-cross", "virtus", "amarok", "jetta", "tiguan",
             "fastback", "pulse", "toro", "compass", "commander", "renegade",
@@ -796,7 +809,6 @@
             "dolphin", "seal", "song", "han", "tucson", "creta", "hr-v", "cr-v"
         ]);
         
-        // Modelos aspirados confirmados (não turbo)
         const modelosAspiradosConfirmados = new Set([
             "gol", "voyage", "saveiro", "polo", "up", "onix", "prisma", "joy", 
             "spin", "cobalt", "celta", "classic", "mobi", "argo", "cronos", "uno", 
@@ -804,12 +816,10 @@
             "kwid", "duster", "etios", "yaris", "civic", "city", "fit", "kicks", "versa"
         ]);
         
-        // Motores que são explicitamente turbo
         const motoresTurbo = new Set([
             "1.0 turbo", "1.3 turbo", "1.4 turbo", "1.5 turbo", "1.6 turbo", "1.8 turbo", "2.0 turbo", "3.0 turbo"
         ]);
         
-        // Motores que são explicitamente aspirados
         const motoresAspirados = new Set([
             "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", "2.0", "2.5", "3.0", "v6", "v8"
         ]);
@@ -823,30 +833,91 @@
         let selectedProblem = "";
         let qualificationResult = null;
 
-        // ==================== FUNÇÃO PARA CARREGAR CIDADES DO IBGE ====================
+        // ==================== LISTA DE CIDADES BRASILEIRAS (FALLBACK) ====================
+        const fallbackCities = [
+            "São Paulo - SP", "Rio de Janeiro - RJ", "Belo Horizonte - MG", "Brasília - DF", 
+            "Salvador - BA", "Fortaleza - CE", "Curitiba - PR", "Manaus - AM", "Recife - PE", 
+            "Porto Alegre - RS", "Belém - PA", "Goiânia - GO", "Guarulhos - SP", "Campinas - SP", 
+            "São Luís - MA", "São Gonçalo - RJ", "Maceió - AL", "Duque de Caxias - RJ", 
+            "Natal - RN", "Campo Grande - MS", "Teresina - PI", "São Bernardo do Campo - SP", 
+            "Nova Iguaçu - RJ", "João Pessoa - PB", "Santo André - SP", "Osasco - SP", 
+            "São José dos Campos - SP", "Ribeirão Preto - SP", "Uberlândia - MG", "Sorocaba - SP",
+            "Contagem - MG", "Aracaju - SE", "Feira de Santana - BA", "Cuiabá - MT", 
+            "Joinville - SC", "Aparecida de Goiânia - GO", "Londrina - PR", "Anápolis - GO", 
+            "Porto Velho - RO", "Juiz de Fora - MG", "Niterói - RJ", "São José do Rio Preto - SP",
+            "Caxias do Sul - RS", "Belford Roxo - RJ", "Campina Grande - PB", "Vila Velha - ES",
+            "Maringá - PR", "Pelotas - RS", "Serra - ES", "Canoas - RS", "Florianópolis - SC"
+        ];
+
+        // ==================== FUNÇÃO PARA CARREGAR CIDADES ====================
         let citiesList = [];
         
         async function loadCities() {
+            const cityStatus = document.getElementById("cityStatus");
+            cityStatus.innerHTML = '<span class="city-loading"></span> Carregando cidades...';
+            
+            // Tentativa 1: API do IBGE com CORS proxy
             try {
                 showToast("📡 Carregando lista de cidades...", false);
-                const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios');
-                const data = await response.json();
                 
-                citiesList = data.map(city => ({
-                    label: `${city.nome} - ${city.microrregiao.mesorregiao.UF.sigla}`,
-                    value: city.nome,
-                    state: city.microrregiao.mesorregiao.UF.sigla
-                }));
+                // Usando um proxy CORS gratuito
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const targetUrl = 'https://servicodados.ibge.gov.br/api/v1/localidades/municipios';
                 
-                console.log(`✅ ${citiesList.length} cidades carregadas com sucesso!`);
-                showToast(`✅ ${citiesList.length} cidades disponíveis!`, false);
+                const response = await fetch(proxyUrl + targetUrl, {
+                    headers: {
+                        'Origin': window.location.origin,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 
-                // Inicializa o autocomplete após carregar as cidades
-                initCityAutocomplete();
+                if (response.ok) {
+                    const data = await response.json();
+                    citiesList = data.map(city => ({
+                        label: `${city.nome} - ${city.microrregiao.mesorregiao.UF.sigla}`,
+                        value: city.nome,
+                        state: city.microrregiao.mesorregiao.UF.sigla
+                    }));
+                    
+                    cityStatus.innerHTML = `✅ ${citiesList.length} cidades carregadas!`;
+                    showToast(`✅ ${citiesList.length} cidades disponíveis!`, false);
+                    initCityAutocomplete();
+                    return;
+                }
             } catch (error) {
-                console.error("❌ Erro ao carregar cidades:", error);
-                showToast("⚠️ Erro ao carregar cidades. Verifique sua conexão.", true);
+                console.warn("⚠️ Erro na API do IBGE, tentando fallback...", error);
             }
+            
+            // Tentativa 2: API alternativa (BrasilAPI)
+            try {
+                const response = await fetch('https://brasilapi.com.br/api/ibge/municipios/v1');
+                if (response.ok) {
+                    const data = await response.json();
+                    citiesList = data.map(city => ({
+                        label: `${city.nome} - ${city.microrregiao.mesorregiao.UF.sigla}`,
+                        value: city.nome,
+                        state: city.microrregiao.mesorregiao.UF.sigla
+                    }));
+                    
+                    cityStatus.innerHTML = `✅ ${citiesList.length} cidades carregadas!`;
+                    showToast(`✅ ${citiesList.length} cidades disponíveis!`, false);
+                    initCityAutocomplete();
+                    return;
+                }
+            } catch (error) {
+                console.warn("⚠️ Erro na BrasilAPI, usando lista de fallback...", error);
+            }
+            
+            // Fallback: Usar lista pré-definida de cidades
+            citiesList = fallbackCities.map(city => ({
+                label: city,
+                value: city.split(' - ')[0],
+                state: city.split(' - ')[1]
+            }));
+            
+            cityStatus.innerHTML = `⚠️ Usando lista básica com ${citiesList.length} cidades principais`;
+            showToast(`⚠️ Usando lista básica com ${citiesList.length} cidades`, true);
+            initCityAutocomplete();
         }
         
         function initCityAutocomplete() {
@@ -951,18 +1022,10 @@
                 });
                 
                 console.log("✅ Meta Pixel - Evento Lead disparado com sucesso!");
-                console.log("📊 Dados do Lead:", {
-                    veiculo: `${leadData.marca} ${leadData.modelo}`,
-                    qualificacao: leadData.qualificacao,
-                    cidade: leadData.cidade
-                });
-            } else {
-                console.warn("⚠️ Meta Pixel não encontrado (fbq não definido)");
             }
         }
 
-        // ==================== LÓGICA DE CLASSIFICAÇÃO REFINADA ====================
-        
+        // ==================== LÓGICA DE CLASSIFICAÇÃO ====================
         function classifyVehicle() {
             const model = selectedModel.toLowerCase().trim();
             const engine = selectedEngine.toLowerCase().trim();
@@ -1289,22 +1352,18 @@
         }
 
         function setupNavigation() {
-            // Botão nextToCity (nome e whatsapp -> cidade)
             document.getElementById("nextToCity").addEventListener("click", () => {
                 showLayer('layerCity');
             });
             
-            // Botão nextToProblem (cidade -> problema)
             document.getElementById("nextToProblem").addEventListener("click", () => {
                 showLayer('layerProblem');
             });
             
-            // Botão backToContactBtn (cidade -> contato)
             document.getElementById("backToContactBtn").addEventListener("click", () => {
                 showLayer('layerContact');
             });
             
-            // Botão backToCityBtn (problema -> cidade)
             document.getElementById("backToCityBtn").addEventListener("click", () => {
                 showLayer('layerCity');
             });
@@ -1415,17 +1474,13 @@
             updateSummary();
             await loadCities();
             
-            // Configurar validações
             const nameInput = document.getElementById("nameInput");
             const whatsappInput = document.getElementById("whatsappInput");
             nameInput.addEventListener("input", validateContact);
             whatsappInput.addEventListener("input", validateContact);
             
             console.log("🚀 SFI Chips Form Refinado inicializado!");
-            console.log("📡 Webhook configurado:", WEBHOOK_URL);
-            console.log("🎯 Nova lógica de classificação ativa");
-            console.log("📊 Meta Pixel configurado");
-            console.log("📍 Aba exclusiva para cidade criada!");
+            console.log("📍 Sistema de cidades com fallback ativo!");
         }
         
         init();
