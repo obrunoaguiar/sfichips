@@ -857,7 +857,13 @@
     
     <script>
         const WEBHOOK_URL = "https://hook.us1.make.com/gojqj74k9mioj8zg7mratyf4qlkl4pqi";
-        const DESTINATARIO_WHATSAPP = "27999833095"; // WhatsApp do técnico/empresa
+        
+        // ==================== WHATSAPP DESTINATÁRIO ====================
+        // Extrai o número da função redirectToWhatsApp
+        function getDestinatarioWhatsApp() {
+            // Este número deve ser o mesmo que está no redirectToWhatsApp
+            return "27999833095"; // ← ALTERE AQUI O NÚMERO DO WHATSAPP DO DESTINATÁRIO
+        }
         
         const vehiclesData = {
             "Chevrolet": ["Onix", "Prisma", "Tracker", "Cruze", "Spin", "S10", "Montana", "Cobalt"],
@@ -1138,6 +1144,7 @@
             const name = document.getElementById("nameInput").value.trim();
             const whatsapp = document.getElementById("whatsappInput").value.trim();
             const whatsappClean = whatsapp.replace(/\D/g, '');
+            const destinatario = getDestinatarioWhatsApp(); // Pega o número do destinatário
             
             const motorClassification = classifyVehicle();
             const motorType = motorClassification.type;
@@ -1170,7 +1177,7 @@
             const leadData = {
                 nome: name,
                 whatsapp: whatsappClean,
-                destinatario: DESTINATARIO_WHATSAPP,
+                destinatario: destinatario,
                 cidade: selectedCity,
                 is_custom_city: isCustomCity,
                 marca: selectedBrand,
@@ -1280,7 +1287,8 @@
         function redirectToWhatsApp() {
             const message = document.getElementById("whatsappMessageContainer").innerHTML;
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/${DESTINATARIO_WHATSAPP}?text=${encodedMessage}`, "_blank");
+            const destinatario = getDestinatarioWhatsApp();
+            window.open(`https://wa.me/${destinatario}?text=${encodedMessage}`, "_blank");
         }
 
         function validateContact() {
@@ -1540,7 +1548,7 @@
             
             console.log("🚀 SFI Chips Form inicializado!");
             console.log(`📍 ${citiesList.length} municípios carregados!`);
-            console.log(`📱 WhatsApp do destinatário: ${DESTINATARIO_WHATSAPP}`);
+            console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
         }
         
         init();
