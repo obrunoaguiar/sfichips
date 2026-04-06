@@ -858,12 +858,26 @@
     <script>
         const WEBHOOK_URL = "https://hook.us1.make.com/gojqj74k9mioj8zg7mratyf4qlkl4pqi";
         
-        // ==================== WHATSAPP DESTINATÁRIO ====================
-        // Extrai o número da função redirectToWhatsApp
+        // ==================== CONFIGURAÇÕES PERSONALIZÁVEIS ====================
+        // Altere aqui o número do WhatsApp do destinatário (técnico/empresa)
         function getDestinatarioWhatsApp() {
-            // Este número deve ser o mesmo que está no redirectToWhatsApp
-            return "8182003636"; // ← ALTERE AQUI O NÚMERO DO WHATSAPP DO DESTINATÁRIO
+            return "8182003636"; // ← ALTERE AQUI O NÚMERO DO WHATSAPP
         }
+        
+        // Altere aqui a região de atendimento
+        function getRegiao() {
+            return "PB e RN"; // ← ALTERE AQUI A REGIÃO (Ex: "Agreste", "Sertão", "Mata Norte", "Litoral", etc.)
+        }
+        
+        // Você também pode adicionar outros campos personalizados aqui
+        function getCustomField1() {
+            return "Valor personalizado 1"; // ← Exemplo de campo extra
+        }
+        
+        function getCustomField2() {
+            return "Valor personalizado 2"; // ← Exemplo de campo extra
+        }
+        // ==================== FIM DAS CONFIGURAÇÕES ====================
         
         const vehiclesData = {
             "Chevrolet": ["Onix", "Prisma", "Tracker", "Cruze", "Spin", "S10", "Montana", "Cobalt"],
@@ -1088,7 +1102,8 @@
                     problem_type: leadData.problema_descricao,
                     qualification_status: leadData.qualificacao,
                     city: leadData.cidade,
-                    destinatario: leadData.destinatario
+                    destinatario: leadData.destinatario,
+                    regiao: leadData.regiao
                 });
             }
         }
@@ -1144,7 +1159,8 @@
             const name = document.getElementById("nameInput").value.trim();
             const whatsapp = document.getElementById("whatsappInput").value.trim();
             const whatsappClean = whatsapp.replace(/\D/g, '');
-            const destinatario = getDestinatarioWhatsApp(); // Pega o número do destinatário
+            const destinatario = getDestinatarioWhatsApp();
+            const regiao = getRegiao();
             
             const motorClassification = classifyVehicle();
             const motorType = motorClassification.type;
@@ -1178,6 +1194,7 @@
                 nome: name,
                 whatsapp: whatsappClean,
                 destinatario: destinatario,
+                regiao: regiao,
                 cidade: selectedCity,
                 is_custom_city: isCustomCity,
                 marca: selectedBrand,
@@ -1206,6 +1223,7 @@
 
 *Nome:* ${name}
 *Cidade:* ${selectedCity}${isCustomCity ? " (adicionada manualmente)" : ""}
+*Região:* ${regiao}
 *Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}
 *Motor:* ${selectedEngine}
 *Combustível:* ${selectedFuel}
@@ -1242,7 +1260,8 @@
                     🔧 Motor: ${selectedEngine} • ⛽ Combustível: ${selectedFuel}<br>
                     🎯 Classificação: ${motorType}<br>
                     📌 Foco: ${problemText[selectedProblem]}<br>
-                    📍 Cidade: ${selectedCity}${isCustomCity ? " ✏️" : ""}
+                    📍 Cidade: ${selectedCity}${isCustomCity ? " ✏️" : ""}<br>
+                    🗺️ Região: ${regiao}
                 </div>
             `;
             
@@ -1549,6 +1568,7 @@
             console.log("🚀 SFI Chips Form inicializado!");
             console.log(`📍 ${citiesList.length} municípios carregados!`);
             console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
+            console.log(`🗺️ Região configurada: ${getRegiao()}`);
         }
         
         init();
