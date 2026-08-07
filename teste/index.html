@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SFICHIPS · Dashboard API</title>
+    
+    <!-- BIBLIOTECAS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f1f5f9; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* CABEÇALHO */
+        .app-header {
+            background: white;
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #2563eb, #1e4a7a);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        .logo-text h1 { font-size: 1.3rem; font-weight: 700; color: #0f3b5e; }
+        .logo-text p { font-size: 0.7rem; color: #64748b; }
+        
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.online { background: #16a34a; }
+        .status-dot.offline { background: #dc2626; }
+        .status-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        /* ÁREA PRINCIPAL */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; }
+        
+        /* MENU INFERIOR */
+        .bottom-nav {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-around;
+            flex-shrink: 0;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .nav-item.active { color: #2563eb; background: rgba(37,99,235,0.08); }
+        .nav-item.active .nav-icon { transform: scale(1.1); }
+        .nav-icon { font-size: 1.3rem; transition: transform 0.2s; }
+        .nav-label { font-size: 0.7rem; margin-top: 4px; }
+        
+        /* MÓDULOS */
+        .module-screen { display: none; animation: fadeIn 0.3s ease; }
+        .module-screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* LOADING */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .loading-overlay.show { display: flex; }
+        .spinner-box {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* CARDS E ESTILOS DOS DASHBOARDS */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .stat-card .icon { font-size: 28px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; color: #0f3b5e; }
+        .stat-card .label { font-size: 0.8rem; color: #64748b; }
+        
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        
+        /* GRÁFICOS */
+        .chart-wrapper {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .chart-wrapper h3 { margin-bottom: 15px; font-size: 1rem; font-weight: 600; color: #0f3b5e; }
+        .chart-container { height: 280px; }
+        
+        /* TABELA */
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; color: #0f3b5e; }
+        tr:hover { background: #f8fafc; }
+        
+        /* BOTÃO VOLTAR */
+        .back-home {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #0f3b5e;
+            color: white;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            border: 3px solid white;
+        }
+        .back-home.show { display: flex; }
+        .back-home:hover { transform: scale(1.1); background: #2563eb; }
+        
+        /* RESPONSIVO */
+        @media (max-width: 640px) {
+            .grid-cards { grid-template-columns: 1fr 1fr; }
+            .logo-text h1 { font-size: 1rem; }
+            .status-bar span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-chart-pie"></i></div>
+            <div class="logo-text">
+                <h1>SFICHIPS</h1>
+                <p>API Dashboard</p>
+            </div>
+        </div>
+        <div class="status-bar">
+            <span class="status-dot loading" id="statusDot"></span>
+            <span id="statusText">Conectando...</span>
+            <span id="dataCount" style="font-weight:600; color:#2563eb;"></span>
+        </div>
+    </header>
+
+    <main class="main-content" id="mainContent">
+        <!-- HOME -->
+        <div id="homeScreen" style="max-width:1200px; margin:0 auto;">
+            <div style="background:linear-gradient(135deg, #2563eb, #1e4a7a); color:white; border-radius:24px; padding:30px; margin-bottom:24px;">
+                <h2 style="font-size:1.8rem;">Olá, Gestor! 👋</h2>
+                <p style="opacity:0.9;">Dados em tempo real via API · Última atualização: <span id="lastUpdate">-</span></p>
+            </div>
+            <div class="grid-cards" id="homeStats"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" id="homeCharts">
+                <div class="chart-wrapper"><h3>Leads por Mês</h3><div class="chart-container"><canvas id="homeLeadsChart"></canvas></div></div>
+                <div class="chart-wrapper"><h3>Matriz vs Dealers</h3><div class="chart-container"><canvas id="homePieChart"></canvas></div></div>
+            </div>
+        </div>
+
+        <!-- MÓDULO: LEADS -->
+        <div id="moduleLeads" class="module-screen" style="max-width:1300px; margin:0 auto;">
+            <h2 style="margin-bottom:20px;"><i class="fa-solid fa-chart-line" style="color:#2563eb;"></i> Comparativo Mensal de Leads</h2>
+            <div id="leadsGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px;"></div>
+            <div id="leadsFooter" style="background:linear-gradient(to right, #e9eff7, #dfeaf5); border-radius:20px; padding:20px; display:flex; justify-content:space-around; flex-wrap:wrap; margin-top:20px;"></div>
+        </div>
+
+        <!-- MÓDULO: ORÇAMENTO -->
+        <div id="moduleBudget" class="module-screen" style="max-width:1400px; margin:0 auto;">
+            <h2 style="margin-bottom:20px;"><i class="fa-solid fa-wallet" style="color:#2563eb;"></i> Orçamento e Performance</h2>
+            <div class="grid-cards" id="budgetStats"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <div class="chart-wrapper"><h3>Leads por Dia - Matriz vs Dealers</h3><div class="chart-container"><canvas id="budgetLeadsChart"></canvas></div></div>
+                <div class="chart-wrapper"><h3>Orçamento por Dia</h3><div class="chart-container"><canvas id="budgetValueChart"></canvas></div></div>
+            </div>
+            <div class="chart-wrapper"><h3>Distribuição de Investimento</h3><div class="chart-container" style="height:200px;"><canvas id="budgetPieChart"></canvas></div></div>
+        </div>
+
+        <!-- MÓDULO: ATENDIMENTO -->
+        <div id="moduleCRM" class="module-screen" style="max-width:1200px; margin:0 auto;">
+            <h2 style="margin-bottom:20px;"><i class="fa-solid fa-headset" style="color:#2563eb;"></i> Atendimento (CRM)</h2>
+            <div class="grid-cards" id="crmStats"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px;" id="crmPies"></div>
+            <div class="chart-wrapper">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <select id="crmDealerFilter" style="border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; flex:1; min-width:120px;"><option value="">Todos Dealers</option></select>
+                    <select id="crmOrigemFilter" style="border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; flex:1; min-width:120px;"><option value="">Todas Origens</option></select>
+                    <select id="crmMotorFilter" style="border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; flex:1; min-width:120px;"><option value="">Todos Motores</option></select>
+                    <input type="text" id="crmSearch" placeholder="Buscar..." style="border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; flex:2; min-width:150px;">
+                </div>
+                <div class="table-scroll"><table><thead><tr><th>Data</th><th>Dealer</th><th>Origem</th><th>Motor</th></tr></thead><tbody id="crmTableBody"></tbody></table></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="back-home" id="backHomeBtn"><i class="fa-solid fa-house"></i></div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="showHome()"><i class="nav-icon fa-solid fa-house"></i><span class="nav-label">Início</span></button>
+        <button class="nav-item" onclick="showModule('leads')"><i class="nav-icon fa-solid fa-chart-line"></i><span class="nav-label">Leads</span></button>
+        <button class="nav-item" onclick="showModule('budget')"><i class="nav-icon fa-solid fa-wallet"></i><span class="nav-label">Orçamento</span></button>
+        <button class="nav-item" onclick="showModule('crm')"><i class="nav-icon fa-solid fa-headset"></i><span class="nav-label">CRM</span></button>
+    </nav>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-box">
+            <div class="spinner"></div>
+            <p style="color:#64748b;">Carregando dados...</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURAÇÃO DA API
+        // ============================================================
+        const API = {
+            BASE_URL: 'http://sfi-chips.herokuapp.com',
+            USUARIO: 'sfichips',
+            SENHA: 'guara561'
+        };
+        
+        // ============================================================
+        // ESTADO GLOBAL
+        // ============================================================
+        let state = {
+            leadsMensal: [],
+            leadsDiarios: [],
+            orcamento: null,
+            atendimento: [],
+            resumo: null,
+            carregado: false
+        };
+        
+        let charts = {};
+        let crmFiltered = [];
+        
+        // ============================================================
+        // FUNÇÕES DE API
+        // ============================================================
+        async function apiRequest(endpoint) {
+            const url = `${API.BASE_URL}/api/${endpoint}`;
+            const auth = btoa(`${API.USUARIO}:${API.SENHA}`);
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Basic ${auth}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Erro em ${endpoint}:`, error);
+                return null;
+            }
+        }
+        
+        // ============================================================
+        // CARREGAR TODOS OS DADOS
+        // ============================================================
+        async function carregarTodosDados() {
+            showLoading(true);
+            
+            try {
+                // Carregar todos os endpoints em paralelo
+                const [resumo, leadsMensal, leadsDiarios, orcamento, atendimento] = await Promise.all([
+                    apiRequest('dashboard/resumo'),
+                    apiRequest('leads/mensal'),
+                    apiRequest('leads/diario'),
+                    apiRequest('orcamento'),
+                    apiRequest('atendimento')
+                ]);
+                
+                // Atualizar estado
+                state.resumo = resumo;
+                state.leadsMensal = leadsMensal || [];
+                state.leadsDiarios = leadsDiarios || [];
+                state.orcamento = orcamento || {};
+                state.atendimento = atendimento || [];
+                state.carregado = true;
+                
+                // Atualizar status
+                const total = state.leadsMensal.length + state.leadsDiarios.length + state.atendimento.length;
+                document.getElementById('statusDot').className = 'status-dot online';
+                document.getElementById('statusText').textContent = 'Online';
+                document.getElementById('dataCount').textContent = `${total} registros`;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('pt-BR');
+                
+                // Renderizar tudo
+                renderHome();
+                renderLeads();
+                renderBudget();
+                renderCRM();
+                
+                // Mostrar home
+                showHome();
+                
+            } catch (error) {
+                console.error('Erro ao carregar:', error);
+                document.getElementById('statusDot').className = 'status-dot offline';
+                document.getElementById('statusText').textContent = 'Erro na API';
+                alert('Erro ao carregar dados da API. Verifique se o servidor está rodando.');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // ============================================================
+        // RENDER: HOME
+        // ============================================================
+        function renderHome() {
+            const r = state.resumo || {};
+            const stats = [
+                { icon: 'fa-solid fa-users', label: 'Total Leads', value: r.totalLeads || 0, color: 'blue' },
+                { icon: 'fa-solid fa-dollar-sign', label: 'Investimento', value: `R$ ${(r.investimentoTotal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`, color: 'green' },
+                { icon: 'fa-solid fa-building', label: 'Leads Matriz', value: r.matrizLeads || 0, color: 'purple' },
+                { icon: 'fa-solid fa-store', label: 'Leads Dealers', value: r.dealersLeads || 0, color: 'orange' }
+            ];
+            
+            document.getElementById('homeStats').innerHTML = stats.map(s => `
+                <div class="stat-card">
+                    <div style="color:${s.color === 'blue' ? '#3b82f6' : s.color === 'green' ? '#16a34a' : s.color === 'purple' ? '#9333ea' : '#f97316'}; font-size:28px; margin-bottom:8px;"><i class="${s.icon}"></i></div>
+                    <div class="value">${s.value}</div>
+                    <div class="label">${s.label}</div>
+                </div>
+            `).join('');
+            
+            // Gráfico de leads por mês
+            if (charts.homeLeads) charts.homeLeads.destroy();
+            const meses = state.leadsMensal.map(m => m.mes || m.Mes || '');
+            const valores = state.leadsMensal.map(m => parseInt(m.total_leads || m.totalLeads || 0));
+            charts.homeLeads = new Chart(document.getElementById('homeLeadsChart'), {
+                type: 'bar',
+                data: {
+                    labels: meses,
+                    datasets: [{ label: 'Leads', data: valores, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+            
+            // Gráfico pizza Matriz vs Dealers
+            if (charts.homePie) charts.homePie.destroy();
+            charts.homePie = new Chart(document.getElementById('homePieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Matriz', 'Dealers'],
+                    datasets: [{ data: [r.matrizLeads || 0, r.dealersLeads || 0], backgroundColor: ['#3b82f6', '#10b981'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
+            });
+        }
+        
+        // ============================================================
+        // RENDER: LEADS
+        // ============================================================
+        function renderLeads() {
+            const data = state.leadsMensal;
+            const cores = ['mes-jan', 'mes-fev', 'mes-mar'];
+            
+            let html = '';
+            data.forEach((item, idx) => {
+                const total = parseInt(item.total_leads || item.totalLeads || 0);
+                const matriz = parseInt(item.matriz || 0);
+                const dealers = parseInt(item.dealers || 0);
+                const invest = parseFloat(item.investimento || 0);
+                const cpl = parseFloat(item.cpl || 0);
+                const variacao = idx === 0 ? 'Mês base' : (idx === 1 ? '▼ -12,8% vs Jan' : '▼ -71,2% vs Fev');
+                const mesNome = item.mes || item.Mes || ['Janeiro', 'Fevereiro', 'Março'][idx];
+                
+                html += `
+                    <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                        <div style="background:${idx === 0 ? '#1e4a7a' : idx === 1 ? '#2d5f8b' : '#3b6f9e'}; color:white; padding:15px 20px; font-size:1.6rem; font-weight:bold;">${mesNome.toUpperCase()} 2026</div>
+                        <div style="padding:20px;">
+                            <div style="text-align:center; border-bottom:2px dashed #cbd5e1; padding-bottom:15px; margin-bottom:15px;">
+                                <span style="font-size:0.9rem;">🚀 TOTAL DE LEADS</span>
+                                <div style="font-size:3rem; font-weight:800; color:#0b1f33;">${total.toLocaleString()}</div>
+                                <span style="background:#fee2e2; color:#b91c1c; padding:2px 10px; border-radius:30px; font-size:0.8rem;">${variacao}</span>
+                            </div>
+                            <div style="display:flex; gap:12px;">
+                                <div style="flex:1; background:#eef2ff; border-left:5px solid #2563eb; border-radius:16px; padding:15px;">
+                                    <div style="font-size:0.8rem; text-transform:uppercase; color:#64748b;">🏢 MATRIZ</div>
+                                    <div style="font-size:1.6rem; font-weight:700;">${matriz.toLocaleString()}</div>
+                                </div>
+                                <div style="flex:1; background:#f0fdf4; border-left:5px solid #16a34a; border-radius:16px; padding:15px;">
+                                    <div style="font-size:0.8rem; text-transform:uppercase; color:#64748b;">🤝 DEALERS</div>
+                                    <div style="font-size:1.6rem; font-weight:700;">${dealers.toLocaleString()}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:15px; background:#fffbeb; border-left:5px solid #d97706; border-radius:16px; padding:15px;">
+                                <div style="font-size:0.8rem; text-transform:uppercase; color:#64748b;">💰 INVESTIMENTO TOTAL</div>
+                                <div style="font-size:1.6rem; font-weight:700;">R$ ${invest.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                                <div style="font-size:0.85rem;">CPL Médio: R$ ${cpl}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('leadsGrid').innerHTML = html;
+            
+            // Rodapé
+            const totalMatriz = data.reduce((s, i) => s + parseInt(i.matriz || 0), 0);
+            const totalDealers = data.reduce((s, i) => s + parseInt(i.dealers || 0), 0);
+            const totalGeral = totalMatriz + totalDealers;
+            const participacao = totalGeral > 0 ? ((totalDealers / totalGeral) * 100).toFixed(1) : 0;
+            const cplMedio = state.resumo?.cplMedio || '3.95';
+            
+            document.getElementById('leadsFooter').innerHTML = `
+                <div><div class="label" style="font-size:0.9rem; color:#1e3a5f;">🏢 TOTAL LEADS MATRIZ</div><div style="font-size:2rem; font-weight:800;">${totalMatriz.toLocaleString()}</div></div>
+                <div><div class="label" style="font-size:0.9rem; color:#1e3a5f;">🤝 TOTAL LEADS DEALERS</div><div style="font-size:2rem; font-weight:800;">${totalDealers.toLocaleString()}</div></div>
+                <div><div class="label" style="font-size:0.9rem; color:#1e3a5f;">📊 PARTICIPAÇÃO DEALERS</div><div style="font-size:2rem; font-weight:800; color:#16a34a;">${participacao}%</div></div>
+                <div><div class="label" style="font-size:0.9rem; color:#1e3a5f;">💰 CPL MÉDIO GERAL</div><div style="font-size:2rem; font-weight:800;">R$ ${cplMedio}</div></div>
+            `;
+        }
+        
+        // ============================================================
+        // RENDER: ORÇAMENTO
+        // ============================================================
+        function renderBudget() {
+            const o = state.orcamento || {};
+            const r = state.resumo || {};
+            
+            // Stats
+            document.getElementById('budgetStats').innerHTML = `
+                <div class="stat-card"><div class="value">${(r.totalLeads || 0).toLocaleString()}</div><div class="label">Total Leads</div></div>
+                <div class="stat-card"><div class="value">R$ ${(r.investimentoTotal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div><div class="label">Investimento Total</div></div>
+                <div class="stat-card"><div class="value">R$ ${(r.cplMedio || 0).toFixed(2)}</div><div class="label">CPL Médio</div></div>
+                <div class="stat-card"><div class="value">${(r.matrizLeads || 0).toLocaleString()}</div><div class="label">Leads Matriz</div></div>
+            `;
+            
+            // Gráficos
+            const data = state.leadsDiarios || [];
+            const labels = data.map(d => d.data || d.Data || '').slice(-20);
+            const matrixLeads = data.map(d => parseInt(d.matriz_total || d.matrizTotal || 0)).slice(-20);
+            const dealersLeads = data.map(d => parseInt(d.dealers_total || d.dealersTotal || 0)).slice(-20);
+            const matrixBudget = data.map(d => parseFloat(d.matriz_budget || d.matrizBudget || 0)).slice(-20);
+            const dealersBudget = data.map(d => parseFloat(d.dealers_budget || d.dealersBudget || 0)).slice(-20);
+            
+            if (charts.budgetLeads) charts.budgetLeads.destroy();
+            charts.budgetLeads = new Chart(document.getElementById('budgetLeadsChart'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Matriz', data: matrixLeads, backgroundColor: 'rgba(46,204,113,0.7)' },
+                        { label: 'Dealers', data: dealersLeads, backgroundColor: 'rgba(231,76,60,0.7)' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+            
+            if (charts.budgetValue) charts.budgetValue.destroy();
+            charts.budgetValue = new Chart(document.getElementById('budgetValueChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Matriz R$', data: matrixBudget, borderColor: '#2ecc71', fill: false, tension: 0.3 },
+                        { label: 'Dealers R$', data: dealersBudget, borderColor: '#e74c3c', fill: false, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+            
+            // Pizza distribuição
+            if (charts.budgetPie) charts.budgetPie.destroy();
+            charts.budgetPie = new Chart(document.getElementById('budgetPieChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Matriz', 'Dealers'],
+                    datasets: [{ data: [r.matrizLeads || 0, r.dealersLeads || 0], backgroundColor: ['#2ecc71', '#e74c3c'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+        
+        // ============================================================
+        // RENDER: CRM
+        // ============================================================
+        function renderCRM() {
+            const data = state.atendimento || [];
+            
+            // Stats
+            document.getElementById('crmStats').innerHTML = `
+                <div class="stat-card"><div class="value">${data.length}</div><div class="label">Total Registros</div></div>
+                <div class="stat-card"><div class="value">${new Set(data.map(d => d.dealer || d.Dealer || '')).size}</div><div class="label">Dealers Distintos</div></div>
+                <div class="stat-card"><div class="value">${new Set(data.map(d => d.origem || d.Origem || '')).size}</div><div class="label">Origens Distintas</div></div>
+            `;
+            
+            // Gráficos
+            const dealerCount = {}; const origemCount = {}; const motorCount = {};
+            data.forEach(d => {
+                const dealer = d.dealer || d.Dealer || 'Outro';
+                const origem = d.origem || d.Origem || 'Outra';
+                const motor = d.motor || d.Motor || 'Outro';
+                dealerCount[dealer] = (dealerCount[dealer] || 0) + 1;
+                origemCount[origem] = (origemCount[origem] || 0) + 1;
+                motorCount[motor] = (motorCount[motor] || 0) + 1;
+            });
+            
+            document.getElementById('crmPies').innerHTML = `
+                <div class="chart-wrapper"><h3>Dealers</h3><div class="chart-container" style="height:160px;"><canvas id="crmPieDealer"></canvas></div></div>
+                <div class="chart-wrapper"><h3>Origens</h3><div class="chart-container" style="height:160px;"><canvas id="crmPieOrigem"></canvas></div></div>
+                <div class="chart-wrapper"><h3>Motor</h3><div class="chart-container" style="height:160px;"><canvas id="crmPieMotor"></canvas></div></div>
+            `;
+            
+            setTimeout(() => {
+                new Chart(document.getElementById('crmPieDealer'), { type: 'pie', data: { labels: Object.keys(dealerCount), datasets: [{ data: Object.values(dealerCount), backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } } });
+                new Chart(document.getElementById('crmPieOrigem'), { type: 'pie', data: { labels: Object.keys(origemCount), datasets: [{ data: Object.values(origemCount), backgroundColor: ['#3b82f6','#10b981','#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } } });
+                new Chart(document.getElementById('crmPieMotor'), { type: 'pie', data: { labels: Object.keys(motorCount), datasets: [{ data: Object.values(motorCount), backgroundColor: ['#8b5cf6','#ec4899'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } } });
+            }, 100);
+            
+            // Filtros
+            const dealers = [...new Set(data.map(d => d.dealer || d.Dealer || ''))].filter(Boolean);
+            const origens = [...new Set(data.map(d => d.origem || d.Origem || ''))].filter(Boolean);
+            const motores = [...new Set(data.map(d => d.motor || d.Motor || ''))].filter(Boolean);
+            
+            document.getElementById('crmDealerFilter').innerHTML = '<option value="">Todos Dealers</option>' + dealers.map(d => `<option value="${d}">${d}</option>`).join('');
+            document.getElementById('crmOrigemFilter').innerHTML = '<option value="">Todas Origens</option>' + origens.map(o => `<option value="${o}">${o}</option>`).join('');
+            document.getElementById('crmMotorFilter').innerHTML = '<option value="">Todos Motores</option>' + motores.map(m => `<option value="${m}">${m}</option>`).join('');
+            
+            applyCRMFilters();
+        }
+        
+        function applyCRMFilters() {
+            const data = state.atendimento || [];
+            const dealer = document.getElementById('crmDealerFilter').value;
+            const origem = document.getElementById('crmOrigemFilter').value;
+            const motor = document.getElementById('crmMotorFilter').value;
+            const search = document.getElementById('crmSearch').value.toLowerCase();
+            
+            crmFiltered = data.filter(d => {
+                const dDealer = d.dealer || d.Dealer || '';
+                const dOrigem = d.origem || d.Origem || '';
+                const dMotor = d.motor || d.Motor || '';
+                const dData = d.data || d.Data || '';
+                const match = (!dealer || dDealer === dealer) && (!origem || dOrigem === origem) && (!motor || dMotor === motor);
+                const searchMatch = !search || (dData + dDealer + dOrigem + dMotor).toLowerCase().includes(search);
+                return match && searchMatch;
+            });
+            
+            document.getElementById('crmTableBody').innerHTML = crmFiltered.map(d => `
+                <tr><td>${d.data || d.Data || '-'}</td><td>${d.dealer || d.Dealer || '-'}</td><td>${d.origem || d.Origem || '-'}</td><td><span style="background:#e0f2fe; padding:2px 10px; border-radius:20px;">${d.motor || d.Motor || '-'}</span></td></tr>
+            `).join('');
+        }
+        
+        // ============================================================
+        // NAVEGAÇÃO
+        // ============================================================
+        function showHome() {
+            document.querySelectorAll('.module-screen').forEach(el => el.classList.remove('active'));
+            document.getElementById('homeScreen').style.display = 'block';
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector('.nav-item:first-child').classList.add('active');
+            document.getElementById('backHomeBtn').className = 'back-home';
+        }
+        
+        function showModule(module) {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.querySelectorAll('.module-screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(`module${module.charAt(0).toUpperCase() + module.slice(1)}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            const btn = document.querySelector(`.nav-item[onclick*="${module}"]`);
+            if (btn) btn.classList.add('active');
+            
+            document.getElementById('backHomeBtn').className = 'back-home show';
+            
+            // Re-renderizar gráficos se necessário
+            setTimeout(() => {
+                Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
+            }, 200);
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').className = `loading-overlay${show ? ' show' : ''}`;
+        }
+        
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        document.getElementById('crmDealerFilter').addEventListener('change', applyCRMFilters);
+        document.getElementById('crmOrigemFilter').addEventListener('change', applyCRMFilters);
+        document.getElementById('crmMotorFilter').addEventListener('change', applyCRMFilters);
+        document.getElementById('crmSearch').addEventListener('input', applyCRMFilters);
+        
+        document.getElementById('backHomeBtn').addEventListener('click', showHome);
+        
+        // ============================================================
+        // INICIAR
+        // ============================================================
+        carregarTodosDados();
+    </script>
+</body>
+</html>
