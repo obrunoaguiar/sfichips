@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
+        /* (mantém todos os estilos anteriores) */
         * {
             margin: 0;
             padding: 0;
@@ -27,9 +28,7 @@
             overflow: hidden;
         }
         
-        /* ============================================================
-           CABEÇALHO
-           ============================================================ */
+        /* CABEÇALHO */
         .app-header {
             background: white;
             padding: 12px 20px;
@@ -96,18 +95,14 @@
         }
         .btn-reload:hover { background: #1d4ed8; }
         
-        /* ============================================================
-           ÁREA PRINCIPAL
-           ============================================================ */
+        /* ÁREA PRINCIPAL */
         .main-content {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
         }
         
-        /* ============================================================
-           FILTROS
-           ============================================================ */
+        /* FILTROS */
         .filters-bar {
             background: white;
             border-radius: 16px;
@@ -175,9 +170,7 @@
         .btn-filter.clear { background: #f1f5f9; color: #64748b; }
         .btn-filter.clear:hover { background: #e2e8f0; }
         
-        /* ============================================================
-           BREADCRUMB
-           ============================================================ */
+        /* BREADCRUMB */
         .breadcrumb {
             display: flex;
             align-items: center;
@@ -217,9 +210,7 @@
             color: #94a3b8;
         }
         
-        /* ============================================================
-           KPI CARDS
-           ============================================================ */
+        /* KPI CARDS */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -252,18 +243,16 @@
             color: #94a3b8;
             margin-top: 4px;
         }
-        .kpi-card .sub .asp { color: #3b82f6; }
-        .kpi-card .sub .turbo { color: #8b5cf6; }
+        .kpi-card .sub .asp { color: #3b82f6; font-weight: 600; }
+        .kpi-card .sub .turbo { color: #8b5cf6; font-weight: 600; }
         
         .kpi-card.blue { border-left-color: #2563eb; }
-        .kpi-card.green { border-left-color: #16a34a; }
         .kpi-card.purple { border-left-color: #8b5cf6; }
+        .kpi-card.green { border-left-color: #16a34a; }
         .kpi-card.orange { border-left-color: #f97316; }
         .kpi-card.rose { border-left-color: #ec4899; }
         
-        /* ============================================================
-           ÁRVORE HIERÁRQUICA
-           ============================================================ */
+        /* ÁRVORE HIERÁRQUICA */
         .tree-container {
             display: flex;
             flex-direction: column;
@@ -328,7 +317,6 @@
         }
         .tree-node-header .arrow { color: #94a3b8; font-size: 0.9rem; }
         
-        /* Cores dos níveis */
         .tree-node.level-matriz { border-left-color: #2563eb; }
         .tree-node.level-dealers { border-left-color: #16a34a; }
         .tree-node.level-turbo { border-left-color: #8b5cf6; }
@@ -347,9 +335,7 @@
         }
         .tree-node.level-total .icon { background: #1e4a7a; color: white; }
         
-        /* ============================================================
-           CHART E TABELA
-           ============================================================ */
+        /* CHART E TABELA */
         .details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -425,9 +411,7 @@
             color: #94a3b8;
         }
         
-        /* ============================================================
-           MENU INFERIOR
-           ============================================================ */
+        /* MENU INFERIOR */
         .bottom-nav {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
@@ -455,9 +439,7 @@
         .nav-icon { font-size: 1.3rem; transition: transform 0.2s; }
         .nav-label { font-size: 0.7rem; margin-top: 4px; }
         
-        /* ============================================================
-           LOADING
-           ============================================================ */
+        /* LOADING */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -489,9 +471,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* ============================================================
-           RESPONSIVO
-           ============================================================ */
         @media (max-width: 768px) {
             .details-grid { grid-template-columns: 1fr; }
             .tree-node { min-width: 140px; max-width: unset; }
@@ -711,7 +690,7 @@
                     return {
                         ...lead,
                         CPL: cpl,
-                        Investimento: cpl > 0 ? 1 * cpl : 0 // cada lead = 1 * CPL
+                        Investimento: cpl > 0 ? 1 * cpl : 0
                     };
                 });
 
@@ -721,7 +700,6 @@
                 updateStatus(`${dados.leads.length} leads, ${dados.meta.length} metas`);
                 popularFiltros();
                 
-                // Inicia com a aba Leads
                 abaAtual = 'leads';
                 processarDados();
                 renderizarDashboard();
@@ -843,7 +821,6 @@
             const data = dadosFiltrados.leads;
             const isOrcamento = abaAtual === 'orcamento';
             
-            // Função para obter o valor (leads ou investimento)
             function getValor(registro) {
                 return isOrcamento ? (registro.Investimento || 0) : 1;
             }
@@ -951,19 +928,20 @@
         }
 
         // ============================================================
-        // RENDERIZAR DASHBOARD
+        // RENDERIZAR DASHBOARD - CORRIGIDO!
         // ============================================================
         function renderizarDashboard() {
             const data = dadosFiltrados.leads;
             const total = data.length;
             const isOrcamento = abaAtual === 'orcamento';
             
-            // ---- KPI CARDS ----
+            // ---- FILTROS POR MOTOR ----
             const aspirados = data.filter(r => (r.Motor || '').toLowerCase() === 'aspirado');
             const turbos = data.filter(r => (r.Motor || '').toLowerCase() === 'turbo');
             const matriz = data.filter(r => (r.Dealer || '').toLowerCase().includes('matriz'));
             const dealers = data.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz'));
 
+            // ---- FUNÇÕES DE CÁLCULO ----
             function somarInvestimento(dados) {
                 return dados.reduce((s, r) => s + (r.Investimento || 0), 0);
             }
@@ -972,53 +950,71 @@
                 return `R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             }
 
+            // ---- CÁLCULOS PARA ORÇAMENTO ----
             const totalInvest = somarInvestimento(data);
             const investMatriz = somarInvestimento(matriz);
             const investDealers = somarInvestimento(dealers);
+            const investAspirados = somarInvestimento(aspirados);
+            const investTurbos = somarInvestimento(turbos);
 
-            const kpiHTML = isOrcamento ? `
-                <div class="kpi-card blue">
-                    <div class="label"><i class="fa-solid fa-coins"></i> Investimento Total</div>
-                    <div class="value">${formatarMoeda(totalInvest)}</div>
-                    <div class="sub">${data.length} leads · CPL médio: ${total > 0 ? formatarMoeda(totalInvest / total) : 'R$ 0,00'}</div>
-                </div>
-                <div class="kpi-card purple">
-                    <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
-                    <div class="value">${formatarMoeda(investMatriz)}</div>
-                    <div class="sub">${matriz.length} leads · ${total > 0 ? ((matriz.length/total)*100).toFixed(1) : 0}%</div>
-                </div>
-                <div class="kpi-card green">
-                    <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
-                    <div class="value">${formatarMoeda(investDealers)}</div>
-                    <div class="sub">${dealers.length} leads · ${total > 0 ? ((dealers.length/total)*100).toFixed(1) : 0}%</div>
-                </div>
-                <div class="kpi-card orange">
-                    <div class="label"><i class="fa-solid fa-bullhorn"></i> CPL Médio</div>
-                    <div class="value">${total > 0 ? formatarMoeda(totalInvest / total) : 'R$ 0,00'}</div>
-                    <div class="sub">Custo por lead</div>
-                </div>
-            ` : `
-                <div class="kpi-card blue">
-                    <div class="label"><i class="fa-solid fa-users"></i> Total de Leads</div>
-                    <div class="value">${total}</div>
-                    <div class="sub"><span class="asp">●</span> Aspirado: ${aspirados.length} <span class="turbo">●</span> Turbo: ${turbos.length}</div>
-                </div>
-                <div class="kpi-card purple">
-                    <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
-                    <div class="value">${matriz.length}</div>
-                    <div class="sub">${total > 0 ? ((matriz.length/total)*100).toFixed(1) : 0}% do total</div>
-                </div>
-                <div class="kpi-card green">
-                    <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
-                    <div class="value">${dealers.length}</div>
-                    <div class="sub">${total > 0 ? ((dealers.length/total)*100).toFixed(1) : 0}% do total</div>
-                </div>
-                <div class="kpi-card orange">
-                    <div class="label"><i class="fa-solid fa-bullhorn"></i> ADS Distintos</div>
-                    <div class="value">${new Set(data.map(r => r.Ads)).size}</div>
-                    <div class="sub">Anúncios ativos</div>
-                </div>
-            `;
+            // ---- KPI CARDS ----
+            let kpiHTML = '';
+
+            if (isOrcamento) {
+                // CARDS PARA ABA ORÇAMENTO
+                kpiHTML = `
+                    <div class="kpi-card blue">
+                        <div class="label"><i class="fa-solid fa-coins"></i> Investimento Total</div>
+                        <div class="value">${formatarMoeda(totalInvest)}</div>
+                        <div class="sub">
+                            <span class="asp">●</span> Aspirado: ${formatarMoeda(investAspirados)} 
+                            <span class="turbo">●</span> Turbo: ${formatarMoeda(investTurbos)}
+                        </div>
+                    </div>
+                    <div class="kpi-card purple">
+                        <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
+                        <div class="value">${formatarMoeda(investMatriz)}</div>
+                        <div class="sub">${matriz.length} leads · ${total > 0 ? ((matriz.length/total)*100).toFixed(1) : 0}%</div>
+                    </div>
+                    <div class="kpi-card green">
+                        <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
+                        <div class="value">${formatarMoeda(investDealers)}</div>
+                        <div class="sub">${dealers.length} leads · ${total > 0 ? ((dealers.length/total)*100).toFixed(1) : 0}%</div>
+                    </div>
+                    <div class="kpi-card orange">
+                        <div class="label"><i class="fa-solid fa-bullhorn"></i> CPL Médio</div>
+                        <div class="value">${total > 0 ? formatarMoeda(totalInvest / total) : 'R$ 0,00'}</div>
+                        <div class="sub">Custo por lead</div>
+                    </div>
+                `;
+            } else {
+                // CARDS PARA ABA LEADS
+                kpiHTML = `
+                    <div class="kpi-card blue">
+                        <div class="label"><i class="fa-solid fa-users"></i> Total de Leads</div>
+                        <div class="value">${total}</div>
+                        <div class="sub">
+                            <span class="asp">●</span> Aspirado: ${aspirados.length} 
+                            <span class="turbo">●</span> Turbo: ${turbos.length}
+                        </div>
+                    </div>
+                    <div class="kpi-card purple">
+                        <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
+                        <div class="value">${matriz.length}</div>
+                        <div class="sub">${total > 0 ? ((matriz.length/total)*100).toFixed(1) : 0}% do total</div>
+                    </div>
+                    <div class="kpi-card green">
+                        <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
+                        <div class="value">${dealers.length}</div>
+                        <div class="sub">${total > 0 ? ((dealers.length/total)*100).toFixed(1) : 0}% do total</div>
+                    </div>
+                    <div class="kpi-card orange">
+                        <div class="label"><i class="fa-solid fa-bullhorn"></i> ADS Distintos</div>
+                        <div class="value">${new Set(data.map(r => r.Ads)).size}</div>
+                        <div class="sub">Anúncios ativos</div>
+                    </div>
+                `;
+            }
 
             document.getElementById('kpiGrid').innerHTML = kpiHTML;
             renderizarArvore();
