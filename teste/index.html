@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>SFICHIPS · Dashboard Hierárquico com Filtros</title>
+    <title>SFICHIPS · Dashboard</title>
     
     <!-- FONTES E ICONES -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -106,7 +106,7 @@
         }
         
         /* ============================================================
-           FILTROS (estilo Data Studio)
+           FILTROS
            ============================================================ */
         .filters-bar {
             background: white;
@@ -176,7 +176,7 @@
         .btn-filter.clear:hover { background: #e2e8f0; }
         
         /* ============================================================
-           BREADCRUMB (caminho de navegação)
+           BREADCRUMB
            ============================================================ */
         .breadcrumb {
             display: flex;
@@ -259,6 +259,7 @@
         .kpi-card.green { border-left-color: #16a34a; }
         .kpi-card.purple { border-left-color: #8b5cf6; }
         .kpi-card.orange { border-left-color: #f97316; }
+        .kpi-card.rose { border-left-color: #ec4899; }
         
         /* ============================================================
            ÁRVORE HIERÁRQUICA
@@ -416,6 +417,7 @@
         }
         .badge-turbo { color: #7c3aed; font-weight: 600; }
         .badge-aspirado { color: #f97316; font-weight: 600; }
+        .badge-invest { color: #16a34a; font-weight: 600; }
         
         .table-count {
             margin-top: 12px;
@@ -515,7 +517,7 @@
             <div class="logo-icon"><i class="fa-solid fa-sitemap"></i></div>
             <div class="logo-text">
                 <h1>SFICHIPS</h1>
-                <p>Hierarquia · Filtros</p>
+                <p id="headerSubtitle">Leads · Filtros</p>
             </div>
         </div>
         <div class="header-right">
@@ -534,7 +536,7 @@
     ============================================================ -->
     <main class="main-content" id="mainContent">
 
-        <!-- FILTROS DINÂMICOS (estilo Data Studio) -->
+        <!-- FILTROS DINÂMICOS -->
         <div class="filters-bar" id="filtersBar">
             <div class="filter-group">
                 <label><i class="fa-regular fa-calendar"></i> Data Início</label>
@@ -581,24 +583,20 @@
         <!-- ÁRVORE HIERÁRQUICA -->
         <div id="treeContainer" class="tree-container"></div>
 
-        <!-- DETALHES (gráficos + tabela) -->
+        <!-- DETALHES -->
         <div id="detailsContainer"></div>
 
     </main>
 
     <!-- ============================================================
-    MENU INFERIOR
+    MENU INFERIOR (2 abas: LEADS e ORÇAMENTO)
     ============================================================ -->
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="window.location.href='/'">
-            <i class="nav-icon fa-solid fa-house"></i>
-            <span class="nav-label">Início</span>
-        </button>
-        <button class="nav-item">
-            <i class="nav-icon fa-solid fa-sitemap"></i>
+        <button class="nav-item active" data-aba="leads" onclick="trocarAba('leads')">
+            <i class="nav-icon fa-solid fa-address-card"></i>
             <span class="nav-label">Leads</span>
         </button>
-        <button class="nav-item" onclick="window.location.href='/orcamento'">
+        <button class="nav-item" data-aba="orcamento" onclick="trocarAba('orcamento')">
             <i class="nav-icon fa-solid fa-chart-simple"></i>
             <span class="nav-label">Orçamento</span>
         </button>
@@ -616,13 +614,23 @@
         // ============================================================
         // CONFIGURAÇÃO
         // ============================================================
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=196866897&single=true&output=csv';
+        const SHEETS = {
+            CRM: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=196866897&single=true&output=csv',
+            META: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=1240530737&single=true&output=csv'
+        };
 
         // ============================================================
         // ESTADO
         // ============================================================
-        let dados = [];
-        let dadosFiltrados = [];
+        let dados = {
+            leads: [],
+            meta: []
+        };
+        let dadosFiltrados = {
+            leads: [],
+            meta: []
+        };
+        let abaAtual = 'leads';
         let caminhoAtual = ['total'];
         let dadosAgrupados = {};
         let charts = {};
@@ -641,18 +649,26 @@
             textEl.textContent = text;
         }
 
+        async function carregarCSV(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const csv = await response.text();
+            const result = Papa.parse(csv, { header: true, skipEmptyLines: true });
+            return result.data;
+        }
+
         async function carregarDados() {
             showLoading(true);
             updateStatus('Carregando...');
 
             try {
-                const response = await fetch(SHEET_URL);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const csv = await response.text();
-                const result = Papa.parse(csv, { header: true, skipEmptyLines: true });
-                
-                dados = result.data
+                const [crmData, metaData] = await Promise.all([
+                    carregarCSV(SHEETS.CRM),
+                    carregarCSV(SHEETS.META)
+                ]);
+
+                // Processa CRM
+                dados.leads = crmData
                     .filter(row => row.Data && row.Data.trim() !== '')
                     .map(row => ({
                         Data: row.Data || '',
@@ -667,12 +683,49 @@
                         Motor: row.Motor || ''
                     }));
 
-                dadosFiltrados = [...dados];
-                updateStatus(`${dados.length} registros`);
-                
+                // Processa META (Orçamento)
+                dados.meta = metaData
+                    .filter(row => row.Day && row.Day.trim() !== '')
+                    .map(row => ({
+                        Data: row.Day || '',
+                        Campanha: row['Campaign Name'] || '',
+                        Conjunto: row['Ad Set Name'] || '',
+                        Anuncio: row['Ad Name'] || '',
+                        Ads: row['Ad Name'] || '',
+                        Leads: parseInt(row.Leads) || 0,
+                        CPL: parseFloat(row['Cost per Lead']) || 0,
+                        CustoTotal: parseFloat(row['Custo Total']) || 0
+                    }));
+
+                // Cria mapa de CPL por ADS
+                const cplPorADS = {};
+                dados.meta.forEach(m => {
+                    if (m.Ads && m.CPL > 0) {
+                        cplPorADS[m.Ads] = m.CPL;
+                    }
+                });
+
+                // Enriquece os leads com CPL
+                dados.leads = dados.leads.map(lead => {
+                    const cpl = cplPorADS[lead.Ads] || 0;
+                    return {
+                        ...lead,
+                        CPL: cpl,
+                        Investimento: cpl > 0 ? 1 * cpl : 0 // cada lead = 1 * CPL
+                    };
+                });
+
+                dadosFiltrados.leads = [...dados.leads];
+                dadosFiltrados.meta = [...dados.meta];
+
+                updateStatus(`${dados.leads.length} leads, ${dados.meta.length} metas`);
                 popularFiltros();
+                
+                // Inicia com a aba Leads
+                abaAtual = 'leads';
                 processarDados();
                 renderizarDashboard();
+                atualizarMenu();
 
             } catch (error) {
                 console.error('Erro:', error);
@@ -687,29 +740,50 @@
         // DADOS MOCK (fallback)
         // ============================================================
         function usarDadosMock() {
-            dados = [
+            const leadsMock = [
                 { Data: '01/01/2026', Nome: 'João Silva', Dealer: 'Matriz A', Origem: 'Facebook', Ads: 'ADS001', Veiculo: 'Fusca', Motor: 'Turbo' },
                 { Data: '02/01/2026', Nome: 'Maria Souza', Dealer: 'Dealer B', Origem: 'Instagram', Ads: 'ADS002', Veiculo: 'Gol', Motor: 'Aspirado' },
                 { Data: '03/01/2026', Nome: 'Carlos Lima', Dealer: 'Matriz A', Origem: 'Google', Ads: 'ADS001', Veiculo: 'Civic', Motor: 'Turbo' },
                 { Data: '04/01/2026', Nome: 'Ana Silva', Dealer: 'Dealer C', Origem: 'Facebook', Ads: 'ADS003', Veiculo: 'Fiesta', Motor: 'Aspirado' },
-                { Data: '05/01/2026', Nome: 'Pedro Santos', Dealer: 'Matriz B', Origem: 'Instagram', Ads: 'ADS004', Veiculo: 'Golf', Motor: 'Turbo' },
-                { Data: '06/01/2026', Nome: 'Julia Costa', Dealer: 'Dealer B', Origem: 'Google', Ads: 'ADS002', Veiculo: 'Onix', Motor: 'Aspirado' }
+                { Data: '05/01/2026', Nome: 'Pedro Santos', Dealer: 'Matriz B', Origem: 'Instagram', Ads: 'ADS004', Veiculo: 'Golf', Motor: 'Turbo' }
             ];
-            dadosFiltrados = [...dados];
-            updateStatus(`${dados.length} registros (mock)`);
+
+            const metaMock = [
+                { Ads: 'ADS001', CPL: 5.50, CustoTotal: 55.00, Leads: 10 },
+                { Ads: 'ADS002', CPL: 4.20, CustoTotal: 42.00, Leads: 10 },
+                { Ads: 'ADS003', CPL: 3.80, CustoTotal: 38.00, Leads: 10 },
+                { Ads: 'ADS004', CPL: 6.00, CustoTotal: 60.00, Leads: 10 }
+            ];
+
+            const cplPorADS = {};
+            metaMock.forEach(m => { cplPorADS[m.Ads] = m.CPL; });
+
+            dados.leads = leadsMock.map(lead => ({
+                ...lead,
+                CPL: cplPorADS[lead.Ads] || 0,
+                Investimento: (cplPorADS[lead.Ads] || 0) * 1
+            }));
+            dados.meta = metaMock;
+            dadosFiltrados.leads = [...dados.leads];
+            dadosFiltrados.meta = [...dados.meta];
+
+            updateStatus(`${dados.leads.length} leads (mock)`);
             popularFiltros();
+            abaAtual = 'leads';
             processarDados();
             renderizarDashboard();
+            atualizarMenu();
         }
 
         // ============================================================
         // POPULAR FILTROS
         // ============================================================
         function popularFiltros() {
-            const dealers = [...new Set(dados.map(r => r.Dealer))].filter(Boolean).sort();
-            const origens = [...new Set(dados.map(r => r.Origem))].filter(Boolean).sort();
-            const motores = [...new Set(dados.map(r => r.Motor))].filter(Boolean).sort();
-            const ads = [...new Set(dados.map(r => r.Ads))].filter(Boolean).sort();
+            const data = dados.leads;
+            const dealers = [...new Set(data.map(r => r.Dealer))].filter(Boolean).sort();
+            const origens = [...new Set(data.map(r => r.Origem))].filter(Boolean).sort();
+            const motores = [...new Set(data.map(r => r.Motor))].filter(Boolean).sort();
+            const ads = [...new Set(data.map(r => r.Ads))].filter(Boolean).sort();
 
             document.getElementById('filterDealer').innerHTML = '<option value="">Todos</option>' + dealers.map(d => `<option value="${d}">${d}</option>`).join('');
             document.getElementById('filterOrigem').innerHTML = '<option value="">Todas</option>' + origens.map(o => `<option value="${o}">${o}</option>`).join('');
@@ -728,7 +802,7 @@
             const motor = document.getElementById('filterMotor').value;
             const ads = document.getElementById('filterADS').value;
 
-            dadosFiltrados = dados.filter(r => {
+            dadosFiltrados.leads = dados.leads.filter(r => {
                 if (dataInicio && r.Data) {
                     const dataRegistro = r.Data.split('/').reverse().join('-');
                     if (dataRegistro < dataInicio) return false;
@@ -744,7 +818,6 @@
                 return true;
             });
 
-            // Resetar navegação para Total
             caminhoAtual = ['total'];
             processarDados();
             renderizarDashboard();
@@ -757,7 +830,7 @@
             document.getElementById('filterOrigem').value = '';
             document.getElementById('filterMotor').value = '';
             document.getElementById('filterADS').value = '';
-            dadosFiltrados = [...dados];
+            dadosFiltrados.leads = [...dados.leads];
             caminhoAtual = ['total'];
             processarDados();
             renderizarDashboard();
@@ -767,8 +840,25 @@
         // PROCESSAMENTO DOS DADOS
         // ============================================================
         function processarDados() {
-            const data = dadosFiltrados;
+            const data = dadosFiltrados.leads;
+            const isOrcamento = abaAtual === 'orcamento';
             
+            // Função para obter o valor (leads ou investimento)
+            function getValor(registro) {
+                return isOrcamento ? (registro.Investimento || 0) : 1;
+            }
+
+            function somarValor(dados) {
+                return dados.reduce((s, r) => s + getValor(r), 0);
+            }
+
+            function formatarValor(valor) {
+                if (isOrcamento) {
+                    return `R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                }
+                return valor.toString();
+            }
+
             const matrizLeads = data.filter(r => (r.Dealer || '').toLowerCase().includes('matriz'));
             const dealersLeads = data.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz'));
             
@@ -791,51 +881,67 @@
             const matrizMotor = agruparPorMotor(matrizLeads);
             const dealersMotor = agruparPorMotor(dealersLeads);
             
+            const totalValor = somarValor(data);
+            
             dadosAgrupados = {
                 total: {
-                    label: 'Total',
-                    icon: 'fa-solid fa-database',
-                    count: data.length,
+                    label: isOrcamento ? 'Total Investido' : 'Total',
+                    icon: isOrcamento ? 'fa-solid fa-coins' : 'fa-solid fa-database',
+                    count: totalValor,
+                    formatted: formatarValor(totalValor),
+                    isOrcamento: isOrcamento,
                     children: {
                         matriz: {
                             label: 'Matriz',
                             icon: 'fa-solid fa-building',
-                            count: matrizLeads.length,
+                            count: somarValor(matrizLeads),
+                            formatted: formatarValor(somarValor(matrizLeads)),
+                            isOrcamento: isOrcamento,
                             children: {
                                 turbo: {
                                     label: 'Turbo',
                                     icon: 'fa-solid fa-bolt',
-                                    count: matrizMotor.turbo.length,
+                                    count: somarValor(matrizMotor.turbo),
+                                    formatted: formatarValor(somarValor(matrizMotor.turbo)),
                                     data: matrizMotor.turbo,
-                                    ads: agruparPorADS(matrizMotor.turbo)
+                                    ads: agruparPorADS(matrizMotor.turbo),
+                                    isOrcamento: isOrcamento
                                 },
                                 aspirado: {
                                     label: 'Aspirado',
                                     icon: 'fa-solid fa-wind',
-                                    count: matrizMotor.aspirado.length,
+                                    count: somarValor(matrizMotor.aspirado),
+                                    formatted: formatarValor(somarValor(matrizMotor.aspirado)),
                                     data: matrizMotor.aspirado,
-                                    ads: agruparPorADS(matrizMotor.aspirado)
+                                    ads: agruparPorADS(matrizMotor.aspirado),
+                                    isOrcamento: isOrcamento
                                 }
                             }
                         },
                         dealers: {
                             label: 'Dealers',
                             icon: 'fa-solid fa-store',
-                            count: dealersLeads.length,
+                            count: somarValor(dealersLeads),
+                            formatted: formatarValor(somarValor(dealersLeads)),
+                            isOrcamento: isOrcamento,
                             children: {
                                 turbo: {
                                     label: 'Turbo',
                                     icon: 'fa-solid fa-bolt',
-                                    count: dealersMotor.turbo.length,
+                                    count: somarValor(dealersMotor.turbo),
+                                    formatted: formatarValor(somarValor(dealersMotor.turbo)),
                                     data: dealersMotor.turbo,
-                                    ads: agruparPorADS(dealersMotor.turbo)
+                                    ads: agruparPorADS(dealersMotor.turbo),
+                                    isOrcamento: isOrcamento
                                 },
                                 aspirado: {
                                     label: 'Aspirado',
                                     icon: 'fa-solid fa-wind',
-                                    count: dealersMotor.aspirado.length,
+                                    count: somarValor(dealersMotor.aspirado),
+                                    formatted: formatarValor(somarValor(dealersMotor.aspirado)),
                                     data: dealersMotor.aspirado,
-                                    ads: agruparPorADS(dealersMotor.aspirado)
+                                    ads: agruparPorADS(dealersMotor.aspirado),
+                                    isOrcamento: isOrcamento
                                 }
                             }
                         }
@@ -848,30 +954,64 @@
         // RENDERIZAR DASHBOARD
         // ============================================================
         function renderizarDashboard() {
-            const data = dadosFiltrados;
+            const data = dadosFiltrados.leads;
             const total = data.length;
+            const isOrcamento = abaAtual === 'orcamento';
             
             // ---- KPI CARDS ----
-            const aspirados = data.filter(r => (r.Motor || '').toLowerCase() === 'aspirado').length;
-            const turbos = data.filter(r => (r.Motor || '').toLowerCase() === 'turbo').length;
-            const matriz = data.filter(r => (r.Dealer || '').toLowerCase().includes('matriz')).length;
-            const dealers = data.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz')).length;
+            const aspirados = data.filter(r => (r.Motor || '').toLowerCase() === 'aspirado');
+            const turbos = data.filter(r => (r.Motor || '').toLowerCase() === 'turbo');
+            const matriz = data.filter(r => (r.Dealer || '').toLowerCase().includes('matriz'));
+            const dealers = data.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz'));
 
-            document.getElementById('kpiGrid').innerHTML = `
+            function somarInvestimento(dados) {
+                return dados.reduce((s, r) => s + (r.Investimento || 0), 0);
+            }
+
+            function formatarMoeda(valor) {
+                return `R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+
+            const totalInvest = somarInvestimento(data);
+            const investMatriz = somarInvestimento(matriz);
+            const investDealers = somarInvestimento(dealers);
+
+            const kpiHTML = isOrcamento ? `
                 <div class="kpi-card blue">
-                    <div class="label"><i class="fa-solid fa-users"></i> Total de Leads</div>
-                    <div class="value">${total}</div>
-                    <div class="sub"><span class="asp">●</span> Aspirado: ${aspirados} <span class="turbo">●</span> Turbo: ${turbos}</div>
+                    <div class="label"><i class="fa-solid fa-coins"></i> Investimento Total</div>
+                    <div class="value">${formatarMoeda(totalInvest)}</div>
+                    <div class="sub">${data.length} leads · CPL médio: ${total > 0 ? formatarMoeda(totalInvest / total) : 'R$ 0,00'}</div>
                 </div>
                 <div class="kpi-card purple">
                     <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
-                    <div class="value">${matriz}</div>
-                    <div class="sub">${total > 0 ? ((matriz/total)*100).toFixed(1) : 0}% do total</div>
+                    <div class="value">${formatarMoeda(investMatriz)}</div>
+                    <div class="sub">${matriz.length} leads · ${total > 0 ? ((matriz.length/total)*100).toFixed(1) : 0}%</div>
                 </div>
                 <div class="kpi-card green">
                     <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
-                    <div class="value">${dealers}</div>
-                    <div class="sub">${total > 0 ? ((dealers/total)*100).toFixed(1) : 0}% do total</div>
+                    <div class="value">${formatarMoeda(investDealers)}</div>
+                    <div class="sub">${dealers.length} leads · ${total > 0 ? ((dealers.length/total)*100).toFixed(1) : 0}%</div>
+                </div>
+                <div class="kpi-card orange">
+                    <div class="label"><i class="fa-solid fa-bullhorn"></i> CPL Médio</div>
+                    <div class="value">${total > 0 ? formatarMoeda(totalInvest / total) : 'R$ 0,00'}</div>
+                    <div class="sub">Custo por lead</div>
+                </div>
+            ` : `
+                <div class="kpi-card blue">
+                    <div class="label"><i class="fa-solid fa-users"></i> Total de Leads</div>
+                    <div class="value">${total}</div>
+                    <div class="sub"><span class="asp">●</span> Aspirado: ${aspirados.length} <span class="turbo">●</span> Turbo: ${turbos.length}</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
+                    <div class="value">${matriz.length}</div>
+                    <div class="sub">${total > 0 ? ((matriz.length/total)*100).toFixed(1) : 0}% do total</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
+                    <div class="value">${dealers.length}</div>
+                    <div class="sub">${total > 0 ? ((dealers.length/total)*100).toFixed(1) : 0}% do total</div>
                 </div>
                 <div class="kpi-card orange">
                     <div class="label"><i class="fa-solid fa-bullhorn"></i> ADS Distintos</div>
@@ -880,7 +1020,7 @@
                 </div>
             `;
 
-            // ---- ÁRVORE ----
+            document.getElementById('kpiGrid').innerHTML = kpiHTML;
             renderizarArvore();
         }
 
@@ -900,6 +1040,9 @@
                     nivel = nivel.children[passo];
                 }
             }
+            
+            const isOrcamento = abaAtual === 'orcamento';
+            const unidade = isOrcamento ? 'investido' : 'leads';
             
             // Se tem filhos (não é ADS)
             if (nivel.children && !nivel.ads) {
@@ -934,7 +1077,7 @@
                                             <div class="icon"><i class="${iconMap[key] || 'fa-solid fa-folder'}"></i></div>
                                             <div>
                                                 <div class="name">${labelMap[key] || filho.label}</div>
-                                                <div class="count">${filho.count} leads</div>
+                                                <div class="count">${filho.formatted || filho.count + ' ' + unidade}</div>
                                             </div>
                                         </div>
                                         <div class="arrow"><i class="fa-solid fa-chevron-right"></i></div>
@@ -955,6 +1098,8 @@
                     <div class="tree-level">
                         ${adsKeys.map(ads => {
                             const dadosAds = nivel.ads[ads];
+                            const totalAds = dadosAds.reduce((s, r) => s + (isOrcamento ? (r.Investimento || 0) : 1), 0);
+                            const formatted = isOrcamento ? `R$ ${totalAds.toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : `${totalAds} leads`;
                             return `
                                 <div class="tree-node level-ads" onclick="selecionarADS('${ads}')">
                                     <div class="tree-node-header">
@@ -962,7 +1107,7 @@
                                             <div class="icon"><i class="fa-solid fa-bullhorn"></i></div>
                                             <div>
                                                 <div class="name">${ads}</div>
-                                                <div class="count">${dadosAds.length} leads</div>
+                                                <div class="count">${formatted}</div>
                                             </div>
                                         </div>
                                         <div class="arrow"><i class="fa-solid fa-chevron-right"></i></div>
@@ -974,14 +1119,17 @@
                 `;
                 
                 // Detalhes: gráficos + tabela
+                const tituloDetalhe = isOrcamento ? 'Investimento por ADS' : 'Leads por ADS';
+                const rotuloValor = isOrcamento ? 'Investimento (R$)' : 'Leads';
+                
                 detailsContainer.innerHTML = `
                     <div class="details-grid">
                         <div class="detail-card">
-                            <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Distribuição por ADS</div>
+                            <div class="card-title"><i class="fa-solid fa-chart-pie"></i> ${tituloDetalhe}</div>
                             <div class="chart-container"><canvas id="chartADS"></canvas></div>
                         </div>
                         <div class="detail-card">
-                            <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Leads por ADS</div>
+                            <div class="card-title"><i class="fa-solid fa-chart-bar"></i> ${rotuloValor} por ADS</div>
                             <div class="chart-container"><canvas id="chartADSBar"></canvas></div>
                         </div>
                     </div>
@@ -998,6 +1146,7 @@
                                         <th>ADS</th>
                                         <th>Veículo</th>
                                         <th>Motor</th>
+                                        ${isOrcamento ? '<th>CPL</th><th>Investimento</th>' : ''}
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody"></tbody>
@@ -1009,22 +1158,29 @@
                 
                 // Preencher tabela
                 const tbody = document.getElementById('tableBody');
-                tbody.innerHTML = nivel.data.map(r => `
-                    <tr>
-                        <td>${r.Data || '-'}</td>
-                        <td><strong>${r.Nome || '-'}</strong></td>
-                        <td>${r.Dealer || '-'}</td>
-                        <td>${r.Origem || '-'}</td>
-                        <td><span class="badge-ads">${r.Ads || '-'}</span></td>
-                        <td>${r.Veiculo || '-'}</td>
-                        <td class="${(r.Motor || '').toLowerCase() === 'turbo' ? 'badge-turbo' : 'badge-aspirado'}">${r.Motor || '-'}</td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = nivel.data.map(r => {
+                    const motorClass = (r.Motor || '').toLowerCase() === 'turbo' ? 'badge-turbo' : 'badge-aspirado';
+                    return `
+                        <tr>
+                            <td>${r.Data || '-'}</td>
+                            <td><strong>${r.Nome || '-'}</strong></td>
+                            <td>${r.Dealer || '-'}</td>
+                            <td>${r.Origem || '-'}</td>
+                            <td><span class="badge-ads">${r.Ads || '-'}</span></td>
+                            <td>${r.Veiculo || '-'}</td>
+                            <td class="${motorClass}">${r.Motor || '-'}</td>
+                            ${isOrcamento ? `<td>R$ ${(r.CPL || 0).toFixed(2)}</td><td class="badge-invest">R$ ${(r.Investimento || 0).toFixed(2)}</td>` : ''}
+                        </tr>
+                    `;
+                }).join('');
                 
                 // Gráficos
                 setTimeout(() => {
                     const adsLabels = Object.keys(nivel.ads);
-                    const adsValues = adsLabels.map(a => nivel.ads[a].length);
+                    const adsValues = adsLabels.map(a => {
+                        const dadosAds = nivel.ads[a];
+                        return dadosAds.reduce((s, r) => s + (isOrcamento ? (r.Investimento || 0) : 1), 0);
+                    });
                     const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
                     
                     if (charts.adsPie) charts.adsPie.destroy();
@@ -1048,7 +1204,8 @@
                                         label: function(context) {
                                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                             const pct = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
-                                            return `${context.label}: ${context.raw} (${pct}%)`;
+                                            const valor = isOrcamento ? `R$ ${context.raw.toFixed(2)}` : context.raw;
+                                            return `${context.label}: ${valor} (${pct}%)`;
                                         }
                                     }
                                 }
@@ -1062,7 +1219,7 @@
                         data: {
                             labels: adsLabels,
                             datasets: [{
-                                label: 'Leads',
+                                label: isOrcamento ? 'Investimento (R$)' : 'Leads',
                                 data: adsValues,
                                 backgroundColor: '#2563eb',
                                 borderRadius: 4
@@ -1132,8 +1289,8 @@
                     nivel = nivel.children[passo];
                 }
             }
-            const count = nivel.count || 0;
-            html += `<span class="count-info">${count} leads</span>`;
+            const count = nivel.formatted || nivel.count;
+            html += `<span class="count-info">${count}</span>`;
             
             container.innerHTML = html;
         }
@@ -1173,6 +1330,24 @@
         }
 
         // ============================================================
+        // TROCAR ABA
+        // ============================================================
+        function trocarAba(aba) {
+            abaAtual = aba;
+            document.getElementById('headerSubtitle').textContent = aba === 'leads' ? 'Leads · Filtros' : 'Orçamento · Investimento';
+            caminhoAtual = ['total'];
+            processarDados();
+            renderizarDashboard();
+            atualizarMenu();
+        }
+
+        function atualizarMenu() {
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.aba === abaAtual);
+            });
+        }
+
+        // ============================================================
         // EVENTOS
         // ============================================================
         document.getElementById('applyFilters').addEventListener('click', aplicarFiltros);
@@ -1182,7 +1357,6 @@
             carregarDados();
         });
 
-        // Atalho: Enter aplica filtros
         document.querySelectorAll('#filtersBar input, #filtersBar select').forEach(el => {
             el.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') aplicarFiltros();
