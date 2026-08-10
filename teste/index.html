@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>SFICHIPS · Leads</title>
+    <title>SFICHIPS · Dashboard Hierárquico com Filtros</title>
     
     <!-- FONTES E ICONES -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
@@ -19,67 +20,55 @@
         }
         
         body {
-            background-color: #f1f5f9;
+            background: #f1f5f9;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
         
-        /* CABEÇALHO */
+        /* ============================================================
+           CABEÇALHO
+           ============================================================ */
         .app-header {
             background: white;
-            padding: 14px 20px;
+            padding: 12px 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            z-index: 30;
             border-bottom: 1px solid #e2e8f0;
             flex-shrink: 0;
             flex-wrap: wrap;
             gap: 10px;
         }
         
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
+        .logo-area { display: flex; align-items: center; gap: 12px; }
         .logo-icon {
-            width: 44px;
-            height: 44px;
+            width: 40px; height: 40px;
             background: linear-gradient(135deg, #2563eb, #1e4a7a);
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 22px;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            font-size: 20px;
         }
+        .logo-text h1 { font-size: 1.3rem; font-weight: 700; color: #0f3b5e; }
+        .logo-text p { font-size: 0.7rem; color: #64748b; }
         
-        .logo-text h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #0f3b5e;
-            line-height: 1.2;
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        
-        .logo-text p {
-            font-size: 0.7rem;
-            color: #64748b;
-        }
-        
-        .header-status {
+        .status-bar {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.75rem;
             color: #64748b;
         }
-        
         .status-dot {
             width: 8px;
             height: 8px;
@@ -89,45 +78,112 @@
         .status-dot.online { background: #16a34a; }
         .status-dot.offline { background: #dc2626; }
         .status-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
-        
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         
-        .reload-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
+        .btn-reload {
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            gap: 6px;
             transition: all 0.2s;
         }
+        .btn-reload:hover { background: #1d4ed8; }
         
-        .reload-btn:hover {
-            background: #f1f5f9;
-            transform: rotate(90deg);
-            color: #2563eb;
-        }
-        
-        /* ÁREA PRINCIPAL */
+        /* ============================================================
+           ÁREA PRINCIPAL
+           ============================================================ */
         .main-content {
             flex: 1;
-            position: relative;
-            background: #f1f5f9;
             overflow-y: auto;
             padding: 20px;
         }
         
-        /* BREADCRUMB */
+        /* ============================================================
+           FILTROS (estilo Data Studio)
+           ============================================================ */
+        .filters-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .filter-group label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: white;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding-bottom: 4px;
+        }
+        
+        .btn-filter {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-filter.apply { background: #2563eb; color: white; }
+        .btn-filter.apply:hover { background: #1d4ed8; }
+        .btn-filter.clear { background: #f1f5f9; color: #64748b; }
+        .btn-filter.clear:hover { background: #e2e8f0; }
+        
+        /* ============================================================
+           BREADCRUMB (caminho de navegação)
+           ============================================================ */
         .breadcrumb {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-            padding: 12px 16px;
+            padding: 10px 16px;
             background: white;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -138,14 +194,13 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
-        
         .breadcrumb-item:hover { opacity: 0.7; }
         
         .breadcrumb-item.level-total { color: #1e4a7a; background: #e0f2fe; }
@@ -155,11 +210,70 @@
         .breadcrumb-item.level-aspirado { color: #f97316; background: #fff7ed; }
         .breadcrumb-item.level-ads { color: #0f3b5e; background: #f1f5f9; }
         
-        /* ÁRVORE */
+        .breadcrumb .sep { color: #94a3b8; font-size: 0.7rem; }
+        .breadcrumb .count-info {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        /* ============================================================
+           KPI CARDS
+           ============================================================ */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #2563eb;
+        }
+        
+        .kpi-card .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f3b5e;
+        }
+        .kpi-card .sub {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .kpi-card .sub .asp { color: #3b82f6; }
+        .kpi-card .sub .turbo { color: #8b5cf6; }
+        
+        .kpi-card.blue { border-left-color: #2563eb; }
+        .kpi-card.green { border-left-color: #16a34a; }
+        .kpi-card.purple { border-left-color: #8b5cf6; }
+        .kpi-card.orange { border-left-color: #f97316; }
+        
+        /* ============================================================
+           ÁRVORE HIERÁRQUICA
+           ============================================================ */
         .tree-container {
             display: flex;
             flex-direction: column;
             gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .tree-level {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         
         .tree-node {
@@ -168,11 +282,17 @@
             padding: 16px 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border-left: 4px solid #2563eb;
-            transition: all 0.2s;
             cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 180px;
+            max-width: 280px;
         }
         
-        .tree-node:hover { transform: translateX(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .tree-node:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
         
         .tree-node-header {
             display: flex;
@@ -187,32 +307,27 @@
         }
         
         .tree-node-header .left .icon {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .tree-node-header .left .name {
             font-weight: 600;
             font-size: 1rem;
+            color: #0f3b5e;
         }
-        
         .tree-node-header .left .count {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #64748b;
-            font-weight: 400;
         }
+        .tree-node-header .arrow { color: #94a3b8; font-size: 0.9rem; }
         
-        .tree-node-header .arrow {
-            font-size: 1.2rem;
-            color: #94a3b8;
-            transition: transform 0.2s;
-        }
-        
+        /* Cores dos níveis */
         .tree-node.level-matriz { border-left-color: #2563eb; }
         .tree-node.level-dealers { border-left-color: #16a34a; }
         .tree-node.level-turbo { border-left-color: #8b5cf6; }
@@ -231,85 +346,116 @@
         }
         .tree-node.level-total .icon { background: #1e4a7a; color: white; }
         
-        /* TABELA */
-        .ads-table-wrapper {
+        /* ============================================================
+           CHART E TABELA
+           ============================================================ */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-card {
             background: white;
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-top: 12px;
-            width: 100%;
         }
         
-        .ads-table-wrapper .table-title {
+        .detail-card .card-title {
             font-weight: 600;
             color: #0f3b5e;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 0.95rem;
         }
+        .detail-card .card-title i { color: #2563eb; }
+        
+        .chart-container {
+            height: 220px;
+            position: relative;
+        }
+        
+        /* TABELA */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .table-card .table-title {
+            font-weight: 600;
+            color: #0f3b5e;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        .table-card .table-title i { color: #2563eb; }
         
         .table-scroll { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f8fafc; font-weight: 600; color: #0f3b5e; }
+        th { background: #f8fafc; font-weight: 600; color: #0f3b5e; white-space: nowrap; }
         tr:hover { background: #f8fafc; }
         
-        .ads-badge {
+        .badge-ads {
             display: inline-block;
             padding: 2px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
             background: #e0f2fe;
             color: #2563eb;
         }
+        .badge-turbo { color: #7c3aed; font-weight: 600; }
+        .badge-aspirado { color: #f97316; font-weight: 600; }
         
-        /* GRID DE FILHOS */
-        .children-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
+        .table-count {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #94a3b8;
         }
         
-        /* MENU INFERIOR */
+        /* ============================================================
+           MENU INFERIOR
+           ============================================================ */
         .bottom-nav {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(203, 213, 225, 0.5);
+            border-top: 1px solid #e2e8f0;
             padding: 8px 12px;
             display: flex;
             justify-content: space-around;
-            align-items: center;
-            z-index: 40;
             flex-shrink: 0;
         }
-        
         .nav-item {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px 4px;
+            padding: 8px;
             border-radius: 16px;
-            transition: all 0.2s;
             cursor: pointer;
-            background: transparent;
             border: none;
+            background: transparent;
             color: #64748b;
+            transition: all 0.2s;
         }
-        
-        .nav-item.active {
-            color: #2563eb;
-            background: rgba(37, 99, 235, 0.08);
-        }
-        
+        .nav-item.active { color: #2563eb; background: rgba(37,99,235,0.08); }
         .nav-item.active .nav-icon { transform: scale(1.1); }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; transition: transform 0.2s; }
-        .nav-label { font-size: 0.7rem; font-weight: 500; }
+        .nav-icon { font-size: 1.3rem; transition: transform 0.2s; }
+        .nav-label { font-size: 0.7rem; margin-top: 4px; }
         
-        /* LOADING */
+        /* ============================================================
+           LOADING
+           ============================================================ */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -324,7 +470,6 @@
             backdrop-filter: blur(4px);
         }
         .loading-overlay.show { display: flex; }
-        
         .spinner-box {
             background: white;
             padding: 30px 40px;
@@ -340,56 +485,116 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        @media (max-width: 640px) {
-            .children-grid { grid-template-columns: 1fr; }
+        /* ============================================================
+           RESPONSIVO
+           ============================================================ */
+        @media (max-width: 768px) {
+            .details-grid { grid-template-columns: 1fr; }
+            .tree-node { min-width: 140px; max-width: unset; }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+            .filter-group { min-width: unset; }
+            .filter-actions { flex-wrap: wrap; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .tree-level { flex-direction: column; }
+            .tree-node { min-width: unset; }
+            .kpi-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO -->
+    <!-- ============================================================
+    CABEÇALHO
+    ============================================================ -->
     <header class="app-header">
         <div class="logo-area">
-            <div class="logo-icon"><i class="fa-solid fa-chart-pie"></i></div>
+            <div class="logo-icon"><i class="fa-solid fa-sitemap"></i></div>
             <div class="logo-text">
                 <h1>SFICHIPS</h1>
-                <p>Leads · Planilha CRM</p>
+                <p>Hierarquia · Filtros</p>
             </div>
         </div>
-        <div class="header-status">
-            <span class="status-dot loading" id="statusDot"></span>
-            <span id="statusText">Carregando...</span>
-        </div>
-        <div class="reload-btn" id="reloadBtn" title="Recarregar">
-            <i class="fa-solid fa-rotate-right"></i>
+        <div class="header-right">
+            <div class="status-bar">
+                <span class="status-dot loading" id="statusDot"></span>
+                <span id="statusText">Carregando...</span>
+            </div>
+            <button class="btn-reload" id="reloadBtn">
+                <i class="fa-solid fa-rotate"></i> Atualizar
+            </button>
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL -->
+    <!-- ============================================================
+    ÁREA PRINCIPAL
+    ============================================================ -->
     <main class="main-content" id="mainContent">
-        
+
+        <!-- FILTROS DINÂMICOS (estilo Data Studio) -->
+        <div class="filters-bar" id="filtersBar">
+            <div class="filter-group">
+                <label><i class="fa-regular fa-calendar"></i> Data Início</label>
+                <input type="date" id="filterDataInicio">
+            </div>
+            <div class="filter-group">
+                <label><i class="fa-regular fa-calendar"></i> Data Fim</label>
+                <input type="date" id="filterDataFim">
+            </div>
+            <div class="filter-group">
+                <label><i class="fa-solid fa-store"></i> Dealer</label>
+                <select id="filterDealer"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group">
+                <label><i class="fa-solid fa-globe"></i> Origem</label>
+                <select id="filterOrigem"><option value="">Todas</option></select>
+            </div>
+            <div class="filter-group">
+                <label><i class="fa-solid fa-gear"></i> Motor</label>
+                <select id="filterMotor"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-group">
+                <label><i class="fa-solid fa-bullhorn"></i> ADS</label>
+                <select id="filterADS"><option value="">Todos</option></select>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-filter apply" id="applyFilters"><i class="fa-solid fa-filter"></i> Aplicar</button>
+                <button class="btn-filter clear" id="clearFilters"><i class="fa-solid fa-xmark"></i> Limpar</button>
+            </div>
+        </div>
+
         <!-- BREADCRUMB -->
         <div class="breadcrumb" id="breadcrumb">
-            <span style="color:#94a3b8; font-size:0.85rem;">📍</span>
+            <span style="color:#94a3b8;"><i class="fa-solid fa-location-dot"></i></span>
             <span class="breadcrumb-item level-total" onclick="navegarPara('total')">
                 <i class="fa-solid fa-house"></i> Total
             </span>
+            <span class="count-info" id="breadcrumbCount"></span>
         </div>
 
-        <!-- ÁRVORE -->
-        <div class="tree-container" id="treeContainer">
-            <!-- Renderizado via JavaScript -->
-        </div>
+        <!-- KPI CARDS -->
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <!-- ÁRVORE HIERÁRQUICA -->
+        <div id="treeContainer" class="tree-container"></div>
+
+        <!-- DETALHES (gráficos + tabela) -->
+        <div id="detailsContainer"></div>
+
     </main>
 
-    <!-- MENU INFERIOR -->
+    <!-- ============================================================
+    MENU INFERIOR
+    ============================================================ -->
     <nav class="bottom-nav">
-        <button class="nav-item" onclick="window.location.href='/'">
+        <button class="nav-item active" onclick="window.location.href='/'">
             <i class="nav-icon fa-solid fa-house"></i>
             <span class="nav-label">Início</span>
         </button>
-        <button class="nav-item active">
+        <button class="nav-item">
             <i class="nav-icon fa-solid fa-sitemap"></i>
             <span class="nav-label">Leads</span>
         </button>
@@ -399,6 +604,7 @@
         </button>
     </nav>
 
+    <!-- LOADING -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner-box">
             <div class="spinner"></div>
@@ -408,27 +614,18 @@
 
     <script>
         // ============================================================
-        // CONFIGURAÇÃO - Planilha Google
+        // CONFIGURAÇÃO
         // ============================================================
-        // IMPORTANTE: Para publicar a planilha como CSV:
-        // 1. Abra a planilha
-        // 2. Arquivo > Compartilhar > Publicar na web
-        // 3. Selecione a aba "CRM" e formato "CSV"
-        // 4. Copie o link gerado e cole abaixo
-        // ============================================================
-        
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvK_d2iB7K5Iqm-A6NkUJQVSYhas4E4KZ5Knog051Ii3zkitIY7W1W_8dsWfAq05CIknqQ__niizHi/pub?gid=196866897&single=true&output=csv';
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1ALv2JzP9JChn5b3k-LpmH52Qkv6eB2yqsK7FWZIwRg8/pub?gid=196866897&single=true&output=csv';
 
         // ============================================================
         // ESTADO
         // ============================================================
-        let state = {
-            crm: [],
-            carregado: false
-        };
-
+        let dados = [];
+        let dadosFiltrados = [];
         let caminhoAtual = ['total'];
         let dadosAgrupados = {};
+        let charts = {};
 
         // ============================================================
         // FUNÇÕES DE CARREGAMENTO
@@ -437,31 +634,25 @@
             document.getElementById('loadingOverlay').className = `loading-overlay${show ? ' show' : ''}`;
         }
 
-        async function carregarCSV(url) {
-            return new Promise((resolve, reject) => {
-                Papa.parse(url, {
-                    download: true,
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (results) => {
-                        if (results.errors.length > 0) {
-                            reject(results.errors);
-                        } else {
-                            resolve(results.data);
-                        }
-                    },
-                    error: (error) => reject(error)
-                });
-            });
+        function updateStatus(text, isError = false) {
+            const dot = document.getElementById('statusDot');
+            const textEl = document.getElementById('statusText');
+            dot.className = `status-dot${isError ? ' offline' : ' online'}`;
+            textEl.textContent = text;
         }
 
         async function carregarDados() {
             showLoading(true);
+            updateStatus('Carregando...');
+
             try {
-                const crmData = await carregarCSV(SHEET_URL);
+                const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
-                // Filtra linhas vazias e mapeia as colunas corretas
-                state.crm = crmData
+                const csv = await response.text();
+                const result = Papa.parse(csv, { header: true, skipEmptyLines: true });
+                
+                dados = result.data
                     .filter(row => row.Data && row.Data.trim() !== '')
                     .map(row => ({
                         Data: row.Data || '',
@@ -475,19 +666,17 @@
                         Veiculo: row.Veículo || row.Veiculo || '',
                         Motor: row.Motor || ''
                     }));
+
+                dadosFiltrados = [...dados];
+                updateStatus(`${dados.length} registros`);
                 
-                state.carregado = true;
-                
-                document.getElementById('statusDot').className = 'status-dot online';
-                document.getElementById('statusText').textContent = `${state.crm.length} registros`;
-                
+                popularFiltros();
                 processarDados();
-                renderizarArvore();
-                
+                renderizarDashboard();
+
             } catch (error) {
-                console.error('Erro ao carregar:', error);
-                document.getElementById('statusDot').className = 'status-dot offline';
-                document.getElementById('statusText').textContent = 'Erro ao carregar';
+                console.error('Erro:', error);
+                updateStatus('Erro ao carregar', true);
                 usarDadosMock();
             } finally {
                 showLoading(false);
@@ -495,10 +684,10 @@
         }
 
         // ============================================================
-        // DADOS MOCK (fallback caso a planilha não carregue)
+        // DADOS MOCK (fallback)
         // ============================================================
         function usarDadosMock() {
-            state.crm = [
+            dados = [
                 { Data: '01/01/2026', Nome: 'João Silva', Dealer: 'Matriz A', Origem: 'Facebook', Ads: 'ADS001', Veiculo: 'Fusca', Motor: 'Turbo' },
                 { Data: '02/01/2026', Nome: 'Maria Souza', Dealer: 'Dealer B', Origem: 'Instagram', Ads: 'ADS002', Veiculo: 'Gol', Motor: 'Aspirado' },
                 { Data: '03/01/2026', Nome: 'Carlos Lima', Dealer: 'Matriz A', Origem: 'Google', Ads: 'ADS001', Veiculo: 'Civic', Motor: 'Turbo' },
@@ -506,22 +695,82 @@
                 { Data: '05/01/2026', Nome: 'Pedro Santos', Dealer: 'Matriz B', Origem: 'Instagram', Ads: 'ADS004', Veiculo: 'Golf', Motor: 'Turbo' },
                 { Data: '06/01/2026', Nome: 'Julia Costa', Dealer: 'Dealer B', Origem: 'Google', Ads: 'ADS002', Veiculo: 'Onix', Motor: 'Aspirado' }
             ];
-            state.carregado = true;
-            document.getElementById('statusDot').className = 'status-dot online';
-            document.getElementById('statusText').textContent = `${state.crm.length} registros (mock)`;
+            dadosFiltrados = [...dados];
+            updateStatus(`${dados.length} registros (mock)`);
+            popularFiltros();
             processarDados();
-            renderizarArvore();
+            renderizarDashboard();
+        }
+
+        // ============================================================
+        // POPULAR FILTROS
+        // ============================================================
+        function popularFiltros() {
+            const dealers = [...new Set(dados.map(r => r.Dealer))].filter(Boolean).sort();
+            const origens = [...new Set(dados.map(r => r.Origem))].filter(Boolean).sort();
+            const motores = [...new Set(dados.map(r => r.Motor))].filter(Boolean).sort();
+            const ads = [...new Set(dados.map(r => r.Ads))].filter(Boolean).sort();
+
+            document.getElementById('filterDealer').innerHTML = '<option value="">Todos</option>' + dealers.map(d => `<option value="${d}">${d}</option>`).join('');
+            document.getElementById('filterOrigem').innerHTML = '<option value="">Todas</option>' + origens.map(o => `<option value="${o}">${o}</option>`).join('');
+            document.getElementById('filterMotor').innerHTML = '<option value="">Todos</option>' + motores.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('filterADS').innerHTML = '<option value="">Todos</option>' + ads.map(a => `<option value="${a}">${a}</option>`).join('');
+        }
+
+        // ============================================================
+        // APLICAR FILTROS
+        // ============================================================
+        function aplicarFiltros() {
+            const dataInicio = document.getElementById('filterDataInicio').value;
+            const dataFim = document.getElementById('filterDataFim').value;
+            const dealer = document.getElementById('filterDealer').value;
+            const origem = document.getElementById('filterOrigem').value;
+            const motor = document.getElementById('filterMotor').value;
+            const ads = document.getElementById('filterADS').value;
+
+            dadosFiltrados = dados.filter(r => {
+                if (dataInicio && r.Data) {
+                    const dataRegistro = r.Data.split('/').reverse().join('-');
+                    if (dataRegistro < dataInicio) return false;
+                }
+                if (dataFim && r.Data) {
+                    const dataRegistro = r.Data.split('/').reverse().join('-');
+                    if (dataRegistro > dataFim) return false;
+                }
+                if (dealer && r.Dealer !== dealer) return false;
+                if (origem && r.Origem !== origem) return false;
+                if (motor && r.Motor !== motor) return false;
+                if (ads && r.Ads !== ads) return false;
+                return true;
+            });
+
+            // Resetar navegação para Total
+            caminhoAtual = ['total'];
+            processarDados();
+            renderizarDashboard();
+        }
+
+        function limparFiltros() {
+            document.getElementById('filterDataInicio').value = '';
+            document.getElementById('filterDataFim').value = '';
+            document.getElementById('filterDealer').value = '';
+            document.getElementById('filterOrigem').value = '';
+            document.getElementById('filterMotor').value = '';
+            document.getElementById('filterADS').value = '';
+            dadosFiltrados = [...dados];
+            caminhoAtual = ['total'];
+            processarDados();
+            renderizarDashboard();
         }
 
         // ============================================================
         // PROCESSAMENTO DOS DADOS
         // ============================================================
         function processarDados() {
-            const crm = state.crm;
+            const data = dadosFiltrados;
             
-            // Matriz = Dealer que contém "Matriz" no nome
-            const matrizLeads = crm.filter(r => (r.Dealer || '').toLowerCase().includes('matriz'));
-            const dealersLeads = crm.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz'));
+            const matrizLeads = data.filter(r => (r.Dealer || '').toLowerCase().includes('matriz'));
+            const dealersLeads = data.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz'));
             
             function agruparPorMotor(dados) {
                 const turbo = dados.filter(r => (r.Motor || '').toLowerCase() === 'turbo');
@@ -546,7 +795,7 @@
                 total: {
                     label: 'Total',
                     icon: 'fa-solid fa-database',
-                    count: crm.length,
+                    count: data.length,
                     children: {
                         matriz: {
                             label: 'Matriz',
@@ -596,17 +845,57 @@
         }
 
         // ============================================================
-        // RENDERIZAÇÃO DA ÁRVORE
+        // RENDERIZAR DASHBOARD
+        // ============================================================
+        function renderizarDashboard() {
+            const data = dadosFiltrados;
+            const total = data.length;
+            
+            // ---- KPI CARDS ----
+            const aspirados = data.filter(r => (r.Motor || '').toLowerCase() === 'aspirado').length;
+            const turbos = data.filter(r => (r.Motor || '').toLowerCase() === 'turbo').length;
+            const matriz = data.filter(r => (r.Dealer || '').toLowerCase().includes('matriz')).length;
+            const dealers = data.filter(r => !(r.Dealer || '').toLowerCase().includes('matriz')).length;
+
+            document.getElementById('kpiGrid').innerHTML = `
+                <div class="kpi-card blue">
+                    <div class="label"><i class="fa-solid fa-users"></i> Total de Leads</div>
+                    <div class="value">${total}</div>
+                    <div class="sub"><span class="asp">●</span> Aspirado: ${aspirados} <span class="turbo">●</span> Turbo: ${turbos}</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="label"><i class="fa-solid fa-building"></i> Matriz</div>
+                    <div class="value">${matriz}</div>
+                    <div class="sub">${total > 0 ? ((matriz/total)*100).toFixed(1) : 0}% do total</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="label"><i class="fa-solid fa-store"></i> Dealers</div>
+                    <div class="value">${dealers}</div>
+                    <div class="sub">${total > 0 ? ((dealers/total)*100).toFixed(1) : 0}% do total</div>
+                </div>
+                <div class="kpi-card orange">
+                    <div class="label"><i class="fa-solid fa-bullhorn"></i> ADS Distintos</div>
+                    <div class="value">${new Set(data.map(r => r.Ads)).size}</div>
+                    <div class="sub">Anúncios ativos</div>
+                </div>
+            `;
+
+            // ---- ÁRVORE ----
+            renderizarArvore();
+        }
+
+        // ============================================================
+        // RENDERIZAR ÁRVORE
         // ============================================================
         function renderizarArvore() {
             const container = document.getElementById('treeContainer');
-            const caminho = caminhoAtual;
+            const detailsContainer = document.getElementById('detailsContainer');
             
             atualizarBreadcrumb();
             
             let nivel = dadosAgrupados.total;
-            for (let i = 1; i < caminho.length; i++) {
-                const passo = caminho[i];
+            for (let i = 1; i < caminhoAtual.length; i++) {
+                const passo = caminhoAtual[i];
                 if (nivel.children && nivel.children[passo]) {
                     nivel = nivel.children[passo];
                 }
@@ -627,9 +916,15 @@
                     'turbo': 'level-turbo',
                     'aspirado': 'level-aspirado'
                 };
+                const labelMap = {
+                    'matriz': 'Matriz',
+                    'dealers': 'Dealers',
+                    'turbo': 'Turbo',
+                    'aspirado': 'Aspirado'
+                };
                 
                 container.innerHTML = `
-                    <div class="children-grid">
+                    <div class="tree-level">
                         ${filhos.map(key => {
                             const filho = nivel.children[key];
                             return `
@@ -638,7 +933,7 @@
                                         <div class="left">
                                             <div class="icon"><i class="${iconMap[key] || 'fa-solid fa-folder'}"></i></div>
                                             <div>
-                                                <div class="name">${filho.label}</div>
+                                                <div class="name">${labelMap[key] || filho.label}</div>
                                                 <div class="count">${filho.count} leads</div>
                                             </div>
                                         </div>
@@ -649,16 +944,17 @@
                         }).join('')}
                     </div>
                 `;
+                detailsContainer.innerHTML = '';
             }
             
             // Se tem ADS (é Turbo ou Aspirado)
             if (nivel.ads) {
                 const adsKeys = Object.keys(nivel.ads);
                 
-                let html = `
-                    <div class="children-grid">
+                container.innerHTML = `
+                    <div class="tree-level">
                         ${adsKeys.map(ads => {
-                            const dados = nivel.ads[ads];
+                            const dadosAds = nivel.ads[ads];
                             return `
                                 <div class="tree-node level-ads" onclick="selecionarADS('${ads}')">
                                     <div class="tree-node-header">
@@ -666,7 +962,7 @@
                                             <div class="icon"><i class="fa-solid fa-bullhorn"></i></div>
                                             <div>
                                                 <div class="name">${ads}</div>
-                                                <div class="count">${dados.length} leads</div>
+                                                <div class="count">${dadosAds.length} leads</div>
                                             </div>
                                         </div>
                                         <div class="arrow"><i class="fa-solid fa-chevron-right"></i></div>
@@ -677,13 +973,20 @@
                     </div>
                 `;
                 
-                // Tabela detalhada
-                html += `
-                    <div class="ads-table-wrapper">
-                        <div class="table-title">
-                            <i class="fa-solid fa-table" style="color:#2563eb;"></i>
-                            Detalhes dos Leads · ${nivel.label}
+                // Detalhes: gráficos + tabela
+                detailsContainer.innerHTML = `
+                    <div class="details-grid">
+                        <div class="detail-card">
+                            <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Distribuição por ADS</div>
+                            <div class="chart-container"><canvas id="chartADS"></canvas></div>
                         </div>
+                        <div class="detail-card">
+                            <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Leads por ADS</div>
+                            <div class="chart-container"><canvas id="chartADSBar"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="table-card">
+                        <div class="table-title"><i class="fa-solid fa-table"></i> Detalhes · ${nivel.label}</div>
                         <div class="table-scroll">
                             <table>
                                 <thead>
@@ -697,29 +1000,142 @@
                                         <th>Motor</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    ${nivel.data.map(r => `
-                                        <tr>
-                                            <td>${r.Data || '-'}</td>
-                                            <td><strong>${r.Nome || '-'}</strong></td>
-                                            <td>${r.Dealer || '-'}</td>
-                                            <td>${r.Origem || '-'}</td>
-                                            <td><span class="ads-badge">${r.Ads || '-'}</span></td>
-                                            <td>${r.Veiculo || '-'}</td>
-                                            <td style="color:${(r.Motor || '').toLowerCase() === 'turbo' ? '#7c3aed' : '#f97316'}; font-weight:600;">${r.Motor || '-'}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
+                                <tbody id="tableBody"></tbody>
                             </table>
                         </div>
-                        <div style="margin-top:10px; font-size:0.85rem; color:#64748b;">
-                            ${nivel.data.length} registros encontrados
-                        </div>
+                        <div class="table-count" id="tableCount">${nivel.data.length} registros encontrados</div>
                     </div>
                 `;
                 
-                container.innerHTML = html;
+                // Preencher tabela
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = nivel.data.map(r => `
+                    <tr>
+                        <td>${r.Data || '-'}</td>
+                        <td><strong>${r.Nome || '-'}</strong></td>
+                        <td>${r.Dealer || '-'}</td>
+                        <td>${r.Origem || '-'}</td>
+                        <td><span class="badge-ads">${r.Ads || '-'}</span></td>
+                        <td>${r.Veiculo || '-'}</td>
+                        <td class="${(r.Motor || '').toLowerCase() === 'turbo' ? 'badge-turbo' : 'badge-aspirado'}">${r.Motor || '-'}</td>
+                    </tr>
+                `).join('');
+                
+                // Gráficos
+                setTimeout(() => {
+                    const adsLabels = Object.keys(nivel.ads);
+                    const adsValues = adsLabels.map(a => nivel.ads[a].length);
+                    const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+                    
+                    if (charts.adsPie) charts.adsPie.destroy();
+                    charts.adsPie = new Chart(document.getElementById('chartADS'), {
+                        type: 'pie',
+                        data: {
+                            labels: adsLabels,
+                            datasets: [{
+                                data: adsValues,
+                                backgroundColor: cores.slice(0, adsLabels.length),
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10 } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const pct = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                            return `${context.label}: ${context.raw} (${pct}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    if (charts.adsBar) charts.adsBar.destroy();
+                    charts.adsBar = new Chart(document.getElementById('chartADSBar'), {
+                        type: 'bar',
+                        data: {
+                            labels: adsLabels,
+                            datasets: [{
+                                label: 'Leads',
+                                data: adsValues,
+                                backgroundColor: '#2563eb',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                }, 50);
             }
+        }
+
+        // ============================================================
+        // BREADCRUMB
+        // ============================================================
+        function atualizarBreadcrumb() {
+            const container = document.getElementById('breadcrumb');
+            const labels = {
+                'total': 'Total',
+                'matriz': 'Matriz',
+                'dealers': 'Dealers',
+                'turbo': 'Turbo',
+                'aspirado': 'Aspirado'
+            };
+            const levelClasses = {
+                'total': 'level-total',
+                'matriz': 'level-matriz',
+                'dealers': 'level-dealers',
+                'turbo': 'level-turbo',
+                'aspirado': 'level-aspirado'
+            };
+            const icons = {
+                'total': 'fa-solid fa-house',
+                'matriz': 'fa-solid fa-building',
+                'dealers': 'fa-solid fa-store',
+                'turbo': 'fa-solid fa-bolt',
+                'aspirado': 'fa-solid fa-wind'
+            };
+            
+            let html = `<span style="color:#94a3b8;"><i class="fa-solid fa-location-dot"></i></span>`;
+            
+            caminhoAtual.forEach((item, index) => {
+                const label = labels[item] || item;
+                const cls = levelClasses[item] || 'level-total';
+                const icon = icons[item] || 'fa-solid fa-folder';
+                const isLast = index === caminhoAtual.length - 1;
+                
+                html += `
+                    <span class="breadcrumb-item ${cls}" onclick="navegarPara('${item}')">
+                        <i class="${icon}"></i> ${label}
+                    </span>
+                `;
+                
+                if (!isLast) {
+                    html += `<span class="sep"><i class="fa-solid fa-chevron-right"></i></span>`;
+                }
+            });
+            
+            let nivel = dadosAgrupados.total;
+            for (let i = 1; i < caminhoAtual.length; i++) {
+                const passo = caminhoAtual[i];
+                if (nivel.children && nivel.children[passo]) {
+                    nivel = nivel.children[passo];
+                }
+            }
+            const count = nivel.count || 0;
+            html += `<span class="count-info">${count} leads</span>`;
+            
+            container.innerHTML = html;
         }
 
         // ============================================================
@@ -737,74 +1153,40 @@
                 }
             }
             renderizarArvore();
+            document.getElementById('treeContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function selecionarADS(ads) {
-            const el = document.querySelector(`.tree-node.level-ads .name:contains("${ads}")`);
-            if (el) {
-                el.closest('.tree-node').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-
-        function atualizarBreadcrumb() {
-            const container = document.getElementById('breadcrumb');
-            const caminho = caminhoAtual;
-            
-            const labels = {
-                'total': 'Total',
-                'matriz': 'Matriz',
-                'dealers': 'Dealers',
-                'turbo': 'Turbo',
-                'aspirado': 'Aspirado'
-            };
-            
-            const levelClasses = {
-                'total': 'level-total',
-                'matriz': 'level-matriz',
-                'dealers': 'level-dealers',
-                'turbo': 'level-turbo',
-                'aspirado': 'level-aspirado'
-            };
-            
-            const icons = {
-                'total': 'fa-solid fa-house',
-                'matriz': 'fa-solid fa-building',
-                'dealers': 'fa-solid fa-store',
-                'turbo': 'fa-solid fa-bolt',
-                'aspirado': 'fa-solid fa-wind'
-            };
-            
-            let html = `<span style="color:#94a3b8; font-size:0.85rem;">📍</span>`;
-            
-            caminho.forEach((item, index) => {
-                const label = labels[item] || item;
-                const cls = levelClasses[item] || 'level-total';
-                const icon = icons[item] || 'fa-solid fa-folder';
-                const isLast = index === caminho.length - 1;
-                
-                html += `
-                    <span class="breadcrumb-item ${cls}" onclick="navegarPara('${item}')">
-                        <i class="${icon}"></i> ${label}
-                    </span>
-                `;
-                
-                if (!isLast) {
-                    html += `<span style="color:#94a3b8; font-size:0.7rem;"><i class="fa-solid fa-chevron-right"></i></span>`;
+            const nodes = document.querySelectorAll('.tree-node.level-ads');
+            nodes.forEach(node => {
+                const name = node.querySelector('.name');
+                if (name && name.textContent === ads) {
+                    node.style.borderColor = '#2563eb';
+                    node.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.2)';
+                    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        node.style.borderColor = '';
+                        node.style.boxShadow = '';
+                    }, 3000);
                 }
             });
-            
-            const total = state.crm.length;
-            html += `<span style="margin-left:auto; font-size:0.75rem; color:#64748b;">${total} leads no total</span>`;
-            
-            container.innerHTML = html;
         }
 
         // ============================================================
         // EVENTOS
         // ============================================================
+        document.getElementById('applyFilters').addEventListener('click', aplicarFiltros);
+        document.getElementById('clearFilters').addEventListener('click', limparFiltros);
         document.getElementById('reloadBtn').addEventListener('click', () => {
             caminhoAtual = ['total'];
             carregarDados();
+        });
+
+        // Atalho: Enter aplica filtros
+        document.querySelectorAll('#filtersBar input, #filtersBar select').forEach(el => {
+            el.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') aplicarFiltros();
+            });
         });
 
         // ============================================================
