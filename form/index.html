@@ -711,6 +711,40 @@
             display: none;
         }
 
+        .classification-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .badge-turbo {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-aspirado {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-eletrico {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .badge-hibrido {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .badge-indefinido {
+            background: #f5f5f5;
+            color: #666;
+        }
+
         @media (max-width: 480px) {
             .options-grid {
                 grid-template-columns: 1fr;
@@ -859,153 +893,240 @@
         const WEBHOOK_URL = "https://hook.us1.make.com/gojqj74k9mioj8zg7mratyf4qlkl4pqi";
         
         // ==================== WHATSAPP DESTINATÁRIO ====================
-        // Extrai o número da função redirectToWhatsApp
         function getDestinatarioWhatsApp() {
-            // Este número deve ser o mesmo que está no redirectToWhatsApp
-            return "27999833095"; // ← ALTERE AQUI O NÚMERO DO WHATSAPP DO DESTINATÁRIO
+            return "27999833095";
         }
         
-const vehiclesData = {
-    "Chevrolet": ["Onix", "Onix Plus", "Prisma", "Tracker", "Cruze", "Cruze Sport6", "Spin", "S10", "Montana", "Cobalt", "Bolt EV", "Equinox", "Blazer", "Silverado", "Camaro"],
-    "Fiat": ["Argo", "Cronos", "Mobi", "Strada", "Toro", "Pulse", "Fastback", "Palio", "Uno", "Punto", "Linea", "Doblô", "Fiorino", "Ducato", "500e"],
-    "Volkswagen": ["Gol", "Polo", "Polo Track", "Virtus", "Nivus", "T-Cross", "Taos", "Saveiro", "Amarok", "Jetta", "Tiguan", "ID.4", "ID. Buzz", "Fox", "SpaceFox", "Voyage"],
-    "Ford": ["Ka", "Ka Sedan", "Fiesta", "Fiesta Sedan", "EcoSport", "Ranger", "Maverick", "Bronco", "Bronco Sport", "Mustang", "Mustang Mach-E", "F-250", "F-350", "Transit"],
-    "Toyota": ["Corolla", "Corolla Cross", "Hilux", "SW4", "Yaris", "Yaris Sedan", "Etios", "RAV4", "Camry", "Prius", "bZ4X", "Land Cruiser"],
-    "Honda": ["Civic", "HR-V", "CR-V", "City", "City Sedan", "Fit", "Accord", "ZR-V", "e:Ny1"],
-    "Hyundai": ["HB20", "HB20S", "Creta", "Tucson", "Azera", "Santa Fe", "Kona", "Ioniq 5", "Ioniq 6"],
-    "Nissan": ["Kicks", "Versa", "Sentra", "Frontier", "Leaf", "Ariya", "Pathfinder"],
-    "Renault": ["Kwid", "Sandero", "Logan", "Duster", "Captur", "Oroch", "Megane E-Tech"],
-    "Jeep": ["Renegade", "Compass", "Commander", "Wrangler", "Gladiator"],
-    "BYD": ["Dolphin", "Dolphin Mini", "Seal", "Song Plus", "Han", "Tan", "Yuan Pro"],
-    "GWM": ["Haval H6", "Haval H6 GT", "Ora 03", "Ora Skin", "Poer"],
-    "RAM": ["Rampage", "1500", "2500", "3500"],
-    "Peugeot": ["208", "2008", "3008", "5008", "Expert"],
-    "Citroën": ["C3", "C3 Aircross", "C4 Cactus", "Aircross", "Berlingo"],
-    "BMW": ["320i", "X1", "X3", "X5", "i3", "i4", "iX", "M3", "M4"],
-    "Mercedes-Benz": ["Classe A", "Classe C", "GLA", "GLB", "GLC", "GLE", "EQA", "EQB", "EQE"],
-    "Audi": ["A3", "A4", "Q3", "Q5", "Q8", "e-tron", "Q4 e-tron"],
-    "Volvo": ["XC40", "XC60", "XC90", "S60", "C40 Recharge", "EX30"],
-    "Land Rover": ["Evoque", "Discovery Sport", "Range Rover Sport", "Defender"],
-    "Porsche": ["Cayenne", "Macan", "Taycan", "911", "Panamera"],
-    "Mini": ["Cooper", "Countryman", "Clubman", "Cooper SE"],
-    "Mitsubishi": ["Pajero", "Outlander", "ASX", "L200 Triton", "Eclipse Cross"],
-    "Subaru": ["Forester", "Outback", "XV", "WRX"],
-    "Suzuki": ["Jimny", "Swift", "Vitara", "Grand Vitara"],
-    "Lexus": ["UX", "NX", "RX", "ES", "LX"],
-    "Jaguar": ["F-Pace", "E-Pace", "I-Pace", "XF"],
-    "Kia": ["Sportage", "Seltos", "Stonic", "Cerato", "Picanto", "Niro EV"],
-    "Chery": ["Tiggo 3x", "Tiggo 5x", "Tiggo 7", "Tiggo 8", "Arrizo 6"],
-    "Caoa Chery": ["iCar", "QQ", "Celer"],
-    "Iveco": ["Daily", "Tector"],
-    "Agrale": ["Marruá", "Delivery"],
-    "Effa Motors": ["M100", "V21"],
-    "Foton": ["Tunland", "Aumark"],
-    "Jac Motors": ["T40", "T60", "J2", "E-JS1"],
-    "Lifan": ["X60", "320", "530"],
-    "Baic": ["X25", "Senova"]
-};
+        // ============================================
+        // DADOS DOS VEÍCULOS - ATUALIZADO
+        // ============================================
+        const vehiclesData = {
+            "Chevrolet": ["Onix", "Onix Plus", "Prisma", "Tracker", "Cruze", "Cruze Sport6", "Spin", "S10", "Montana", "Cobalt", "Bolt EV", "Equinox", "Blazer", "Silverado", "Camaro"],
+            "Fiat": ["Argo", "Cronos", "Mobi", "Strada", "Toro", "Pulse", "Fastback", "Palio", "Uno", "Punto", "Linea", "Doblô", "Fiorino", "Ducato", "500e"],
+            "Volkswagen": ["Gol", "Polo", "Polo Track", "Virtus", "Nivus", "T-Cross", "Taos", "Saveiro", "Amarok", "Jetta", "Tiguan", "ID.4", "ID. Buzz", "Fox", "SpaceFox", "Voyage"],
+            "Ford": ["Ka", "Ka Sedan", "Fiesta", "Fiesta Sedan", "EcoSport", "Ranger", "Maverick", "Bronco", "Bronco Sport", "Mustang", "Mustang Mach-E", "F-250", "F-350", "Transit"],
+            "Toyota": ["Corolla", "Corolla Cross", "Hilux", "SW4", "Yaris", "Yaris Sedan", "Etios", "RAV4", "Camry", "Prius", "bZ4X", "Land Cruiser"],
+            "Honda": ["Civic", "HR-V", "CR-V", "City", "City Sedan", "Fit", "Accord", "ZR-V", "e:Ny1"],
+            "Hyundai": ["HB20", "HB20S", "Creta", "Tucson", "Azera", "Santa Fe", "Kona", "Ioniq 5", "Ioniq 6"],
+            "Nissan": ["Kicks", "Versa", "Sentra", "Frontier", "Leaf", "Ariya", "Pathfinder"],
+            "Renault": ["Kwid", "Sandero", "Logan", "Duster", "Captur", "Oroch", "Megane E-Tech"],
+            "Jeep": ["Renegade", "Compass", "Commander", "Wrangler", "Gladiator"],
+            "BYD": ["Dolphin", "Dolphin Mini", "Seal", "Song Plus", "Han", "Tan", "Yuan Pro"],
+            "GWM": ["Haval H6", "Haval H6 GT", "Ora 03", "Ora Skin", "Poer"],
+            "RAM": ["Rampage", "1500", "2500", "3500"],
+            "Peugeot": ["208", "2008", "3008", "5008", "Expert"],
+            "Citroën": ["C3", "C3 Aircross", "C4 Cactus", "Aircross", "Berlingo"],
+            "BMW": ["320i", "X1", "X3", "X5", "i3", "i4", "iX", "M3", "M4"],
+            "Mercedes-Benz": ["Classe A", "Classe C", "GLA", "GLB", "GLC", "GLE", "EQA", "EQB", "EQE"],
+            "Audi": ["A3", "A4", "Q3", "Q5", "Q8", "e-tron", "Q4 e-tron"],
+            "Volvo": ["XC40", "XC60", "XC90", "S60", "C40 Recharge", "EX30"],
+            "Land Rover": ["Evoque", "Discovery Sport", "Range Rover Sport", "Defender"],
+            "Porsche": ["Cayenne", "Macan", "Taycan", "911", "Panamera"],
+            "Mini": ["Cooper", "Countryman", "Clubman", "Cooper SE"],
+            "Mitsubishi": ["Pajero", "Outlander", "ASX", "L200 Triton", "Eclipse Cross"],
+            "Subaru": ["Forester", "Outback", "XV", "WRX"],
+            "Suzuki": ["Jimny", "Swift", "Vitara", "Grand Vitara"],
+            "Lexus": ["UX", "NX", "RX", "ES", "LX"],
+            "Jaguar": ["F-Pace", "E-Pace", "I-Pace", "XF"],
+            "Kia": ["Sportage", "Seltos", "Stonic", "Cerato", "Picanto", "Niro EV"],
+            "Chery": ["Tiggo 3x", "Tiggo 5x", "Tiggo 7", "Tiggo 8", "Arrizo 6"],
+            "Caoa Chery": ["iCar", "QQ", "Celer"],
+            "Iveco": ["Daily", "Tector"],
+            "Agrale": ["Marruá", "Delivery"],
+            "Effa Motors": ["M100", "V21"],
+            "Foton": ["Tunland", "Aumark"],
+            "Jac Motors": ["T40", "T60", "J2", "E-JS1"],
+            "Lifan": ["X60", "320", "530"],
+            "Baic": ["X25", "Senova"]
+        };
 
-const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
+        const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
 
-const engineOptions = [
-    "1.0", "1.0 Turbo", "1.3", "1.3 Turbo", "1.4", "1.4 Turbo", 
-    "1.5", "1.5 Turbo", "1.6", "1.6 Turbo", "1.8", "1.8 Turbo", 
-    "2.0", "2.0 Turbo", "2.5", "3.0", "3.0 Turbo", "V6", "V8"
-];
+        const engineOptions = [
+            "1.0", "1.0 Turbo", "1.3", "1.3 Turbo", "1.4", "1.4 Turbo", 
+            "1.5", "1.5 Turbo", "1.6", "1.6 Turbo", "1.8", "1.8 Turbo", 
+            "2.0", "2.0 Turbo", "2.5", "3.0", "3.0 Turbo", "V6", "V8"
+        ];
 
-const fuelOptions = [
-    "Gasolina", "Etanol", "Flex", "Diesel", "Híbrido", "Elétrico"
-];
+        const fuelOptions = [
+            "Gasolina", "Etanol", "Flex", "Diesel", "Híbrido", "Elétrico"
+        ];
 
-// Atualizado com TODOS os modelos turbo (incluindo novos)
-const modelosOriginalmenteTurbo = new Set([
-    // VW
-    "nivus", "taos", "t-cross", "virtus", "amarok", "jetta", "tiguan", "id.4", "id. buzz",
-    // Fiat
-    "fastback", "pulse", "toro", "500e",
-    // Jeep
-    "compass", "commander", "renegade",
-    // Ford
-    "ranger", "maverick", "bronco", "bronco sport", "mustang", "mustang mach-e",
-    // Chevrolet
-    "cruze", "cruze sport6", "tracker", "s10", "blazer", "silverado", "bolt ev",
-    // Toyota
-    "hilux", "sw4", "corolla cross", "bZ4x", "prius",
-    // Hyundai
-    "tucson", "creta", "kona", "ioniq 5", "ioniq 6",
-    // Honda
-    "hr-v", "cr-v", "zr-v", "e:ny1",
-    // Nissan
-    "frontier", "leaf", "ariya",
-    // Renault
-    "captur", "megane e-tech",
-    // BYD
-    "dolphin", "dolphin mini", "seal", "song plus", "han", "tan", "yuan pro",
-    // GWM
-    "haval h6", "haval h6 gt", "ora 03", "ora skin", "poer",
-    // RAM
-    "rampage", "ram",
-    // Premium
-    "x1", "x3", "x5", "i3", "i4", "ix", "m3", "m4",
-    "classe a", "classe c", "gla", "glb", "glc", "gle", "eqa", "eqb", "eqe",
-    "a3", "a4", "q3", "q5", "q8", "e-tron", "q4 e-tron",
-    "xc40", "xc60", "xc90", "c40 recharge", "ex30",
-    "cayenne", "macan", "taycan",
-    // Outros
-    "outlander", "l200 triton", "eclipse cross",
-    "forester", "outback",
-    "sportage", "seltos", "niro ev",
-    "tiggo 3x", "tiggo 5x", "tiggo 7", "tiggo 8"
-]);
+        // ============================================
+        // TIPOS DE MOTOR - ATUALIZADO
+        // ============================================
+        const TIPOS_MOTOR = {
+            ASPIRADO: "Aspirado",
+            TURBO: "Turbo",
+            ELETRICO: "Elétrico",
+            HIBRIDO: "Híbrido",
+            INDEFINIDO: "Indefinido"
+        };
 
-// Atualizado com TODOS os modelos aspirados (incluindo antigos que ainda rodam)
-const modelosAspiradosConfirmados = new Set([
-    // VW
-    "gol", "voyage", "saveiro", "polo", "polo track", "fox", "spacefox",
-    // Chevrolet
-    "onix", "onix plus", "prisma", "spin", "cobalt", "celta", "classic", "camaro",
-    // Fiat
-    "mobi", "argo", "cronos", "palio", "uno", "punto", "linea", "doblô", "fiorino", "ducato",
-    // Ford
-    "ka", "ka sedan", "fiesta", "fiesta sedan", "ecosport",
-    // Toyota
-    "corolla", "yaris", "yaris sedan", "etios",
-    // Honda
-    "civic", "city", "city sedan", "fit", "accord",
-    // Hyundai
-    "hb20", "hb20s", "azera", "santa fe",
-    // Nissan
-    "kicks", "versa", "sentra", "pathfinder",
-    // Renault
-    "kwid", "sandero", "logan", "duster", "oroch",
-    // Peugeot
-    "208", "2008", "3008", "5008",
-    // Citroën
-    "c3", "c3 aircross", "c4 cactus", "aircross", "berlingo",
-    // Mitsubishi
-    "pajero", "asx",
-    // Suzuki
-    "jimny", "swift", "vitara", "grand vitara",
-    // Kia
-    "picanto", "cerato", "stonic",
-    // Chery/Caoa
-    "icar", "qq", "celer", "arrizo 6",
-    // JAC
-    "j2", "e-js1",
-    // Lifan
-    "x60", "320", "530",
-    // Baic
-    "x25", "senova"
-]);
+        // Modelos TURBO (incluindo Diesel)
+        const modelosTurbo = new Set([
+            // VW
+            "nivus", "taos", "t-cross", "virtus", "amarok", "jetta", "tiguan", "id.4", "id. buzz",
+            // Fiat
+            "fastback", "pulse", "toro", "500e",
+            // Jeep
+            "compass", "commander", "renegade", "wrangler", "gladiator",
+            // Ford
+            "ranger", "maverick", "bronco", "bronco sport", "mustang mach-e",
+            // Chevrolet
+            "cruze", "cruze sport6", "tracker", "s10", "blazer", "silverado", "bolt ev",
+            // Toyota
+            "hilux", "sw4", "corolla cross", "bZ4x", "prius", "land cruiser",
+            // Hyundai
+            "tucson", "creta", "kona", "ioniq 5", "ioniq 6",
+            // Honda
+            "hr-v", "cr-v", "zr-v", "accord", "e:ny1",
+            // Nissan
+            "frontier", "leaf", "ariya",
+            // Renault
+            "captur", "megane e-tech",
+            // BYD            "dolphin", "dolphin mini", "seal", "song plus", "han", "tan", "yuan pro",
+            // GWM
+            "haval h6", "haval h6 gt", "ora 03", "ora skin", "poer",
+            // RAM
+            "rampage", "ram 1500", "ram 2500", "ram 3500", "ram",
+            // Peugeot
+            "3008", "5008",
+            // Premium
+            "x1", "x3", "x5", "i3", "i4", "ix", "m3", "m4",
+            "classe a", "classe c", "gla", "glb", "glc", "gle", "eqa", "eqb", "eqe",
+            "a3", "a4", "q3", "q5", "q8", "e-tron", "q4 e-tron",
+            "xc40", "xc60", "xc90", "s60", "c40 recharge", "ex30",
+            "cayenne", "macan", "taycan", "911", "panamera",
+            // Outros
+            "outlander", "l200 triton", "eclipse cross",
+            "forester", "outback", "wrx",
+            "sportage", "seltos", "niro ev",
+            "tiggo 3x", "tiggo 5x", "tiggo 7", "tiggo 8",
+            // Diesel - Comerciais
+            "ducato", "daily", "tector", "transit", "f-250", "f-350",
+            // Adicionais
+            "pajero", "santa fe"
+        ]);
 
-// Atualizado com TODOS os motores disponíveis
-const motoresTurbo = new Set([
-    "1.0 turbo", "1.3 turbo", "1.4 turbo", "1.5 turbo", "1.6 turbo", "1.8 turbo", "2.0 turbo", "3.0 turbo"
-]);
+        // Modelos ASPIRADOS confirmados
+        const modelosAspirados = new Set([
+            // VW
+            "gol", "voyage", "saveiro", "polo", "polo track", "fox", "spacefox",
+            // Chevrolet
+            "onix", "onix plus", "prisma", "spin", "cobalt", "celta", "classic", "camaro",
+            // Fiat
+            "mobi", "argo", "cronos", "palio", "uno", "punto", "linea", "doblô", "fiorino",
+            // Ford
+            "ka", "ka sedan", "fiesta", "fiesta sedan", "ecosport", "mustang",
+            // Toyota
+            "corolla", "yaris", "yaris sedan", "etios", "rav4", "camry",
+            // Honda
+            "civic", "city", "city sedan", "fit",
+            // Hyundai
+            "hb20", "hb20s", "azera",
+            // Nissan
+            "kicks", "versa", "sentra", "pathfinder",
+            // Renault
+            "kwid", "sandero", "logan", "duster", "oroch",
+            // Peugeot
+            "208", "2008",
+            // Citroën
+            "c3", "c3 aircross", "c4 cactus", "aircross", "berlingo",
+            // Mitsubishi
+            "asx",
+            // Suzuki
+            "jimny", "swift", "vitara", "grand vitara",
+            // Kia
+            "picanto", "cerato", "stonic",
+            // Chery/Caoa
+            "icar", "qq", "celer", "arrizo 6",
+            // JAC
+            "j2", "e-js1",
+            // Lifan
+            "x60", "320", "530",
+            // Baic
+            "x25", "senova"
+        ]);
 
-const motoresAspirados = new Set([
-    "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", "2.0", "2.5", "3.0", "v6", "v8"
-]);
+        // Motores Turbo específicos
+        const motoresTurboLista = new Set([
+            "1.0 turbo", "1.3 turbo", "1.4 turbo", "1.5 turbo", "1.6 turbo", "1.8 turbo", "2.0 turbo", "3.0 turbo"
+        ]);
+
+        // Motores Aspirados específicos
+        const motoresAspiradosLista = new Set([
+            "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", "2.0", "2.5", "3.0", "v6", "v8"
+        ]);
+
+        // ============================================
+        // NOVA FUNÇÃO DE CLASSIFICAÇÃO - CORRIGIDA
+        // ============================================
+        function classificarMotor(selectedBrand, selectedModel, engine, fuel) {
+            const modelLower = selectedModel.toLowerCase().trim();
+            const engineLower = engine.toLowerCase().trim();
+            const fuelLower = fuel.toLowerCase().trim();
+
+            // REGRA 1: Veículos Elétricos
+            if (fuelLower === "elétrico" || fuelLower === "eletrico") {
+                return { type: TIPOS_MOTOR.ELETRICO, confidence: "Alta", reason: "Veículo elétrico" };
+            }
+
+            // REGRA 2: Veículos Híbridos
+            if (fuelLower === "híbrido" || fuelLower === "hibrido") {
+                return { type: TIPOS_MOTOR.HIBRIDO, confidence: "Alta", reason: "Veículo híbrido" };
+            }
+
+            // REGRA 3: DIESEL SEMPRE É TURBO (em veículos modernos)
+            if (fuelLower === "diesel") {
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor Diesel com turbocompressor" };
+            }
+
+            // REGRA 4: Motores V6 e V8
+            if (engineLower === "v6" || engineLower === "v8") {
+                // Modelos V8 aspirados clássicos (esportivos)
+                const aspiradosV8 = ["camaro", "mustang", "challenger", "charger"];
+                if (aspiradosV8.includes(modelLower)) {
+                    return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: "Motor V8 aspirado clássico" };
+                }
+                // Todos os outros V6/V8 modernos são Turbo
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor V6/V8 com turbocompressor" };
+            }
+
+            // REGRA 5: Verifica se o motor tem "turbo" no nome
+            if (engineLower.includes("turbo")) {
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Motor ${engine} com turbo` };
+            }
+
+            // REGRA 6: Verifica nos sets de modelos
+            if (modelosTurbo.has(modelLower)) {
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Modelo ${selectedModel} é originalmente turbo` };
+            }
+
+            if (modelosAspirados.has(modelLower)) {
+                return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: `Modelo ${selectedModel} é aspirado` };
+            }
+
+            // REGRA 7: Verifica motores específicos
+            if (motoresTurboLista.has(engineLower)) {
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Motor ${engine} turbo confirmado` };
+            }
+
+            if (motoresAspiradosLista.has(engineLower)) {
+                return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: `Motor ${engine} aspirado confirmado` };
+            }
+
+            // REGRA 8: Padrão - baseado no ano
+            const year = parseInt(selectedYear);
+            if (year >= 2020) {
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
+            }
+            if (year <= 2015) {
+                return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Baixa", reason: `Veículo mais antigo (${year}), provavelmente aspirado` };
+            }
+
+            return { type: TIPOS_MOTOR.INDEFINIDO, confidence: "Baixa", reason: "Não foi possível classificar automaticamente" };
+        }
 
         let selectedBrand = "";
         let selectedModel = "";
@@ -1019,45 +1140,18 @@ const motoresAspirados = new Set([
 
         // ==================== LISTA DE MUNICÍPIOS ====================
         const municipiosList = [
-    // Zona Leste - São Paulo - SP
-    "Aricanduva - SP",
-    "Artur Alvim - SP",
-    "Água Rasa - SP",
-    "Belém - SP",
-    "Brás - SP",
-    "Cangaíba - SP",
-    "Carrão - SP",
-    "Cidade Líder - SP",
-    "Cidade Tiradentes - SP",
-    "Ermelino Matarazzo - SP",
-    "Guaianases - SP",
-    "Iguatemi - SP",
-    "Itaim Paulista - SP",
-    "Itaquera - SP",
-    "José Bonifácio - SP",
-    "Lajeado - SP",
-    "Mooca - SP",
-    "Pari - SP",
-    "Parque do Carmo - SP",
-    "Penha - SP",
-    "Ponte Rasa - SP",
-    "São Mateus - SP",
-    "São Miguel Paulista - SP",
-    "São Rafael - SP",
-    "Sapopemba - SP",
-    "Tatuapé - SP",
-    "Vila Curuçá - SP",
-    "Vila Formosa - SP",
-    "Vila Matilde - SP",
-    "Vila Prudente - SP",
-    "Guarulhos - SP",
-    "Belemzinho - SP",
-    "Av. Europa - SP",
-    "República - SP",
-    "Vila Prudente - SP",
-    "Mooca - SP",
-    "Casa Verde - SP"
-];
+            "Aricanduva - SP", "Artur Alvim - SP", "Água Rasa - SP", "Belém - SP",
+            "Brás - SP", "Cangaíba - SP", "Carrão - SP", "Cidade Líder - SP",
+            "Cidade Tiradentes - SP", "Ermelino Matarazzo - SP", "Guaianases - SP",
+            "Iguatemi - SP", "Itaim Paulista - SP", "Itaquera - SP",
+            "José Bonifácio - SP", "Lajeado - SP", "Mooca - SP", "Pari - SP",
+            "Parque do Carmo - SP", "Penha - SP", "Ponte Rasa - SP",
+            "São Mateus - SP", "São Miguel Paulista - SP", "São Rafael - SP",
+            "Sapopemba - SP", "Tatuapé - SP", "Vila Curuçá - SP",
+            "Vila Formosa - SP", "Vila Matilde - SP", "Vila Prudente - SP",
+            "Guarulhos - SP", "Belemzinho - SP", "Av. Europa - SP",
+            "República - SP", "Vila Prudente - SP", "Mooca - SP", "Casa Verde - SP"
+        ];
 
         let citiesList = [];
 
@@ -1214,32 +1308,6 @@ const motoresAspirados = new Set([
             }
         }
 
-        function classifyVehicle() {
-            const model = selectedModel.toLowerCase().trim();
-            const engine = selectedEngine.toLowerCase().trim();
-            const year = parseInt(selectedYear);
-            
-            if (motoresTurbo.has(engine)) {
-                return { type: "Turbo", confidence: "Alta", reason: `Motor ${selectedEngine} originalmente turbo` };
-            }
-            if (modelosOriginalmenteTurbo.has(model)) {
-                return { type: "Turbo", confidence: "Alta", reason: `Modelo ${selectedModel} é originalmente turbo` };
-            }
-            if (motoresAspirados.has(engine)) {
-                return { type: "Aspirado", confidence: "Alta", reason: `Motor ${selectedEngine} aspirado` };
-            }
-            if (modelosAspiradosConfirmados.has(model)) {
-                return { type: "Aspirado", confidence: "Média", reason: `Modelo ${selectedModel} é aspirado` };
-            }
-            if (year >= 2020) {
-                return { type: "Turbo", confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
-            }
-            if (year <= 2015) {
-                return { type: "Aspirado", confidence: "Baixa", reason: `Veículo mais antigo (${year}), provavelmente aspirado` };
-            }
-            return { type: "Indefinido", confidence: "Baixa", reason: "Não foi possível classificar automaticamente" };
-        }
-
         async function sendToWebhook(data) {
             try {
                 const response = await fetch(WEBHOOK_URL, {
@@ -1265,9 +1333,10 @@ const motoresAspirados = new Set([
             const name = document.getElementById("nameInput").value.trim();
             const whatsapp = document.getElementById("whatsappInput").value.trim();
             const whatsappClean = whatsapp.replace(/\D/g, '');
-            const destinatario = getDestinatarioWhatsApp(); // Pega o número do destinatário
+            const destinatario = getDestinatarioWhatsApp();
             
-            const motorClassification = classifyVehicle();
+            // Usa a nova função de classificação
+            const motorClassification = classificarMotor(selectedBrand, selectedModel, selectedEngine, selectedFuel);
             const motorType = motorClassification.type;
             const confidence = motorClassification.confidence;
             const reason = motorClassification.reason;
@@ -1275,6 +1344,7 @@ const motoresAspirados = new Set([
             let atende = false;
             let qualificacaoLevel = "";
             
+            // Lógica de qualificação atualizada
             if (motorType === "Turbo" && (selectedProblem === "performance" || selectedProblem === "economy")) {
                 atende = true;
                 qualificacaoLevel = "Qualificado";
@@ -1282,8 +1352,12 @@ const motoresAspirados = new Set([
                 atende = false;
                 qualificacaoLevel = "Não Qualificado - Problema fora do escopo";
             } else if (motorType === "Aspirado") {
+                // VEÍCULO ASPIRADO - NÃO É PERFIL IDEAL PARA REPROGRAMAÇÃO
                 atende = false;
                 qualificacaoLevel = "Não Qualificado - Perfil Inadequado";
+            } else if (motorType === "Elétrico" || motorType === "Híbrido") {
+                atende = false;
+                qualificacaoLevel = "Não Qualificado - Motorização alternativa";
             } else {
                 atende = false;
                 qualificacaoLevel = "Necessita Análise Manual";
@@ -1348,20 +1422,32 @@ const motoresAspirados = new Set([
                 title = "🔍 ANÁLISE DETALHADA CONCLUÍDA";
                 icon = "📋";
                 
-            if (motorType === "Aspirado") {
-                message = `Com o Euro Booster da SFI CHIPS, você elimina o atraso do acelerador e ganha mais performance em qualquer motor. Quer testar no seu carro?`;
-            } else if (motorType === "Turbo" && selectedProblem === "electronic") {
-                message = `Seu veículo turbo tem grande potencial! Para problemas elétricos, indicamos um diagnóstico especializado antes. Podemos orientar você.`;
-            } else {
-                message = `Nossos especialistas estão prontos para analisar seu caso e oferecer a melhor solução em performance automotiva. Fale conosco!`;
+                if (motorType === "Aspirado") {
+                    message = `Seu ${selectedBrand} ${selectedModel} possui motor aspirado. A boa notícia é que a SFI CHIPS tem a solução ideal para você! Com o Euro Booster, atuamos diretamente no pedal do acelerador, eliminando o atraso e proporcionando uma resposta muito mais ágil e prazerosa ao dirigir, independentemente do tipo de motor. Quer conhecer mais?`;
+                } else if (motorType === "Turbo" && selectedProblem === "electronic") {
+                    message = `Seu ${selectedBrand} ${selectedModel} turbo tem grande potencial! Porém, para problemas elétricos, recomendamos uma avaliação especializada em diagnóstico automotivo antes de qualquer alteração. Podemos orientar você nesse processo.`;
+                } else if (motorType === "Elétrico") {
+                    message = `Seu ${selectedBrand} ${selectedModel} é um veículo elétrico de alta tecnologia! Embora a reprogramação tradicional não se aplique, podemos oferecer orientações sobre performance e manutenção. Fale conosco!`;
+                } else if (motorType === "Híbrido") {
+                    message = `Seu ${selectedBrand} ${selectedModel} é um veículo híbrido! Temos soluções que podem complementar a performance do seu sistema. Que tal conhecer mais?`;
+                } else {
+                    message = `Seu ${selectedBrand} ${selectedModel} possui grande potencial! Nossos especialistas podem analisar seu caso e encontrar a melhor solução para você. Fale conosco!`;
+                }
             }
-            }
+            
+            const badgeClass = {
+                "Turbo": "badge-turbo",
+                "Aspirado": "badge-aspirado",
+                "Elétrico": "badge-eletrico",
+                "Híbrido": "badge-hibrido",
+                "Indefinido": "badge-indefinido"
+            };
             
             const vehicleInfoHtml = `
                 <div class="vehicle-info">
                     <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
                     🔧 Motor: ${selectedEngine} • ⛽ Combustível: ${selectedFuel}<br>
-                    🎯 Classificação: ${motorType}<br>
+                    🎯 Classificação: <span class="classification-badge ${badgeClass[motorType] || 'badge-indefinido'}">${motorType}</span><br>
                     📌 Foco: ${problemText[selectedProblem]}<br>
                     📍 Cidade: ${selectedCity}${isCustomCity ? " ✏️" : ""}
                 </div>
