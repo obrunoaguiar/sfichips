@@ -1348,13 +1348,13 @@ const motoresAspirados = new Set([
                 title = "🔍 ANÁLISE DETALHADA CONCLUÍDA";
                 icon = "📋";
                 
-                if (motorType === "Aspirado") {
-                    message = `Identificamos que seu ${selectedBrand} ${selectedModel} possui motor aspirado. Embora não seja o perfil ideal para nossas soluções atuais, podemos oferecer orientações personalizadas.`;
-                } else if (motorType === "Turbo" && selectedProblem === "electronic") {
-                    message = `Seu veículo é turbo e tem grande potencial! Porém, para problemas elétricos, recomendamos uma avaliação especializada em diagnóstico automotivo primeiro.`;
-                } else {
-                    message = `Seu perfil requer uma avaliação mais aprofundada. Nossos especialistas podem analisar seu caso específico.`;
-                }
+            if (motorType === "Aspirado") {
+                message = `Com o Euro Booster da SFI CHIPS, você elimina o atraso do acelerador e ganha mais performance em qualquer motor. Quer testar no seu carro?`;
+            } else if (motorType === "Turbo" && selectedProblem === "electronic") {
+                message = `Seu veículo turbo tem grande potencial! Para problemas elétricos, indicamos um diagnóstico especializado antes. Podemos orientar você.`;
+            } else {
+                message = `Nossos especialistas estão prontos para analisar seu caso e oferecer a melhor solução em performance automotiva. Fale conosco!`;
+            }
             }
             
             const vehicleInfoHtml = `
