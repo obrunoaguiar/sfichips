@@ -131,24 +131,105 @@
             }
         }
 
+        .search-container {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: white;
+            outline: none;
+            color: #333;
+        }
+
+        .search-input:focus {
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+        }
+
+        .search-input::placeholder {
+            color: #bbb;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bbb;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            display: none;
+        }
+
+        .search-clear:hover {
+            color: #666;
+        }
+
+        .search-clear.visible {
+            display: block;
+        }
+
         .options-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
             margin-bottom: 24px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .options-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .options-grid::-webkit-scrollbar-track {
+            background: #f5f5f7;
+            border-radius: 4px;
+        }
+
+        .options-grid::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 4px;
+        }
+
+        .options-grid::-webkit-scrollbar-thumb:hover {
+            background: #ccc;
         }
 
         .option-btn {
             background: white;
             border: 1.5px solid #e5e5e5;
-            border-radius: 12px;
-            padding: 14px 12px;
+            border-radius: 10px;
+            padding: 12px 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 500;
             color: #333;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
         .option-btn:hover {
@@ -164,6 +245,24 @@
             border-color: #000000;
             color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .no-results i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 12px;
+            color: #ddd;
+        }
+
+        .no-results strong {
+            color: #666;
         }
 
         .input-field {
@@ -211,7 +310,7 @@
 
         .city-input:focus {
             border-color: #000000;
-            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
         }
 
         .btn-add-city {
@@ -384,6 +483,7 @@
             justify-content: center;
             font-size: 24px;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         .problem-card.selected .problem-icon {
@@ -745,15 +845,63 @@
             color: #666;
         }
 
+        /* ===== RESPONSIVO ===== */
         @media (max-width: 480px) {
+            .main-content {
+                padding: 20px 16px;
+            }
+            .logo {
+                max-width: 140px;
+            }
             .options-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+                max-height: 340px;
+            }
+            .option-btn {
+                padding: 10px 6px;
+                font-size: 12px;
+            }
+            .search-input {
+                padding: 12px 16px 12px 40px;
+                font-size: 14px;
+            }
+            .search-icon {
+                left: 12px;
+                font-size: 14px;
+            }
+            .result-title {
+                font-size: 20px;
+            }
+            .result-message {
+                font-size: 14px;
+            }
+            .summary-section {
+                padding: 14px 16px;
+            }
+            .choice-breadcrumb {
+                font-size: 13px;
+                gap: 8px;
+            }
+            .choice-value {
+                font-size: 12px;
+                padding: 2px 10px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
             .main-content {
                 padding: 24px 20px;
             }
-            .logo {
-                max-width: 140px;
+        }
+
+        @media (min-width: 769px) {
+            .options-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                max-height: 440px;
             }
         }
     </style>
@@ -774,8 +922,13 @@
         </div>
 
         <div class="main-content" id="mainContent">
-            <!-- Camada 1: Marcas -->
+            <!-- Camada 1: Marcas com Busca -->
             <div id="layerBrands" class="selection-layer">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="brandSearchInput" class="search-input" placeholder="Buscar marca..." autocomplete="off">
+                    <button class="search-clear" id="clearSearchBtn" aria-label="Limpar busca">✕</button>
+                </div>
                 <div class="options-grid" id="brandsGrid"></div>
             </div>
 
@@ -985,7 +1138,8 @@
             "frontier", "leaf", "ariya",
             // Renault
             "captur", "megane e-tech",
-            // BYD            "dolphin", "dolphin mini", "seal", "song plus", "han", "tan", "yuan pro",
+            // BYD
+            "dolphin", "dolphin mini", "seal", "song plus", "han", "tan", "yuan pro",
             // GWM
             "haval h6", "haval h6 gt", "ora 03", "ora skin", "poer",
             // RAM
@@ -1005,7 +1159,6 @@
             "tiggo 3x", "tiggo 5x", "tiggo 7", "tiggo 8",
             // Diesel - Comerciais
             "ducato", "daily", "tector", "transit", "f-250", "f-350",
-            // Adicionais
             "pajero", "santa fe"
         ]);
 
@@ -1060,7 +1213,7 @@
         ]);
 
         // ============================================
-        // NOVA FUNÇÃO DE CLASSIFICAÇÃO - CORRIGIDA
+        // FUNÇÃO DE CLASSIFICAÇÃO - CORRIGIDA
         // ============================================
         function classificarMotor(selectedBrand, selectedModel, engine, fuel) {
             const modelLower = selectedModel.toLowerCase().trim();
@@ -1137,6 +1290,7 @@
         let selectedProblem = "";
         let qualificationResult = null;
         let isCustomCity = false;
+        let searchTimeout = null;
 
         // ==================== LISTA DE MUNICÍPIOS ====================
         const municipiosList = [
@@ -1277,6 +1431,9 @@
                 if (element) element.style.display = 'none';
             });
             document.getElementById(layerId).style.display = 'block';
+            
+            // Scroll para o topo do conteúdo
+            document.getElementById("mainContent").scrollTop = 0;
         }
 
         function showAnalyzingAnimation() {
@@ -1335,7 +1492,6 @@
             const whatsappClean = whatsapp.replace(/\D/g, '');
             const destinatario = getDestinatarioWhatsApp();
             
-            // Usa a nova função de classificação
             const motorClassification = classificarMotor(selectedBrand, selectedModel, selectedEngine, selectedFuel);
             const motorType = motorClassification.type;
             const confidence = motorClassification.confidence;
@@ -1344,7 +1500,6 @@
             let atende = false;
             let qualificacaoLevel = "";
             
-            // Lógica de qualificação atualizada
             if (motorType === "Turbo" && (selectedProblem === "performance" || selectedProblem === "economy")) {
                 atende = true;
                 qualificacaoLevel = "Qualificado";
@@ -1352,7 +1507,6 @@
                 atende = false;
                 qualificacaoLevel = "Não Qualificado - Problema fora do escopo";
             } else if (motorType === "Aspirado") {
-                // VEÍCULO ASPIRADO - NÃO É PERFIL IDEAL PARA REPROGRAMAÇÃO
                 atende = false;
                 qualificacaoLevel = "Não Qualificado - Perfil Inadequado";
             } else if (motorType === "Elétrico" || motorType === "Híbrido") {
@@ -1520,9 +1674,37 @@
             }
         }
 
-        function renderBrands() {
+        // ============================================
+        // NOVA FUNÇÃO renderBrands COM BUSCA
+        // ============================================
+        function renderBrands(filter = "") {
             const brandsGrid = document.getElementById("brandsGrid");
-            brandsGrid.innerHTML = Object.keys(vehiclesData).sort().map(brand => `
+            const allBrands = Object.keys(vehiclesData).sort();
+            
+            const filteredBrands = filter 
+                ? allBrands.filter(brand => brand.toLowerCase().includes(filter.toLowerCase()))
+                : allBrands;
+            
+            // Atualizar visibilidade do botão de limpar
+            const clearBtn = document.getElementById("clearSearchBtn");
+            if (filter.length > 0) {
+                clearBtn.classList.add("visible");
+            } else {
+                clearBtn.classList.remove("visible");
+            }
+            
+            if (filteredBrands.length === 0) {
+                brandsGrid.innerHTML = `
+                    <div class="no-results" style="grid-column: 1 / -1;">
+                        <i class="fas fa-search"></i>
+                        Nenhuma marca encontrada para "<strong>${filter}</strong>"
+                        <div style="margin-top: 12px; font-size: 13px; color: #bbb;">Tente buscar por outro termo</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            brandsGrid.innerHTML = filteredBrands.map(brand => `
                 <div class="option-btn" data-brand="${brand}">${brand}</div>
             `).join("");
 
@@ -1536,12 +1718,18 @@
                     selectedEngine = "";
                     selectedFuel = "";
                     updateSummary();
+                    // Limpar busca ao selecionar
+                    document.getElementById("brandSearchInput").value = "";
+                    renderBrands();
                     showLayer('layerModels');
                     renderModels();
                 });
             });
         }
 
+        // ============================================
+        // FUNÇÕES DE RENDERIZAÇÃO (modelos, anos, etc)
+        // ============================================
         function renderModels() {
             const modelsGrid = document.getElementById("modelsGrid");
             const models = vehiclesData[selectedBrand] || [];
@@ -1650,6 +1838,7 @@
                 selectedEngine = "";
                 selectedFuel = "";
                 updateSummary();
+                document.getElementById("brandSearchInput").value = "";
                 renderBrands();
                 showLayer('layerBrands');
             });
@@ -1726,11 +1915,13 @@
             document.getElementById("nameInput").value = "";
             document.getElementById("whatsappInput").value = "";
             document.getElementById("cityInput").value = "";
+            document.getElementById("brandSearchInput").value = "";
             document.getElementById("nextToCity").disabled = true;
             document.getElementById("nextToProblem").disabled = true;
             document.getElementById("qualifyButton").disabled = true;
             document.getElementById("whatsappMessageContainer").innerHTML = "";
             document.getElementById("cityError").style.display = "none";
+            document.getElementById("clearSearchBtn").classList.remove("visible");
             
             document.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
             document.querySelectorAll(".problem-card").forEach(card => card.classList.remove("selected"));
@@ -1740,7 +1931,36 @@
             showLayer('layerBrands');
         }
 
+        // ============================================
+        // INIT
+        // ============================================
         async function init() {
+            // Configurar busca com debounce
+            const searchInput = document.getElementById("brandSearchInput");
+            const clearBtn = document.getElementById("clearSearchBtn");
+            
+            searchInput.addEventListener("input", function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    renderBrands(this.value);
+                }, 150);
+            });
+            
+            clearBtn.addEventListener("click", function() {
+                searchInput.value = "";
+                renderBrands("");
+                searchInput.focus();
+            });
+            
+            // Fechar busca ao pressionar ESC
+            searchInput.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                    this.value = "";
+                    renderBrands("");
+                    this.blur();
+                }
+            });
+            
             renderBrands();
             setupNavigation();
             setupBackNavigation();
@@ -1756,6 +1976,7 @@
             console.log("🚀 SFI Chips Form inicializado!");
             console.log(`📍 ${citiesList.length} municípios carregados!`);
             console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
+            console.log(`🏷️ ${Object.keys(vehiclesData).length} marcas disponíveis`);
         }
         
         init();
