@@ -846,7 +846,7 @@
             color: #666;
         }
 
-        /* ===== TOGGLE SWITCH COM ESTADO NEUTRO ===== */
+        /* ===== BOTÕES DE SELEÇÃO (OPÇÃO 2) ===== */
         .engine-type-selector {
             margin-bottom: 20px;
         }
@@ -869,130 +869,152 @@
             font-size: 13px;
         }
 
-        .toggle-container {
+        .engine-type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .engine-type-btn {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 14px;
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .engine-type-btn:hover {
+            border-color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .engine-type-btn:active {
+            transform: scale(0.97);
+        }
+
+        .engine-type-btn .icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .engine-type-btn .title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .engine-type-btn .subtitle {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .engine-type-btn .check-mark {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 28px;
+            height: 28px;
+            background: #2e7d32;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 16px;
-            background: #f5f5f7;
-            padding: 12px 20px;
-            border-radius: 16px;
             justify-content: center;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-container.neutral {
-            border-color: #ff6b6b;
-            background: #fff5f5;
-            animation: pulse-border 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse-border {
-            0%, 100% { border-color: #ff6b6b; }
-            50% { border-color: #ffa8a8; }
-        }
-
-        .toggle-container.has-selection {
-            border-color: #2e7d32;
-            background: #f0f7f0;
-        }
-
-        .toggle-label {
+            color: white;
             font-size: 14px;
-            font-weight: 600;
-            color: #999;
+            opacity: 0;
+            transform: scale(0.5);
             transition: all 0.3s ease;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 8px;
-            user-select: none;
         }
 
-        .toggle-label:hover {
-            background: rgba(0,0,0,0.05);
+        /* Estado Selecionado - Aspirado */
+        .engine-type-btn.selected-aspirado {
+            border-color: #e65100;
+            background: #fff8f0;
+            box-shadow: 0 2px 12px rgba(230, 81, 0, 0.15);
         }
 
-        .toggle-label.active {
-            color: #000000;
-            font-weight: 700;
+        .engine-type-btn.selected-aspirado .icon {
+            transform: scale(1.1);
         }
 
-        .toggle-label.selected-aspirado {
+        .engine-type-btn.selected-aspirado .title {
             color: #e65100;
         }
 
-        .toggle-label.selected-turbo {
-            color: #2e7d32;
+        .engine-type-btn.selected-aspirado .subtitle {
+            color: #bf360c;
         }
 
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 32px;
-            background: #ddd;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-            border: 2px solid transparent;
+        .engine-type-btn.selected-aspirado .check-mark {
+            opacity: 1;
+            transform: scale(1);
+            background: #e65100;
         }
 
-        .toggle-switch:hover {
-            transform: scale(1.05);
-        }
-
-        .toggle-switch.neutral {
-            background: #e5e5e5;
-            border-color: #ff6b6b;
-            animation: pulse-border-switch 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse-border-switch {
-            0%, 100% { border-color: #ff6b6b; }
-            50% { border-color: #ffa8a8; }
-        }
-
-        .toggle-switch.active {
-            background: #000000;
+        /* Estado Selecionado - Turbo */
+        .engine-type-btn.selected-turbo {
             border-color: #2e7d32;
+            background: #f0f8f0;
+            box-shadow: 0 2px 12px rgba(46, 125, 50, 0.15);
         }
 
-        .toggle-switch .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        .engine-type-btn.selected-turbo .icon {
+            transform: scale(1.1);
         }
 
-        .toggle-switch.neutral .toggle-slider {
-            background: #ff6b6b;
-            left: 3px;
-        }
-
-        .toggle-switch.active .toggle-slider {
-            left: 31px;
-            background: white;
-        }
-
-        .toggle-status {
-            text-align: center;
-            font-size: 12px;
-            margin-top: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-status.neutral {
-            color: #e74c3c;
-        }
-
-        .toggle-status.selected {
+        .engine-type-btn.selected-turbo .title {
             color: #2e7d32;
+        }
+
+        .engine-type-btn.selected-turbo .subtitle {
+            color: #1b5e20;
+        }
+
+        .engine-type-btn.selected-turbo .check-mark {
+            opacity: 1;
+            transform: scale(1);
+            background: #2e7d32;
+        }
+
+        .engine-type-status {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .engine-type-status.neutral {
+            color: #e74c3c;
+            background: #fff5f5;
+            border: 1px solid #ffcdd2;
+        }
+
+        .engine-type-status.selected-aspirado {
+            color: #e65100;
+            background: #fff3e0;
+            border: 1px solid #ffcc80;
+        }
+
+        .engine-type-status.selected-turbo {
+            color: #2e7d32;
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
         }
 
         /* ===== RESPONSIVO ===== */
@@ -1037,26 +1059,22 @@
                 font-size: 12px;
                 padding: 2px 10px;
             }
-            .toggle-container {
-                padding: 10px 14px;
+            .engine-type-grid {
+                grid-template-columns: 1fr;
                 gap: 10px;
-                flex-wrap: wrap;
             }
-            .toggle-switch {
-                width: 50px;
-                height: 28px;
+            .engine-type-btn {
+                padding: 14px 12px;
             }
-            .toggle-switch .toggle-slider {
-                width: 20px;
-                height: 20px;
-                top: 2px;
-                left: 2px;
+            .engine-type-btn .icon {
+                font-size: 24px;
             }
-            .toggle-switch.active .toggle-slider {
-                left: 26px;
+            .engine-type-btn .title {
+                font-size: 14px;
             }
-            .toggle-label {
+            .engine-type-status {
                 font-size: 12px;
+                padding: 6px;
             }
         }
 
@@ -1129,22 +1147,31 @@
                 </button>
             </div>
 
-            <!-- Camada 4: Motor com Busca + Toggle com Estado Neutro -->
+            <!-- Camada 4: Motor com Busca + Botões de Seleção -->
             <div id="layerEngine" class="selection-layer" style="display: none;">
-                <!-- Toggle com Estado Neutro -->
+                <!-- Botões de Seleção -->
                 <div class="engine-type-selector">
                     <div class="selector-label">
                         ⚠️ Selecione o tipo do motor <span class="required">*</span>
-                        <span class="hint" id="engineTypeHint">(clique no toggle para escolher)</span>
+                        <span class="hint" id="engineTypeHint">(clique em uma opção)</span>
                     </div>
-                    <div class="toggle-container neutral" id="toggleContainer">
-                        <span class="toggle-label" id="aspiradoLabel">⬇️ Aspirado (Comum)</span>
-                        <div class="toggle-switch neutral" id="engineTypeToggle">
-                            <div class="toggle-slider"></div>
+                    
+                    <div class="engine-type-grid">
+                        <div class="engine-type-btn" id="aspiradoBtn" data-type="Aspirado">
+                            <div class="check-mark">✓</div>
+                            <div class="icon">⬇️</div>
+                            <div class="title">Aspirado (Comum)</div>
+                            <div class="subtitle">Motor sem turbo</div>
                         </div>
-                        <span class="toggle-label" id="turboLabel">🚀 Turbo</span>
+                        <div class="engine-type-btn" id="turboBtn" data-type="Turbo">
+                            <div class="check-mark">✓</div>
+                            <div class="icon">🚀</div>
+                            <div class="title">Turbo</div>
+                            <div class="subtitle">Motor com turbocompressor</div>
+                        </div>
                     </div>
-                    <div class="toggle-status neutral" id="toggleStatus">
+                    
+                    <div class="engine-type-status neutral" id="engineTypeStatus">
                         ⚠️ Selecione o tipo do motor para continuar
                     </div>
                 </div>
@@ -1384,7 +1411,7 @@
             const engineLower = engine.toLowerCase().trim();
             const fuelLower = fuel.toLowerCase().trim();
 
-            // Se o usuário selecionou explicitamente Turbo ou Aspirado no toggle
+            // Se o usuário selecionou explicitamente Turbo ou Aspirado
             if (engineType === "Turbo") {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Selecionado como Turbo pelo usuário" };
             }
@@ -1650,7 +1677,6 @@
             const whatsappClean = whatsapp.replace(/\D/g, '');
             const destinatario = getDestinatarioWhatsApp();
             
-            // Usa o tipo selecionado no toggle ou classifica automaticamente
             const motorClassification = classificarMotor(selectedBrand, selectedModel, selectedEngine, selectedFuel, selectedEngineType);
             const motorType = motorClassification.type;
             const confidence = motorClassification.confidence;
@@ -1873,14 +1899,12 @@
                         this.classList.add("selected");
                         const value = this.getAttribute("data-item");
                         selectCallback(value);
-                        // Limpa a busca após selecionar
                         searchInput.value = "";
                         render("");
                     });
                 });
             }
             
-            // Eventos de busca
             searchInput.addEventListener("input", function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
@@ -1980,7 +2004,6 @@
                     selectedEngine = value;
                     validateEngineSelection();
                     updateSummary();
-                    // Não avança automaticamente - espera o toggle ser selecionado
                     if (selectedEngineType) {
                         showLayer('layerFuel');
                         renderFuel();
@@ -2007,107 +2030,75 @@
         }
 
         // ============================================
-        // TOGGLE COM ESTADO NEUTRO
+        // BOTÕES DE SELEÇÃO (OPÇÃO 2)
         // ============================================
-        function setupEngineTypeToggle() {
-            const toggle = document.getElementById("engineTypeToggle");
-            const toggleContainer = document.getElementById("toggleContainer");
-            const aspiradoLabel = document.getElementById("aspiradoLabel");
-            const turboLabel = document.getElementById("turboLabel");
-            const statusText = document.getElementById("toggleStatus");
+        function setupEngineTypeButtons() {
+            const aspiradoBtn = document.getElementById("aspiradoBtn");
+            const turboBtn = document.getElementById("turboBtn");
+            const statusText = document.getElementById("engineTypeStatus");
             const hintText = document.getElementById("engineTypeHint");
             
-            // Estado: null = neutro, false = Aspirado, true = Turbo
-            let state = null;
-            
-            function updateToggle() {
-                // Remove todas as classes
-                toggle.classList.remove("active", "neutral");
-                toggleContainer.classList.remove("neutral", "has-selection");
-                aspiradoLabel.classList.remove("active", "selected-aspirado", "selected-turbo");
-                turboLabel.classList.remove("active", "selected-aspirado", "selected-turbo");
-                statusText.classList.remove("neutral", "selected");
+            function updateSelection(selectedType) {
+                // Remove seleções anteriores
+                aspiradoBtn.classList.remove("selected-aspirado", "selected-turbo");
+                turboBtn.classList.remove("selected-aspirado", "selected-turbo");
+                statusText.classList.remove("neutral", "selected-aspirado", "selected-turbo");
                 
-                if (state === null) {
-                    // ESTADO NEUTRO - Nenhum selecionado
-                    toggle.classList.add("neutral");
-                    toggleContainer.classList.add("neutral");
+                if (selectedType === "Aspirado") {
+                    aspiradoBtn.classList.add("selected-aspirado");
+                    statusText.classList.add("selected-aspirado");
+                    statusText.textContent = "✅ Aspirado (Comum) selecionado";
+                    selectedEngineType = "Aspirado";
+                    hintText.style.display = "none";
+                } else if (selectedType === "Turbo") {
+                    turboBtn.classList.add("selected-turbo");
+                    statusText.classList.add("selected-turbo");
+                    statusText.textContent = "✅ Turbo selecionado";
+                    selectedEngineType = "Turbo";
+                    hintText.style.display = "none";
+                } else {
                     statusText.classList.add("neutral");
                     statusText.textContent = "⚠️ Selecione o tipo do motor para continuar";
-                    hintText.style.display = "inline";
                     selectedEngineType = "";
-                } else if (state === false) {
-                    // ASPIRADO selecionado
-                    aspiradoLabel.classList.add("active", "selected-aspirado");
-                    toggleContainer.classList.add("has-selection");
-                    statusText.classList.add("selected");
-                    statusText.textContent = "✅ Aspirado (Comum) selecionado";
-                    statusText.style.color = "#e65100";
-                    hintText.style.display = "none";
-                    selectedEngineType = "Aspirado";
-                } else if (state === true) {
-                    // TURBO selecionado
-                    turboLabel.classList.add("active", "selected-turbo");
-                    toggle.classList.add("active");
-                    toggleContainer.classList.add("has-selection");
-                    statusText.classList.add("selected");
-                    statusText.textContent = "✅ Turbo selecionado";
-                    statusText.style.color = "#2e7d32";
-                    hintText.style.display = "none";
-                    selectedEngineType = "Turbo";
+                    hintText.style.display = "inline";
                 }
                 
                 updateSummary();
                 validateEngineSelection();
                 
                 // Se já tem motor selecionado e tipo foi escolhido, avança
-                if (selectedEngine && state !== null) {
+                if (selectedEngine && selectedEngineType) {
                     showLayer('layerFuel');
                     renderFuel();
                 }
             }
             
-            // Clique no toggle
-            toggle.addEventListener("click", function(e) {
-                e.stopPropagation();
-                if (state === null) {
-                    state = false; // Primeiro clique = Aspirado
-                } else if (state === false) {
-                    state = true; // Segundo clique = Turbo
-                } else if (state === true) {
-                    state = null; // Terceiro clique = Neutro (desmarcar)
-                }
-                updateToggle();
-            });
-            
-            // Clique nos labels
-            aspiradoLabel.addEventListener("click", function(e) {
-                e.stopPropagation();
-                if (state === false) {
-                    state = null; // Desmarca
+            // Clique no botão Aspirado
+            aspiradoBtn.addEventListener("click", function() {
+                if (selectedEngineType === "Aspirado") {
+                    // Desmarca se já estava selecionado
+                    updateSelection(null);
                 } else {
-                    state = false; // Marca Aspirado
+                    updateSelection("Aspirado");
                 }
-                updateToggle();
             });
             
-            turboLabel.addEventListener("click", function(e) {
-                e.stopPropagation();
-                if (state === true) {
-                    state = null; // Desmarca
+            // Clique no botão Turbo
+            turboBtn.addEventListener("click", function() {
+                if (selectedEngineType === "Turbo") {
+                    // Desmarca se já estava selecionado
+                    updateSelection(null);
                 } else {
-                    state = true; // Marca Turbo
+                    updateSelection("Turbo");
                 }
-                updateToggle();
             });
             
-            updateToggle();
+            // Inicializa com neutro
+            updateSelection(null);
         }
 
         function validateEngineSelection() {
-            // O botão de avançar para combustível só fica disponível se 
-            // motor E tipo foram selecionados
-            // Mas o avanço é feito automaticamente no renderEngine quando ambos estão selecionados
+            // Validação é feita no renderEngine
         }
 
         // ============================================
@@ -2178,6 +2169,13 @@
                 selectedFuel = "";
                 updateSummary();
                 document.getElementById("engineSearchInput").value = "";
+                // Reset dos botões
+                document.getElementById("aspiradoBtn").classList.remove("selected-aspirado", "selected-turbo");
+                document.getElementById("turboBtn").classList.remove("selected-aspirado", "selected-turbo");
+                document.getElementById("engineTypeStatus").textContent = "⚠️ Selecione o tipo do motor para continuar";
+                document.getElementById("engineTypeStatus").className = "engine-type-status neutral";
+                selectedEngineType = "";
+                document.getElementById("engineTypeHint").style.display = "inline";
                 renderEngine();
                 showLayer('layerEngine');
             });
@@ -2226,17 +2224,11 @@
             isCustomCity = false;
             qualificationResult = null;
             
-            // Reset do toggle
-            const toggle = document.getElementById("engineTypeToggle");
-            const toggleContainer = document.getElementById("toggleContainer");
-            toggle.classList.remove("active");
-            toggle.classList.add("neutral");
-            toggleContainer.classList.remove("has-selection");
-            toggleContainer.classList.add("neutral");
-            document.getElementById("aspiradoLabel").classList.remove("active", "selected-aspirado", "selected-turbo");
-            document.getElementById("turboLabel").classList.remove("active", "selected-aspirado", "selected-turbo");
-            document.getElementById("toggleStatus").textContent = "⚠️ Selecione o tipo do motor para continuar";
-            document.getElementById("toggleStatus").classList.add("neutral");
+            // Reset dos botões
+            document.getElementById("aspiradoBtn").classList.remove("selected-aspirado", "selected-turbo");
+            document.getElementById("turboBtn").classList.remove("selected-aspirado", "selected-turbo");
+            document.getElementById("engineTypeStatus").textContent = "⚠️ Selecione o tipo do motor para continuar";
+            document.getElementById("engineTypeStatus").className = "engine-type-status neutral";
             document.getElementById("engineTypeHint").style.display = "inline";
             
             document.getElementById("nameInput").value = "";
@@ -2270,7 +2262,7 @@
             setupNavigation();
             setupBackNavigation();
             setupProblemSelection();
-            setupEngineTypeToggle();
+            setupEngineTypeButtons();
             updateSummary();
             await loadCities();
             
@@ -2283,7 +2275,7 @@
             console.log(`📍 ${citiesList.length} municípios carregados!`);
             console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
             console.log(`🏷️ ${Object.keys(vehiclesData).length} marcas disponíveis`);
-            console.log(`🔧 Toggle iniciado em estado neutro (usuário precisa escolher)`);
+            console.log(`🔘 Botões de seleção iniciados em estado neutro`);
         }
         
         init();
