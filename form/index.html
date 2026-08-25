@@ -846,7 +846,29 @@
             color: #666;
         }
 
-        /* ===== TOGGLE SWITCH ===== */
+        /* ===== TOGGLE SWITCH COM ESTADO NEUTRO ===== */
+        .engine-type-selector {
+            margin-bottom: 20px;
+        }
+
+        .engine-type-selector .selector-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .engine-type-selector .selector-label .required {
+            color: #e74c3c;
+        }
+
+        .engine-type-selector .selector-label .hint {
+            font-weight: 400;
+            color: #999;
+            font-size: 13px;
+        }
+
         .toggle-container {
             display: flex;
             align-items: center;
@@ -854,18 +876,53 @@
             background: #f5f5f7;
             padding: 12px 20px;
             border-radius: 16px;
-            margin-bottom: 20px;
             justify-content: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-container.neutral {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+            animation: pulse-border 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: #ff6b6b; }
+            50% { border-color: #ffa8a8; }
+        }
+
+        .toggle-container.has-selection {
+            border-color: #2e7d32;
+            background: #f0f7f0;
         }
 
         .toggle-label {
             font-size: 14px;
             font-weight: 600;
-            color: #666;
+            color: #999;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            user-select: none;
+        }
+
+        .toggle-label:hover {
+            background: rgba(0,0,0,0.05);
         }
 
         .toggle-label.active {
             color: #000000;
+            font-weight: 700;
+        }
+
+        .toggle-label.selected-aspirado {
+            color: #e65100;
+        }
+
+        .toggle-label.selected-turbo {
+            color: #2e7d32;
         }
 
         .toggle-switch {
@@ -877,38 +934,65 @@
             cursor: pointer;
             transition: all 0.3s ease;
             flex-shrink: 0;
+            border: 2px solid transparent;
+        }
+
+        .toggle-switch:hover {
+            transform: scale(1.05);
+        }
+
+        .toggle-switch.neutral {
+            background: #e5e5e5;
+            border-color: #ff6b6b;
+            animation: pulse-border-switch 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-border-switch {
+            0%, 100% { border-color: #ff6b6b; }
+            50% { border-color: #ffa8a8; }
         }
 
         .toggle-switch.active {
             background: #000000;
+            border-color: #2e7d32;
         }
 
         .toggle-switch .toggle-slider {
             position: absolute;
             top: 3px;
             left: 3px;
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             background: white;
             border-radius: 50%;
             transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .toggle-switch.active .toggle-slider {
-            left: 31px;
+        .toggle-switch.neutral .toggle-slider {
+            background: #ff6b6b;
+            left: 3px;
         }
 
-        .toggle-option {
-            font-size: 13px;
+        .toggle-switch.active .toggle-slider {
+            left: 31px;
+            background: white;
+        }
+
+        .toggle-status {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 8px;
             font-weight: 500;
-            color: #999;
             transition: all 0.3s ease;
         }
 
-        .toggle-option.active {
-            color: #000000;
-            font-weight: 700;
+        .toggle-status.neutral {
+            color: #e74c3c;
+        }
+
+        .toggle-status.selected {
+            color: #2e7d32;
         }
 
         /* ===== RESPONSIVO ===== */
@@ -963,13 +1047,16 @@
                 height: 28px;
             }
             .toggle-switch .toggle-slider {
-                width: 22px;
-                height: 22px;
-                top: 3px;
-                left: 3px;
+                width: 20px;
+                height: 20px;
+                top: 2px;
+                left: 2px;
             }
             .toggle-switch.active .toggle-slider {
-                left: 25px;
+                left: 26px;
+            }
+            .toggle-label {
+                font-size: 12px;
             }
         }
 
@@ -1042,15 +1129,24 @@
                 </button>
             </div>
 
-            <!-- Camada 4: Motor com Busca + Toggle Aspirado/Turbo -->
+            <!-- Camada 4: Motor com Busca + Toggle com Estado Neutro -->
             <div id="layerEngine" class="selection-layer" style="display: none;">
-                <!-- Toggle Aspirado / Turbo -->
-                <div class="toggle-container">
-                    <span class="toggle-option active" id="aspiradoLabel">⬇️ Aspirado</span>
-                    <div class="toggle-switch" id="engineTypeToggle">
-                        <div class="toggle-slider"></div>
+                <!-- Toggle com Estado Neutro -->
+                <div class="engine-type-selector">
+                    <div class="selector-label">
+                        ⚠️ Selecione o tipo do motor <span class="required">*</span>
+                        <span class="hint" id="engineTypeHint">(clique no toggle para escolher)</span>
                     </div>
-                    <span class="toggle-option" id="turboLabel">🚀 Turbo</span>
+                    <div class="toggle-container neutral" id="toggleContainer">
+                        <span class="toggle-label" id="aspiradoLabel">⬇️ Aspirado (Comum)</span>
+                        <div class="toggle-switch neutral" id="engineTypeToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                        <span class="toggle-label" id="turboLabel">🚀 Turbo</span>
+                    </div>
+                    <div class="toggle-status neutral" id="toggleStatus">
+                        ⚠️ Selecione o tipo do motor para continuar
+                    </div>
                 </div>
                 
                 <div class="search-container">
@@ -1208,7 +1304,7 @@
 
         const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
 
-        // Potências (exibidas como opções de motor)
+        // Potências - APENAS OPIÇÕES ASPIRADAS
         const engineOptions = [
             "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", 
             "2.0", "2.5", "3.0", "V6", "V8"
@@ -1320,12 +1416,7 @@
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor V6/V8 com turbocompressor" };
             }
 
-            // REGRA 5: Verifica se o motor tem "turbo" no nome
-            if (engineLower.includes("turbo")) {
-                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Motor ${engine} com turbo` };
-            }
-
-            // REGRA 6: Verifica nos sets de modelos
+            // REGRA 5: Verifica nos sets de modelos
             if (modelosTurbo.has(modelLower)) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Modelo ${selectedModel} é originalmente turbo` };
             }
@@ -1334,7 +1425,7 @@
                 return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: `Modelo ${selectedModel} é aspirado` };
             }
 
-            // REGRA 7: Padrão - baseado no ano
+            // REGRA 6: Padrão - baseado no ano
             const year = parseInt(selectedYear);
             if (year >= 2020) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
@@ -1353,7 +1444,7 @@
         let selectedFuel = "";
         let selectedCity = "";
         let selectedProblem = "";
-        let selectedEngineType = ""; // "Aspirado" ou "Turbo"
+        let selectedEngineType = ""; // "Aspirado" ou "Turbo" - vazio se não selecionado
         let qualificationResult = null;
         let isCustomCity = false;
         let searchTimeout = null;
@@ -1887,9 +1978,15 @@
                 (engine) => `<div class="option-btn" data-item="${engine}">${engine}</div>`,
                 (value) => {
                     selectedEngine = value;
+                    validateEngineSelection();
                     updateSummary();
-                    showLayer('layerFuel');
-                    renderFuel();
+                    // Não avança automaticamente - espera o toggle ser selecionado
+                    if (selectedEngineType) {
+                        showLayer('layerFuel');
+                        renderFuel();
+                    } else {
+                        showToast("⚠️ Selecione o tipo do motor (Aspirado ou Turbo) antes de continuar", true);
+                    }
                 }
             );
         }
@@ -1907,6 +2004,110 @@
                     showLayer('layerContact');
                 }
             );
+        }
+
+        // ============================================
+        // TOGGLE COM ESTADO NEUTRO
+        // ============================================
+        function setupEngineTypeToggle() {
+            const toggle = document.getElementById("engineTypeToggle");
+            const toggleContainer = document.getElementById("toggleContainer");
+            const aspiradoLabel = document.getElementById("aspiradoLabel");
+            const turboLabel = document.getElementById("turboLabel");
+            const statusText = document.getElementById("toggleStatus");
+            const hintText = document.getElementById("engineTypeHint");
+            
+            // Estado: null = neutro, false = Aspirado, true = Turbo
+            let state = null;
+            
+            function updateToggle() {
+                // Remove todas as classes
+                toggle.classList.remove("active", "neutral");
+                toggleContainer.classList.remove("neutral", "has-selection");
+                aspiradoLabel.classList.remove("active", "selected-aspirado", "selected-turbo");
+                turboLabel.classList.remove("active", "selected-aspirado", "selected-turbo");
+                statusText.classList.remove("neutral", "selected");
+                
+                if (state === null) {
+                    // ESTADO NEUTRO - Nenhum selecionado
+                    toggle.classList.add("neutral");
+                    toggleContainer.classList.add("neutral");
+                    statusText.classList.add("neutral");
+                    statusText.textContent = "⚠️ Selecione o tipo do motor para continuar";
+                    hintText.style.display = "inline";
+                    selectedEngineType = "";
+                } else if (state === false) {
+                    // ASPIRADO selecionado
+                    aspiradoLabel.classList.add("active", "selected-aspirado");
+                    toggleContainer.classList.add("has-selection");
+                    statusText.classList.add("selected");
+                    statusText.textContent = "✅ Aspirado (Comum) selecionado";
+                    statusText.style.color = "#e65100";
+                    hintText.style.display = "none";
+                    selectedEngineType = "Aspirado";
+                } else if (state === true) {
+                    // TURBO selecionado
+                    turboLabel.classList.add("active", "selected-turbo");
+                    toggle.classList.add("active");
+                    toggleContainer.classList.add("has-selection");
+                    statusText.classList.add("selected");
+                    statusText.textContent = "✅ Turbo selecionado";
+                    statusText.style.color = "#2e7d32";
+                    hintText.style.display = "none";
+                    selectedEngineType = "Turbo";
+                }
+                
+                updateSummary();
+                validateEngineSelection();
+                
+                // Se já tem motor selecionado e tipo foi escolhido, avança
+                if (selectedEngine && state !== null) {
+                    showLayer('layerFuel');
+                    renderFuel();
+                }
+            }
+            
+            // Clique no toggle
+            toggle.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (state === null) {
+                    state = false; // Primeiro clique = Aspirado
+                } else if (state === false) {
+                    state = true; // Segundo clique = Turbo
+                } else if (state === true) {
+                    state = null; // Terceiro clique = Neutro (desmarcar)
+                }
+                updateToggle();
+            });
+            
+            // Clique nos labels
+            aspiradoLabel.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (state === false) {
+                    state = null; // Desmarca
+                } else {
+                    state = false; // Marca Aspirado
+                }
+                updateToggle();
+            });
+            
+            turboLabel.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (state === true) {
+                    state = null; // Desmarca
+                } else {
+                    state = true; // Marca Turbo
+                }
+                updateToggle();
+            });
+            
+            updateToggle();
+        }
+
+        function validateEngineSelection() {
+            // O botão de avançar para combustível só fica disponível se 
+            // motor E tipo foram selecionados
+            // Mas o avanço é feito automaticamente no renderEngine quando ambos estão selecionados
         }
 
         // ============================================
@@ -2013,37 +2214,12 @@
             });
         }
 
-        // ============================================
-        // TOGGLE ASPIRADO / TURBO
-        // ============================================
-        function setupEngineTypeToggle() {
-            const toggle = document.getElementById("engineTypeToggle");
-            const aspiradoLabel = document.getElementById("aspiradoLabel");
-            const turboLabel = document.getElementById("turboLabel");
-            
-            // Estado inicial: Aspirado (Comum)
-            let isTurbo = false;
-            selectedEngineType = "Aspirado";
-            
-            toggle.addEventListener("click", function() {
-                isTurbo = !isTurbo;
-                this.classList.toggle("active", isTurbo);
-                aspiradoLabel.classList.toggle("active", !isTurbo);
-                turboLabel.classList.toggle("active", isTurbo);
-                
-                selectedEngineType = isTurbo ? "Turbo" : "Aspirado";
-                
-                // Atualiza o resumo
-                updateSummary();
-            });
-        }
-
         function resetForm() {
             selectedBrand = "";
             selectedModel = "";
             selectedYear = "";
             selectedEngine = "";
-            selectedEngineType = "Aspirado";
+            selectedEngineType = "";
             selectedFuel = "";
             selectedCity = "";
             selectedProblem = "";
@@ -2052,9 +2228,16 @@
             
             // Reset do toggle
             const toggle = document.getElementById("engineTypeToggle");
+            const toggleContainer = document.getElementById("toggleContainer");
             toggle.classList.remove("active");
-            document.getElementById("aspiradoLabel").classList.add("active");
-            document.getElementById("turboLabel").classList.remove("active");
+            toggle.classList.add("neutral");
+            toggleContainer.classList.remove("has-selection");
+            toggleContainer.classList.add("neutral");
+            document.getElementById("aspiradoLabel").classList.remove("active", "selected-aspirado", "selected-turbo");
+            document.getElementById("turboLabel").classList.remove("active", "selected-aspirado", "selected-turbo");
+            document.getElementById("toggleStatus").textContent = "⚠️ Selecione o tipo do motor para continuar";
+            document.getElementById("toggleStatus").classList.add("neutral");
+            document.getElementById("engineTypeHint").style.display = "inline";
             
             document.getElementById("nameInput").value = "";
             document.getElementById("whatsappInput").value = "";
@@ -2100,7 +2283,7 @@
             console.log(`📍 ${citiesList.length} municípios carregados!`);
             console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
             console.log(`🏷️ ${Object.keys(vehiclesData).length} marcas disponíveis`);
-            console.log(`🔧 Modo padrão: ${selectedEngineType}`);
+            console.log(`🔧 Toggle iniciado em estado neutro (usuário precisa escolher)`);
         }
         
         init();
