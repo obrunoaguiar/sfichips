@@ -194,7 +194,7 @@
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 10px;
             margin-bottom: 24px;
-            max-height: 420px;
+            max-height: 380px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -252,6 +252,7 @@
             padding: 40px 20px;
             color: #999;
             font-size: 14px;
+            grid-column: 1 / -1;
         }
 
         .no-results i {
@@ -845,6 +846,71 @@
             color: #666;
         }
 
+        /* ===== TOGGLE SWITCH ===== */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #f5f5f7;
+            padding: 12px 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .toggle-label.active {
+            color: #000000;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: #ddd;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch.active {
+            background: #000000;
+        }
+
+        .toggle-switch .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 31px;
+        }
+
+        .toggle-option {
+            font-size: 13px;
+            font-weight: 500;
+            color: #999;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-option.active {
+            color: #000000;
+            font-weight: 700;
+        }
+
         /* ===== RESPONSIVO ===== */
         @media (max-width: 480px) {
             .main-content {
@@ -856,7 +922,7 @@
             .options-grid {
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
                 gap: 8px;
-                max-height: 340px;
+                max-height: 300px;
             }
             .option-btn {
                 padding: 10px 6px;
@@ -887,6 +953,24 @@
                 font-size: 12px;
                 padding: 2px 10px;
             }
+            .toggle-container {
+                padding: 10px 14px;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .toggle-switch {
+                width: 50px;
+                height: 28px;
+            }
+            .toggle-switch .toggle-slider {
+                width: 22px;
+                height: 22px;
+                top: 3px;
+                left: 3px;
+            }
+            .toggle-switch.active .toggle-slider {
+                left: 25px;
+            }
         }
 
         @media (min-width: 481px) and (max-width: 768px) {
@@ -901,7 +985,7 @@
         @media (min-width: 769px) {
             .options-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                max-height: 440px;
+                max-height: 400px;
             }
         }
     </style>
@@ -927,37 +1011,66 @@
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="brandSearchInput" class="search-input" placeholder="Buscar marca..." autocomplete="off">
-                    <button class="search-clear" id="clearSearchBtn" aria-label="Limpar busca">✕</button>
+                    <button class="search-clear" id="clearBrandSearchBtn" aria-label="Limpar busca">✕</button>
                 </div>
                 <div class="options-grid" id="brandsGrid"></div>
             </div>
 
-            <!-- Camada 2: Modelos -->
+            <!-- Camada 2: Modelos com Busca -->
             <div id="layerModels" class="selection-layer" style="display: none;">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="modelSearchInput" class="search-input" placeholder="Buscar modelo..." autocomplete="off">
+                    <button class="search-clear" id="clearModelSearchBtn" aria-label="Limpar busca">✕</button>
+                </div>
                 <div class="options-grid" id="modelsGrid"></div>
                 <button class="back-link" id="backToBrandsBtn">
                     <i class="fas fa-chevron-left"></i> voltar para marcas
                 </button>
             </div>
 
-            <!-- Camada 3: Anos -->
+            <!-- Camada 3: Anos com Busca -->
             <div id="layerYears" class="selection-layer" style="display: none;">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="yearSearchInput" class="search-input" placeholder="Buscar ano..." autocomplete="off">
+                    <button class="search-clear" id="clearYearSearchBtn" aria-label="Limpar busca">✕</button>
+                </div>
                 <div class="options-grid" id="yearsGrid"></div>
                 <button class="back-link" id="backToModelsBtn">
                     <i class="fas fa-chevron-left"></i> voltar para modelos
                 </button>
             </div>
 
-            <!-- Camada 4: Motor -->
+            <!-- Camada 4: Motor com Busca + Toggle Aspirado/Turbo -->
             <div id="layerEngine" class="selection-layer" style="display: none;">
+                <!-- Toggle Aspirado / Turbo -->
+                <div class="toggle-container">
+                    <span class="toggle-option active" id="aspiradoLabel">⬇️ Aspirado</span>
+                    <div class="toggle-switch" id="engineTypeToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span class="toggle-option" id="turboLabel">🚀 Turbo</span>
+                </div>
+                
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="engineSearchInput" class="search-input" placeholder="Buscar potência..." autocomplete="off">
+                    <button class="search-clear" id="clearEngineSearchBtn" aria-label="Limpar busca">✕</button>
+                </div>
                 <div class="options-grid" id="engineGrid"></div>
                 <button class="back-link" id="backToYearsBtn">
                     <i class="fas fa-chevron-left"></i> voltar para anos
                 </button>
             </div>
 
-            <!-- Camada 5: Combustível -->
+            <!-- Camada 5: Combustível com Busca -->
             <div id="layerFuel" class="selection-layer" style="display: none;">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="fuelSearchInput" class="search-input" placeholder="Buscar combustível..." autocomplete="off">
+                    <button class="search-clear" id="clearFuelSearchBtn" aria-label="Limpar busca">✕</button>
+                </div>
                 <div class="options-grid" id="fuelGrid"></div>
                 <button class="back-link" id="backToEngineBtn">
                     <i class="fas fa-chevron-left"></i> voltar para motor
@@ -1051,7 +1164,7 @@
         }
         
         // ============================================
-        // DADOS DOS VEÍCULOS - ATUALIZADO
+        // DADOS DOS VEÍCULOS
         // ============================================
         const vehiclesData = {
             "Chevrolet": ["Onix", "Onix Plus", "Prisma", "Tracker", "Cruze", "Cruze Sport6", "Spin", "S10", "Montana", "Cobalt", "Bolt EV", "Equinox", "Blazer", "Silverado", "Camaro"],
@@ -1095,6 +1208,7 @@
 
         const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
 
+        // Potências (exibidas como opções de motor)
         const engineOptions = [
             "1.0", "1.0 Turbo", "1.3", "1.3 Turbo", "1.4", "1.4 Turbo", 
             "1.5", "1.5 Turbo", "1.6", "1.6 Turbo", "1.8", "1.8 Turbo", 
@@ -1106,7 +1220,7 @@
         ];
 
         // ============================================
-        // TIPOS DE MOTOR - ATUALIZADO
+        // TIPOS DE MOTOR
         // ============================================
         const TIPOS_MOTOR = {
             ASPIRADO: "Aspirado",
@@ -1116,109 +1230,72 @@
             INDEFINIDO: "Indefinido"
         };
 
-        // Modelos TURBO (incluindo Diesel)
+        // Modelos TURBO
         const modelosTurbo = new Set([
-            // VW
             "nivus", "taos", "t-cross", "virtus", "amarok", "jetta", "tiguan", "id.4", "id. buzz",
-            // Fiat
             "fastback", "pulse", "toro", "500e",
-            // Jeep
             "compass", "commander", "renegade", "wrangler", "gladiator",
-            // Ford
             "ranger", "maverick", "bronco", "bronco sport", "mustang mach-e",
-            // Chevrolet
             "cruze", "cruze sport6", "tracker", "s10", "blazer", "silverado", "bolt ev",
-            // Toyota
             "hilux", "sw4", "corolla cross", "bZ4x", "prius", "land cruiser",
-            // Hyundai
             "tucson", "creta", "kona", "ioniq 5", "ioniq 6",
-            // Honda
             "hr-v", "cr-v", "zr-v", "accord", "e:ny1",
-            // Nissan
             "frontier", "leaf", "ariya",
-            // Renault
             "captur", "megane e-tech",
-            // BYD
             "dolphin", "dolphin mini", "seal", "song plus", "han", "tan", "yuan pro",
-            // GWM
             "haval h6", "haval h6 gt", "ora 03", "ora skin", "poer",
-            // RAM
             "rampage", "ram 1500", "ram 2500", "ram 3500", "ram",
-            // Peugeot
             "3008", "5008",
-            // Premium
             "x1", "x3", "x5", "i3", "i4", "ix", "m3", "m4",
             "classe a", "classe c", "gla", "glb", "glc", "gle", "eqa", "eqb", "eqe",
             "a3", "a4", "q3", "q5", "q8", "e-tron", "q4 e-tron",
             "xc40", "xc60", "xc90", "s60", "c40 recharge", "ex30",
             "cayenne", "macan", "taycan", "911", "panamera",
-            // Outros
             "outlander", "l200 triton", "eclipse cross",
             "forester", "outback", "wrx",
             "sportage", "seltos", "niro ev",
             "tiggo 3x", "tiggo 5x", "tiggo 7", "tiggo 8",
-            // Diesel - Comerciais
             "ducato", "daily", "tector", "transit", "f-250", "f-350",
             "pajero", "santa fe"
         ]);
 
-        // Modelos ASPIRADOS confirmados
+        // Modelos ASPIRADOS
         const modelosAspirados = new Set([
-            // VW
             "gol", "voyage", "saveiro", "polo", "polo track", "fox", "spacefox",
-            // Chevrolet
             "onix", "onix plus", "prisma", "spin", "cobalt", "celta", "classic", "camaro",
-            // Fiat
             "mobi", "argo", "cronos", "palio", "uno", "punto", "linea", "doblô", "fiorino",
-            // Ford
             "ka", "ka sedan", "fiesta", "fiesta sedan", "ecosport", "mustang",
-            // Toyota
             "corolla", "yaris", "yaris sedan", "etios", "rav4", "camry",
-            // Honda
             "civic", "city", "city sedan", "fit",
-            // Hyundai
             "hb20", "hb20s", "azera",
-            // Nissan
             "kicks", "versa", "sentra", "pathfinder",
-            // Renault
             "kwid", "sandero", "logan", "duster", "oroch",
-            // Peugeot
             "208", "2008",
-            // Citroën
             "c3", "c3 aircross", "c4 cactus", "aircross", "berlingo",
-            // Mitsubishi
             "asx",
-            // Suzuki
             "jimny", "swift", "vitara", "grand vitara",
-            // Kia
             "picanto", "cerato", "stonic",
-            // Chery/Caoa
             "icar", "qq", "celer", "arrizo 6",
-            // JAC
             "j2", "e-js1",
-            // Lifan
             "x60", "320", "530",
-            // Baic
             "x25", "senova"
         ]);
 
-        // Motores Turbo específicos
-        const motoresTurboLista = new Set([
-            "1.0 turbo", "1.3 turbo", "1.4 turbo", "1.5 turbo", "1.6 turbo", "1.8 turbo", "2.0 turbo", "3.0 turbo"
-        ]);
-
-        // Motores Aspirados específicos
-        const motoresAspiradosLista = new Set([
-            "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", "2.0", "2.5", "3.0", "v6", "v8"
-        ]);
-
         // ============================================
-        // FUNÇÃO DE CLASSIFICAÇÃO - CORRIGIDA
+        // FUNÇÃO DE CLASSIFICAÇÃO
         // ============================================
-        function classificarMotor(selectedBrand, selectedModel, engine, fuel) {
+        function classificarMotor(selectedBrand, selectedModel, engine, fuel, engineType) {
             const modelLower = selectedModel.toLowerCase().trim();
             const engineLower = engine.toLowerCase().trim();
             const fuelLower = fuel.toLowerCase().trim();
+
+            // Se o usuário selecionou explicitamente Turbo ou Aspirado no toggle
+            if (engineType === "Turbo") {
+                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Selecionado como Turbo pelo usuário" };
+            }
+            if (engineType === "Aspirado") {
+                return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: "Selecionado como Aspirado pelo usuário" };
+            }
 
             // REGRA 1: Veículos Elétricos
             if (fuelLower === "elétrico" || fuelLower === "eletrico") {
@@ -1230,19 +1307,17 @@
                 return { type: TIPOS_MOTOR.HIBRIDO, confidence: "Alta", reason: "Veículo híbrido" };
             }
 
-            // REGRA 3: DIESEL SEMPRE É TURBO (em veículos modernos)
+            // REGRA 3: DIESEL SEMPRE É TURBO
             if (fuelLower === "diesel") {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor Diesel com turbocompressor" };
             }
 
             // REGRA 4: Motores V6 e V8
             if (engineLower === "v6" || engineLower === "v8") {
-                // Modelos V8 aspirados clássicos (esportivos)
                 const aspiradosV8 = ["camaro", "mustang", "challenger", "charger"];
                 if (aspiradosV8.includes(modelLower)) {
                     return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: "Motor V8 aspirado clássico" };
                 }
-                // Todos os outros V6/V8 modernos são Turbo
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor V6/V8 com turbocompressor" };
             }
 
@@ -1260,16 +1335,7 @@
                 return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: `Modelo ${selectedModel} é aspirado` };
             }
 
-            // REGRA 7: Verifica motores específicos
-            if (motoresTurboLista.has(engineLower)) {
-                return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Motor ${engine} turbo confirmado` };
-            }
-
-            if (motoresAspiradosLista.has(engineLower)) {
-                return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: `Motor ${engine} aspirado confirmado` };
-            }
-
-            // REGRA 8: Padrão - baseado no ano
+            // REGRA 7: Padrão - baseado no ano
             const year = parseInt(selectedYear);
             if (year >= 2020) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
@@ -1288,6 +1354,7 @@
         let selectedFuel = "";
         let selectedCity = "";
         let selectedProblem = "";
+        let selectedEngineType = ""; // "Aspirado" ou "Turbo"
         let qualificationResult = null;
         let isCustomCity = false;
         let searchTimeout = null;
@@ -1410,6 +1477,9 @@
                         html += `<div class="choice-item"><span class="choice-label">Ano:</span> <span class="choice-value">${selectedYear}</span></div>`;
                         if (selectedEngine) {
                             html += `<div class="choice-item"><span class="choice-label">Motor:</span> <span class="choice-value">${selectedEngine}</span></div>`;
+                            if (selectedEngineType) {
+                                html += `<div class="choice-item"><span class="choice-label">Tipo:</span> <span class="choice-value">${selectedEngineType}</span></div>`;
+                            }
                             if (selectedFuel) {
                                 html += `<div class="choice-item"><span class="choice-label">Combustível:</span> <span class="choice-value">${selectedFuel}</span></div>`;
                             }
@@ -1431,8 +1501,6 @@
                 if (element) element.style.display = 'none';
             });
             document.getElementById(layerId).style.display = 'block';
-            
-            // Scroll para o topo do conteúdo
             document.getElementById("mainContent").scrollTop = 0;
         }
 
@@ -1492,7 +1560,8 @@
             const whatsappClean = whatsapp.replace(/\D/g, '');
             const destinatario = getDestinatarioWhatsApp();
             
-            const motorClassification = classificarMotor(selectedBrand, selectedModel, selectedEngine, selectedFuel);
+            // Usa o tipo selecionado no toggle ou classifica automaticamente
+            const motorClassification = classificarMotor(selectedBrand, selectedModel, selectedEngine, selectedFuel, selectedEngineType);
             const motorType = motorClassification.type;
             const confidence = motorClassification.confidence;
             const reason = motorClassification.reason;
@@ -1533,6 +1602,7 @@
                 modelo: selectedModel,
                 ano: selectedYear,
                 motor: selectedEngine,
+                tipo_motor: selectedEngineType || motorType,
                 combustivel: selectedFuel,
                 classificacao_motor: motorType,
                 confianca_classificacao: confidence,
@@ -1556,7 +1626,7 @@
 *Nome:* ${name}
 *Cidade:* ${selectedCity}${isCustomCity ? " (adicionada manualmente)" : ""}
 *Veículo:* ${selectedBrand} ${selectedModel} ${selectedYear}
-*Motor:* ${selectedEngine}
+*Motor:* ${selectedEngine} ${selectedEngineType || motorType}
 *Combustível:* ${selectedFuel}
 *Solução:* ${problemText[selectedProblem]}
 
@@ -1571,7 +1641,7 @@
             if (atende) {
                 title = "🎉 SOLUÇÃO DISPONÍVEL! 🎉";
                 icon = "🚀";
-                message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} (${selectedEngine}) é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪✨`;
+                message = `INCRÍVEL! Seu ${selectedBrand} ${selectedModel} ${selectedYear} (${selectedEngine} ${selectedEngineType || motorType}) é PERFEITO para nossas soluções de reprogramação! Vamos liberar TODO o potencial do seu veículo! ⚡💪✨`;
             } else {
                 title = "🔍 ANÁLISE DETALHADA CONCLUÍDA";
                 icon = "📋";
@@ -1600,7 +1670,8 @@
             const vehicleInfoHtml = `
                 <div class="vehicle-info">
                     <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
-                    🔧 Motor: ${selectedEngine} • ⛽ Combustível: ${selectedFuel}<br>
+                    🔧 Motor: ${selectedEngine} ${selectedEngineType || motorType}<br>
+                    ⛽ Combustível: ${selectedFuel}<br>
                     🎯 Classificação: <span class="classification-badge ${badgeClass[motorType] || 'badge-indefinido'}">${motorType}</span><br>
                     📌 Foco: ${problemText[selectedProblem]}<br>
                     📍 Cidade: ${selectedCity}${isCustomCity ? " ✏️" : ""}
@@ -1675,139 +1746,173 @@
         }
 
         // ============================================
-        // NOVA FUNÇÃO renderBrands COM BUSCA
+        // FUNÇÃO GENÉRICA DE RENDER COM BUSCA
         // ============================================
-        function renderBrands(filter = "") {
-            const brandsGrid = document.getElementById("brandsGrid");
+        function renderWithSearch(gridId, items, searchInputId, clearBtnId, renderFn, selectCallback) {
+            const grid = document.getElementById(gridId);
+            const searchInput = document.getElementById(searchInputId);
+            const clearBtn = document.getElementById(clearBtnId);
+            
+            function render(filter = "") {
+                const filtered = filter 
+                    ? items.filter(item => item.toLowerCase().includes(filter.toLowerCase()))
+                    : items;
+                
+                if (filter.length > 0) {
+                    clearBtn.classList.add("visible");
+                } else {
+                    clearBtn.classList.remove("visible");
+                }
+                
+                if (filtered.length === 0) {
+                    grid.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-search"></i>
+                            Nenhum resultado encontrado para "<strong>${filter}</strong>"
+                            <div style="margin-top: 12px; font-size: 13px; color: #bbb;">Tente buscar por outro termo</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                grid.innerHTML = filtered.map(item => renderFn(item)).join("");
+                
+                document.querySelectorAll(`#${gridId} [data-item]`).forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        document.querySelectorAll(`#${gridId} [data-item]`).forEach(b => b.classList.remove("selected"));
+                        this.classList.add("selected");
+                        const value = this.getAttribute("data-item");
+                        selectCallback(value);
+                        // Limpa a busca após selecionar
+                        searchInput.value = "";
+                        render("");
+                    });
+                });
+            }
+            
+            // Eventos de busca
+            searchInput.addEventListener("input", function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    render(this.value);
+                }, 150);
+            });
+            
+            clearBtn.addEventListener("click", function() {
+                searchInput.value = "";
+                render("");
+                searchInput.focus();
+            });
+            
+            searchInput.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                    this.value = "";
+                    render("");
+                    this.blur();
+                }
+            });
+            
+            render("");
+        }
+
+        // ============================================
+        // FUNÇÕES DE RENDERIZAÇÃO
+        // ============================================
+        function renderBrands() {
             const allBrands = Object.keys(vehiclesData).sort();
             
-            const filteredBrands = filter 
-                ? allBrands.filter(brand => brand.toLowerCase().includes(filter.toLowerCase()))
-                : allBrands;
-            
-            // Atualizar visibilidade do botão de limpar
-            const clearBtn = document.getElementById("clearSearchBtn");
-            if (filter.length > 0) {
-                clearBtn.classList.add("visible");
-            } else {
-                clearBtn.classList.remove("visible");
-            }
-            
-            if (filteredBrands.length === 0) {
-                brandsGrid.innerHTML = `
-                    <div class="no-results" style="grid-column: 1 / -1;">
-                        <i class="fas fa-search"></i>
-                        Nenhuma marca encontrada para "<strong>${filter}</strong>"
-                        <div style="margin-top: 12px; font-size: 13px; color: #bbb;">Tente buscar por outro termo</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            brandsGrid.innerHTML = filteredBrands.map(brand => `
-                <div class="option-btn" data-brand="${brand}">${brand}</div>
-            `).join("");
-
-            document.querySelectorAll("[data-brand]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    document.querySelectorAll("[data-brand]").forEach(b => b.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    selectedBrand = btn.getAttribute("data-brand");
+            renderWithSearch(
+                "brandsGrid",
+                allBrands,
+                "brandSearchInput",
+                "clearBrandSearchBtn",
+                (brand) => `<div class="option-btn" data-item="${brand}">${brand}</div>`,
+                (value) => {
+                    selectedBrand = value;
                     selectedModel = "";
                     selectedYear = "";
                     selectedEngine = "";
+                    selectedEngineType = "";
                     selectedFuel = "";
                     updateSummary();
-                    // Limpar busca ao selecionar
-                    document.getElementById("brandSearchInput").value = "";
-                    renderBrands();
                     showLayer('layerModels');
                     renderModels();
-                });
-            });
+                }
+            );
         }
 
-        // ============================================
-        // FUNÇÕES DE RENDERIZAÇÃO (modelos, anos, etc)
-        // ============================================
         function renderModels() {
-            const modelsGrid = document.getElementById("modelsGrid");
             const models = vehiclesData[selectedBrand] || [];
-            modelsGrid.innerHTML = models.map(model => `
-                <div class="option-btn" data-model="${model}">${model}</div>
-            `).join("");
-
-            document.querySelectorAll("[data-model]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    document.querySelectorAll("[data-model]").forEach(m => m.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    selectedModel = btn.getAttribute("data-model");
+            
+            renderWithSearch(
+                "modelsGrid",
+                models,
+                "modelSearchInput",
+                "clearModelSearchBtn",
+                (model) => `<div class="option-btn" data-item="${model}">${model}</div>`,
+                (value) => {
+                    selectedModel = value;
                     updateSummary();
                     showLayer('layerYears');
                     renderYears();
-                });
-            });
+                }
+            );
         }
 
         function renderYears() {
-            const yearsGrid = document.getElementById("yearsGrid");
-            yearsGrid.innerHTML = years.map(year => `
-                <div class="option-btn" data-year="${year}">${year}</div>
-            `).join("");
-
-            document.querySelectorAll("[data-year]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    document.querySelectorAll("[data-year]").forEach(y => y.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    selectedYear = btn.getAttribute("data-year");
-                    updateSummary();
-                    
-                    if (parseInt(selectedYear) < 2015) {
+            renderWithSearch(
+                "yearsGrid",
+                years,
+                "yearSearchInput",
+                "clearYearSearchBtn",
+                (year) => `<div class="option-btn" data-item="${year}">${year}</div>`,
+                (value) => {
+                    if (parseInt(value) < 2015) {
                         showToast("⚠️ Trabalhamos com veículos a partir de 2015", true);
                         return;
                     }
-                    
+                    selectedYear = value;
+                    updateSummary();
                     showLayer('layerEngine');
                     renderEngine();
-                });
-            });
+                }
+            );
         }
 
         function renderEngine() {
-            const engineGrid = document.getElementById("engineGrid");
-            engineGrid.innerHTML = engineOptions.map(engine => `
-                <div class="option-btn" data-engine="${engine}">${engine}</div>
-            `).join("");
-            
-            document.querySelectorAll("[data-engine]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    document.querySelectorAll("[data-engine]").forEach(e => e.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    selectedEngine = btn.getAttribute("data-engine");
+            renderWithSearch(
+                "engineGrid",
+                engineOptions,
+                "engineSearchInput",
+                "clearEngineSearchBtn",
+                (engine) => `<div class="option-btn" data-item="${engine}">${engine}</div>`,
+                (value) => {
+                    selectedEngine = value;
                     updateSummary();
                     showLayer('layerFuel');
                     renderFuel();
-                });
-            });
+                }
+            );
         }
 
         function renderFuel() {
-            const fuelGrid = document.getElementById("fuelGrid");
-            fuelGrid.innerHTML = fuelOptions.map(fuel => `
-                <div class="option-btn" data-fuel="${fuel}">${fuel}</div>
-            `).join("");
-            
-            document.querySelectorAll("[data-fuel]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    document.querySelectorAll("[data-fuel]").forEach(f => f.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    selectedFuel = btn.getAttribute("data-fuel");
+            renderWithSearch(
+                "fuelGrid",
+                fuelOptions,
+                "fuelSearchInput",
+                "clearFuelSearchBtn",
+                (fuel) => `<div class="option-btn" data-item="${fuel}">${fuel}</div>`,
+                (value) => {
+                    selectedFuel = value;
                     updateSummary();
                     showLayer('layerContact');
-                });
-            });
+                }
+            );
         }
 
+        // ============================================
+        // NAVEGAÇÃO
+        // ============================================
         function setupNavigation() {
             document.getElementById("nextToCity").addEventListener("click", () => {
                 showLayer('layerCity');
@@ -1836,6 +1941,7 @@
                 selectedModel = "";
                 selectedYear = "";
                 selectedEngine = "";
+                selectedEngineType = "";
                 selectedFuel = "";
                 updateSummary();
                 document.getElementById("brandSearchInput").value = "";
@@ -1847,8 +1953,10 @@
                 selectedModel = "";
                 selectedYear = "";
                 selectedEngine = "";
+                selectedEngineType = "";
                 selectedFuel = "";
                 updateSummary();
+                document.getElementById("modelSearchInput").value = "";
                 renderModels();
                 showLayer('layerModels');
             });
@@ -1856,16 +1964,20 @@
             document.getElementById("backToYearsBtn").addEventListener("click", () => {
                 selectedYear = "";
                 selectedEngine = "";
+                selectedEngineType = "";
                 selectedFuel = "";
                 updateSummary();
+                document.getElementById("yearSearchInput").value = "";
                 renderYears();
                 showLayer('layerYears');
             });
             
             document.getElementById("backToEngineBtn").addEventListener("click", () => {
                 selectedEngine = "";
+                selectedEngineType = "";
                 selectedFuel = "";
                 updateSummary();
+                document.getElementById("engineSearchInput").value = "";
                 renderEngine();
                 showLayer('layerEngine');
             });
@@ -1873,6 +1985,7 @@
             document.getElementById("backToFuelBtn").addEventListener("click", () => {
                 selectedFuel = "";
                 updateSummary();
+                document.getElementById("fuelSearchInput").value = "";
                 renderFuel();
                 showLayer('layerFuel');
             });
@@ -1900,29 +2013,65 @@
                 }
             });
         }
-        
+
+        // ============================================
+        // TOGGLE ASPIRADO / TURBO
+        // ============================================
+        function setupEngineTypeToggle() {
+            const toggle = document.getElementById("engineTypeToggle");
+            const aspiradoLabel = document.getElementById("aspiradoLabel");
+            const turboLabel = document.getElementById("turboLabel");
+            
+            // Estado inicial: Aspirado (Comum)
+            let isTurbo = false;
+            selectedEngineType = "Aspirado";
+            
+            toggle.addEventListener("click", function() {
+                isTurbo = !isTurbo;
+                this.classList.toggle("active", isTurbo);
+                aspiradoLabel.classList.toggle("active", !isTurbo);
+                turboLabel.classList.toggle("active", isTurbo);
+                
+                selectedEngineType = isTurbo ? "Turbo" : "Aspirado";
+                
+                // Atualiza o resumo
+                updateSummary();
+            });
+        }
+
         function resetForm() {
             selectedBrand = "";
             selectedModel = "";
             selectedYear = "";
             selectedEngine = "";
+            selectedEngineType = "Aspirado";
             selectedFuel = "";
             selectedCity = "";
             selectedProblem = "";
             isCustomCity = false;
             qualificationResult = null;
             
+            // Reset do toggle
+            const toggle = document.getElementById("engineTypeToggle");
+            toggle.classList.remove("active");
+            document.getElementById("aspiradoLabel").classList.add("active");
+            document.getElementById("turboLabel").classList.remove("active");
+            
             document.getElementById("nameInput").value = "";
             document.getElementById("whatsappInput").value = "";
             document.getElementById("cityInput").value = "";
             document.getElementById("brandSearchInput").value = "";
+            document.getElementById("modelSearchInput").value = "";
+            document.getElementById("yearSearchInput").value = "";
+            document.getElementById("engineSearchInput").value = "";
+            document.getElementById("fuelSearchInput").value = "";
             document.getElementById("nextToCity").disabled = true;
             document.getElementById("nextToProblem").disabled = true;
             document.getElementById("qualifyButton").disabled = true;
             document.getElementById("whatsappMessageContainer").innerHTML = "";
             document.getElementById("cityError").style.display = "none";
-            document.getElementById("clearSearchBtn").classList.remove("visible");
             
+            document.querySelectorAll(".search-clear").forEach(btn => btn.classList.remove("visible"));
             document.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
             document.querySelectorAll(".problem-card").forEach(card => card.classList.remove("selected"));
             
@@ -1935,36 +2084,11 @@
         // INIT
         // ============================================
         async function init() {
-            // Configurar busca com debounce
-            const searchInput = document.getElementById("brandSearchInput");
-            const clearBtn = document.getElementById("clearSearchBtn");
-            
-            searchInput.addEventListener("input", function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    renderBrands(this.value);
-                }, 150);
-            });
-            
-            clearBtn.addEventListener("click", function() {
-                searchInput.value = "";
-                renderBrands("");
-                searchInput.focus();
-            });
-            
-            // Fechar busca ao pressionar ESC
-            searchInput.addEventListener("keydown", function(e) {
-                if (e.key === "Escape") {
-                    this.value = "";
-                    renderBrands("");
-                    this.blur();
-                }
-            });
-            
             renderBrands();
             setupNavigation();
             setupBackNavigation();
             setupProblemSelection();
+            setupEngineTypeToggle();
             updateSummary();
             await loadCities();
             
@@ -1977,6 +2101,7 @@
             console.log(`📍 ${citiesList.length} municípios carregados!`);
             console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
             console.log(`🏷️ ${Object.keys(vehiclesData).length} marcas disponíveis`);
+            console.log(`🔧 Modo padrão: ${selectedEngineType}`);
         }
         
         init();
