@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     
-    <!-- Meta Pixel Code -->
+    <!-- ============================================ -->
+    <!-- FACEBOOK PIXEL - Instalado corretamente -->
+    <!-- ============================================ -->
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -17,13 +19,16 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '3305329689628007');
+    fbq('init', '459959336301340');
     fbq('track', 'PageView');
     </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=3305329689628007&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
+    <noscript>
+        <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=459959336301340&ev=PageView&noscript=1"/>
+    </noscript>
+    <!-- ============================================ -->
+    <!-- FIM DO FACEBOOK PIXEL -->
+    <!-- ============================================ -->
     
     <style>
         * {
@@ -936,7 +941,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Estado Selecionado - Aspirado */
         .engine-type-btn.selected-aspirado {
             border-color: #e65100;
             background: #fff8f0;
@@ -961,7 +965,6 @@
             background: #e65100;
         }
 
-        /* Estado Selecionado - Turbo */
         .engine-type-btn.selected-turbo {
             border-color: #2e7d32;
             background: #f0f8f0;
@@ -1279,11 +1282,14 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     
     <script>
+        // ============================================
+        // CONFIGURAÇÕES GERAIS
+        // ============================================
         const WEBHOOK_URL = "https://hook.us1.make.com/gojqj74k9mioj8zg7mratyf4qlkl4pqi";
+        const FACEBOOK_PIXEL_ID = "459959336301340";
         
-        // ==================== WHATSAPP DESTINATÁRIO ====================
         function getDestinatarioWhatsApp() {
-            return "11995700026";
+            return "27999833095";
         }
         
         // ============================================
@@ -1331,7 +1337,6 @@
 
         const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
 
-        // Potências - APENAS OPIÇÕES ASPIRADAS
         const engineOptions = [
             "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", 
             "2.0", "2.5", "3.0", "V6", "V8"
@@ -1352,7 +1357,6 @@
             INDEFINIDO: "Indefinido"
         };
 
-        // Modelos TURBO
         const modelosTurbo = new Set([
             "nivus", "taos", "t-cross", "virtus", "amarok", "jetta", "tiguan", "id.4", "id. buzz",
             "fastback", "pulse", "toro", "500e",
@@ -1381,7 +1385,6 @@
             "pajero", "santa fe"
         ]);
 
-        // Modelos ASPIRADOS
         const modelosAspirados = new Set([
             "gol", "voyage", "saveiro", "polo", "polo track", "fox", "spacefox",
             "onix", "onix plus", "prisma", "spin", "cobalt", "celta", "classic", "camaro",
@@ -1411,7 +1414,6 @@
             const engineLower = engine.toLowerCase().trim();
             const fuelLower = fuel.toLowerCase().trim();
 
-            // Se o usuário selecionou explicitamente Turbo ou Aspirado
             if (engineType === "Turbo") {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Selecionado como Turbo pelo usuário" };
             }
@@ -1419,22 +1421,18 @@
                 return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: "Selecionado como Aspirado pelo usuário" };
             }
 
-            // REGRA 1: Veículos Elétricos
             if (fuelLower === "elétrico" || fuelLower === "eletrico") {
                 return { type: TIPOS_MOTOR.ELETRICO, confidence: "Alta", reason: "Veículo elétrico" };
             }
 
-            // REGRA 2: Veículos Híbridos
             if (fuelLower === "híbrido" || fuelLower === "hibrido") {
                 return { type: TIPOS_MOTOR.HIBRIDO, confidence: "Alta", reason: "Veículo híbrido" };
             }
 
-            // REGRA 3: DIESEL SEMPRE É TURBO
             if (fuelLower === "diesel") {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor Diesel com turbocompressor" };
             }
 
-            // REGRA 4: Motores V6 e V8
             if (engineLower === "v6" || engineLower === "v8") {
                 const aspiradosV8 = ["camaro", "mustang", "challenger", "charger"];
                 if (aspiradosV8.includes(modelLower)) {
@@ -1443,7 +1441,6 @@
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: "Motor V6/V8 com turbocompressor" };
             }
 
-            // REGRA 5: Verifica nos sets de modelos
             if (modelosTurbo.has(modelLower)) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Alta", reason: `Modelo ${selectedModel} é originalmente turbo` };
             }
@@ -1452,7 +1449,6 @@
                 return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Alta", reason: `Modelo ${selectedModel} é aspirado` };
             }
 
-            // REGRA 6: Padrão - baseado no ano
             const year = parseInt(selectedYear);
             if (year >= 2020) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
@@ -1471,7 +1467,7 @@
         let selectedFuel = "";
         let selectedCity = "";
         let selectedProblem = "";
-        let selectedEngineType = ""; // "Aspirado" ou "Turbo" - vazio se não selecionado
+        let selectedEngineType = "";
         let qualificationResult = null;
         let isCustomCity = false;
         let searchTimeout = null;
@@ -1632,6 +1628,9 @@
             `;
         }
 
+        // ============================================
+        // FACEBOOK PIXEL - EVENTO LEAD
+        // ============================================
         function trackFacebookLead(leadData) {
             if (typeof fbq !== 'undefined') {
                 fbq('track', 'Lead', {
@@ -1644,12 +1643,19 @@
                     vehicle_fuel: leadData.combustivel,
                     problem_type: leadData.problema_descricao,
                     qualification_status: leadData.qualificacao,
-                    city: leadData.cidade,
-                    destinatario: leadData.destinatario
+                    city: leadData.cidade
                 });
+                
+                console.log("✅ Facebook Pixel - Evento Lead disparado com sucesso!");
+                console.log("📊 Pixel ID:", FACEBOOK_PIXEL_ID);
+            } else {
+                console.warn("⚠️ Facebook Pixel não encontrado.");
             }
         }
 
+        // ============================================
+        // ENVIA PARA WEBHOOK E DISPARA PIXEL
+        // ============================================
         async function sendToWebhook(data) {
             try {
                 const response = await fetch(WEBHOOK_URL, {
@@ -1659,16 +1665,28 @@
                         ...data,
                         timestamp: new Date().toISOString(),
                         source: "SFI_Chips_Form",
-                        userAgent: navigator.userAgent
+                        userAgent: navigator.userAgent,
+                        pixel_id: FACEBOOK_PIXEL_ID
                     })
                 });
-                return response.ok;
+                
+                if (response.ok) {
+                    console.log("✅ Webhook enviado com sucesso!");
+                    trackFacebookLead(data);
+                    return true;
+                } else {
+                    console.error("❌ Erro no webhook:", response.status);
+                    return false;
+                }
             } catch (error) {
-                console.error("Erro na requisição:", error);
+                console.error("❌ Erro na requisição:", error);
                 return false;
             }
         }
 
+        // ============================================
+        // PROCESSAMENTO DA QUALIFICAÇÃO
+        // ============================================
         async function processQualification() {
             if (!selectedProblem) return;
             
@@ -1731,11 +1749,8 @@
             };
             
             await sendToWebhook(leadData);
-            qualificationResult = leadData;
             
-            if (atende) {
-                trackFacebookLead(leadData);
-            }
+            qualificationResult = leadData;
             
             const whatsappMessage = `🚗 *Olá! Vim pelo formulário da SFI Chips!*
 
@@ -1862,7 +1877,7 @@
         }
 
         // ============================================
-        // FUNÇÃO GENÉRICA DE RENDER COM BUSCA
+        // RENDER COM BUSCA
         // ============================================
         function renderWithSearch(gridId, items, searchInputId, clearBtnId, renderFn, selectCallback) {
             const grid = document.getElementById(gridId);
@@ -1930,7 +1945,7 @@
         }
 
         // ============================================
-        // FUNÇÕES DE RENDERIZAÇÃO
+        // RENDERIZAÇÃO DAS CAMADAS
         // ============================================
         function renderBrands() {
             const allBrands = Object.keys(vehiclesData).sort();
@@ -2002,7 +2017,6 @@
                 (engine) => `<div class="option-btn" data-item="${engine}">${engine}</div>`,
                 (value) => {
                     selectedEngine = value;
-                    validateEngineSelection();
                     updateSummary();
                     if (selectedEngineType) {
                         showLayer('layerFuel');
@@ -2039,7 +2053,6 @@
             const hintText = document.getElementById("engineTypeHint");
             
             function updateSelection(selectedType) {
-                // Remove seleções anteriores
                 aspiradoBtn.classList.remove("selected-aspirado", "selected-turbo");
                 turboBtn.classList.remove("selected-aspirado", "selected-turbo");
                 statusText.classList.remove("neutral", "selected-aspirado", "selected-turbo");
@@ -2064,41 +2077,30 @@
                 }
                 
                 updateSummary();
-                validateEngineSelection();
                 
-                // Se já tem motor selecionado e tipo foi escolhido, avança
                 if (selectedEngine && selectedEngineType) {
                     showLayer('layerFuel');
                     renderFuel();
                 }
             }
             
-            // Clique no botão Aspirado
             aspiradoBtn.addEventListener("click", function() {
                 if (selectedEngineType === "Aspirado") {
-                    // Desmarca se já estava selecionado
                     updateSelection(null);
                 } else {
                     updateSelection("Aspirado");
                 }
             });
             
-            // Clique no botão Turbo
             turboBtn.addEventListener("click", function() {
                 if (selectedEngineType === "Turbo") {
-                    // Desmarca se já estava selecionado
                     updateSelection(null);
                 } else {
                     updateSelection("Turbo");
                 }
             });
             
-            // Inicializa com neutro
             updateSelection(null);
-        }
-
-        function validateEngineSelection() {
-            // Validação é feita no renderEngine
         }
 
         // ============================================
@@ -2169,7 +2171,6 @@
                 selectedFuel = "";
                 updateSummary();
                 document.getElementById("engineSearchInput").value = "";
-                // Reset dos botões
                 document.getElementById("aspiradoBtn").classList.remove("selected-aspirado", "selected-turbo");
                 document.getElementById("turboBtn").classList.remove("selected-aspirado", "selected-turbo");
                 document.getElementById("engineTypeStatus").textContent = "⚠️ Selecione o tipo do motor para continuar";
@@ -2224,7 +2225,6 @@
             isCustomCity = false;
             qualificationResult = null;
             
-            // Reset dos botões
             document.getElementById("aspiradoBtn").classList.remove("selected-aspirado", "selected-turbo");
             document.getElementById("turboBtn").classList.remove("selected-aspirado", "selected-turbo");
             document.getElementById("engineTypeStatus").textContent = "⚠️ Selecione o tipo do motor para continuar";
@@ -2275,7 +2275,14 @@
             console.log(`📍 ${citiesList.length} municípios carregados!`);
             console.log(`📱 WhatsApp do destinatário: ${getDestinatarioWhatsApp()}`);
             console.log(`🏷️ ${Object.keys(vehiclesData).length} marcas disponíveis`);
+            console.log(`📊 Facebook Pixel ID: ${FACEBOOK_PIXEL_ID}`);
             console.log(`🔘 Botões de seleção iniciados em estado neutro`);
+            
+            if (typeof fbq !== 'undefined') {
+                console.log("✅ Facebook Pixel carregado com sucesso!");
+            } else {
+                console.warn("⚠️ Facebook Pixel NÃO foi carregado.");
+            }
         }
         
         init();
