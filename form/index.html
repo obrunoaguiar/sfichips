@@ -2119,8 +2119,8 @@
                 "clearYearSearchBtn",
                 (year) => `<div class="option-btn" data-item="${year}">${year}</div>`,
                 (value) => {
-                    if (parseInt(value) < 2015) {
-                        showToast("⚠️ Trabalhamos com veículos a partir de 2015", true);
+                    if (parseInt(value) < 2013) {
+                        showToast("⚠️ Trabalhamos com veículos a partir de 2013", true);
                         return;
                     }
                     selectedYear = value;
