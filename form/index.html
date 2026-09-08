@@ -31,6 +31,7 @@
     <!-- ============================================ -->
     
     <style>
+        /* ===== ESTILOS EXISTENTES (mantidos) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1293,6 +1294,77 @@
         }
         
         // ============================================
+        // CAPTURAR DADOS DO ANÚNCIO (NOVO)
+        // ============================================
+        function getAdData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Captura parâmetros da URL
+            const adData = {
+                // Parâmetros UTM
+                utm_source: urlParams.get('utm_source') || '',
+                utm_medium: urlParams.get('utm_medium') || '',
+                utm_campaign: urlParams.get('utm_campaign') || '',
+                utm_content: urlParams.get('utm_content') || '',
+                utm_term: urlParams.get('utm_term') || '',
+                
+                // Parâmetros do Facebook
+                fbclid: urlParams.get('fbclid') || '',
+                gclid: urlParams.get('gclid') || '', // Google Ads
+                
+                // Dados do referenciador
+                referrer: document.referrer || '',
+                referrer_domain: document.referrer ? new URL(document.referrer).hostname : '',
+                
+                // Dados do pixel (se disponível)
+                fbc: localStorage.getItem('_fbc') || '',
+                fbp: localStorage.getItem('_fbp') || '',
+                
+                // Nome do anúncio (prioridade: UTM Content > UTM Campaign > Referrer)
+                nome_anuncio: urlParams.get('utm_content') || 
+                               urlParams.get('utm_campaign') || 
+                               document.referrer || 
+                               'N/A',
+                
+                // ID do anúncio (se disponível)
+                ad_id: urlParams.get('ad_id') || '',
+                ad_set_id: urlParams.get('ad_set_id') || '',
+                campaign_id: urlParams.get('campaign_id') || '',
+                
+                // Page
+                pagina_atual: window.location.pathname,
+                url_completa: window.location.href,
+                hostname: window.location.hostname,
+            };
+            
+            // Extrai ID do anúncio do fbc se disponível
+            if (adData.fbc) {
+                const fbcParts = adData.fbc.split('.');
+                if (fbcParts.length >= 4) {
+                    adData.fbc_ad_id = fbcParts[3] || '';
+                }
+            }
+            
+            // Detecta fonte de tráfego
+            if (adData.utm_source) {
+                adData.traffic_source = adData.utm_source;
+            } else if (adData.referrer_domain.includes('facebook.com')) {
+                adData.traffic_source = 'facebook_organico';
+            } else if (adData.referrer_domain.includes('instagram.com')) {
+                adData.traffic_source = 'instagram_organico';
+            } else if (adData.referrer_domain.includes('google.com')) {
+                adData.traffic_source = 'google_organico';
+            } else if (adData.referrer_domain) {
+                adData.traffic_source = adData.referrer_domain;
+            } else {
+                adData.traffic_source = 'direct';
+            }
+            
+            console.log('📊 Dados do anúncio capturados:', adData);
+            return adData;
+        }
+
+        // ============================================
         // DADOS DOS VEÍCULOS
         // ============================================
         const vehiclesData = {
@@ -1335,11 +1407,11 @@
             "Baic": ["X25", "Senova"]
         };
 
-        const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
+        const years = Array.from({ length: 11 }, (_, i) => (2013 + i).toString());
 
         const engineOptions = [
             "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", 
-            "2.0", "2.5", "3.0", "V6", "V8"
+            "2.0", "2.5", "2.8" "3.0", "V6", "V8"
         ];
 
         const fuelOptions = [
@@ -1453,7 +1525,7 @@
             if (year >= 2020) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
             }
-            if (year <= 2015) {
+            if (year <= 2013) {
                 return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Baixa", reason: `Veículo mais antigo (${year}), provavelmente aspirado` };
             }
 
@@ -1629,10 +1701,12 @@
         }
 
         // ============================================
-        // FACEBOOK PIXEL - EVENTO LEAD
+        // FACEBOOK PIXEL - EVENTO LEAD (ATUALIZADO)
         // ============================================
         function trackFacebookLead(leadData) {
             if (typeof fbq !== 'undefined') {
+                const adData = getAdData();
+                
                 fbq('track', 'Lead', {
                     content_name: 'Lead Qualificado SFI Chips',
                     content_category: 'Qualificação de Veículo',
@@ -1643,36 +1717,65 @@
                     vehicle_fuel: leadData.combustivel,
                     problem_type: leadData.problema_descricao,
                     qualification_status: leadData.qualificacao,
-                    city: leadData.cidade
+                    city: leadData.cidade,
+                    // Dados do anúncio
+                    ad_name: adData.nome_anuncio,
+                    ad_id: adData.ad_id || adData.fbc_ad_id,
+                    utm_source: adData.utm_source,
+                    utm_campaign: adData.utm_campaign,
+                    utm_content: adData.utm_content,
+                    traffic_source: adData.traffic_source,
+                    page: adData.pagina_atual
                 });
                 
                 console.log("✅ Facebook Pixel - Evento Lead disparado com sucesso!");
                 console.log("📊 Pixel ID:", FACEBOOK_PIXEL_ID);
+                console.log("📊 Dados do anúncio enviados:", adData.nome_anuncio);
             } else {
                 console.warn("⚠️ Facebook Pixel não encontrado.");
             }
         }
 
         // ============================================
-        // ENVIA PARA WEBHOOK E DISPARA PIXEL
+        // ENVIA PARA WEBHOOK E DISPARA PIXEL (ATUALIZADO)
         // ============================================
         async function sendToWebhook(data) {
             try {
+                // Captura dados do anúncio
+                const adData = getAdData();
+                
+                // Combina todos os dados
+                const payload = {
+                    ...data,
+                    ...adData, // Dados do anúncio
+                    timestamp: new Date().toISOString(),
+                    source: "SFI_Chips_Form",
+                    userAgent: navigator.userAgent,
+                    pixel_id: FACEBOOK_PIXEL_ID,
+                    // Informações adicionais
+                    nome_anuncio: adData.nome_anuncio,
+                    ad_id: adData.ad_id || adData.fbc_ad_id,
+                    traffic_source: adData.traffic_source,
+                    url_completa: adData.url_completa,
+                    hostname: adData.hostname,
+                    pixel_disparado: data.classificacao_motor === "Turbo"
+                };
+                
+                console.log("📤 Enviando para webhook:", payload);
+                
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...data,
-                        timestamp: new Date().toISOString(),
-                        source: "SFI_Chips_Form",
-                        userAgent: navigator.userAgent,
-                        pixel_id: FACEBOOK_PIXEL_ID
-                    })
+                    body: JSON.stringify(payload)
                 });
                 
                 if (response.ok) {
                     console.log("✅ Webhook enviado com sucesso!");
-                    trackFacebookLead(data);
+                    console.log("📊 Nome do anúncio:", adData.nome_anuncio);
+                    // Dispara o pixel APENAS se for TURBO
+                    if (data.classificacao_motor === "Turbo") {
+                        trackFacebookLead(data);
+                    }
                     return true;
                 } else {
                     console.error("❌ Erro no webhook:", response.status);
@@ -1685,7 +1788,7 @@
         }
 
         // ============================================
-        // PROCESSAMENTO DA QUALIFICAÇÃO
+        // PROCESSAMENTO DA QUALIFICAÇÃO (ATUALIZADO)
         // ============================================
         async function processQualification() {
             if (!selectedProblem) return;
@@ -1694,6 +1797,9 @@
             const whatsapp = document.getElementById("whatsappInput").value.trim();
             const whatsappClean = whatsapp.replace(/\D/g, '');
             const destinatario = getDestinatarioWhatsApp();
+            
+            // Captura dados do anúncio
+            const adData = getAdData();
             
             const motorClassification = classificarMotor(selectedBrand, selectedModel, selectedEngine, selectedFuel, selectedEngineType);
             const motorType = motorClassification.type;
@@ -1745,9 +1851,21 @@
                 problema_descricao: problemText[selectedProblem],
                 nivel_qualificacao: qualificacaoLevel,
                 atende_solucao: atende,
-                qualificacao: atende ? "Qualificado" : "Não Qualificado"
+                qualificacao: atende ? "Qualificado" : "Não Qualificado",
+                // Dados do anúncio
+                nome_anuncio: adData.nome_anuncio,
+                ad_id: adData.ad_id || adData.fbc_ad_id,
+                utm_source: adData.utm_source,
+                utm_campaign: adData.utm_campaign,
+                utm_content: adData.utm_content,
+                traffic_source: adData.traffic_source,
+                fbclid: adData.fbclid,
+                referrer: adData.referrer,
+                pagina_atual: adData.pagina_atual,
+                url_completa: adData.url_completa
             };
             
+            // Envia para webhook (com os dados do anúncio)
             await sendToWebhook(leadData);
             
             qualificationResult = leadData;
@@ -1798,6 +1916,10 @@
                 "Indefinido": "badge-indefinido"
             };
             
+            // Adiciona informações do anúncio no resultado
+            const adInfo = adData.nome_anuncio !== 'N/A' ? 
+                `<br>📢 Anúncio: ${adData.nome_anuncio}` : '';
+            
             const vehicleInfoHtml = `
                 <div class="vehicle-info">
                     <strong>📍 ${selectedBrand} ${selectedModel} ${selectedYear}</strong><br>
@@ -1806,6 +1928,7 @@
                     🎯 Classificação: <span class="classification-badge ${badgeClass[motorType] || 'badge-indefinido'}">${motorType}</span><br>
                     📌 Foco: ${problemText[selectedProblem]}<br>
                     📍 Cidade: ${selectedCity}${isCustomCity ? " ✏️" : ""}
+                    ${adInfo}
                 </div>
             `;
             
@@ -1996,8 +2119,8 @@
                 "clearYearSearchBtn",
                 (year) => `<div class="option-btn" data-item="${year}">${year}</div>`,
                 (value) => {
-                    if (parseInt(value) < 2015) {
-                        showToast("⚠️ Trabalhamos com veículos a partir de 2015", true);
+                    if (parseInt(value) < 2013) {
+                        showToast("⚠️ Trabalhamos com veículos a partir de 2013", true);
                         return;
                     }
                     selectedYear = value;
@@ -2258,6 +2381,17 @@
         // INIT
         // ============================================
         async function init() {
+            // Exibe dados do anúncio no console
+            const adData = getAdData();
+            console.log("📢 DADOS DO ANÚNCIO DETECTADOS:");
+            console.log("📌 Nome do anúncio:", adData.nome_anuncio);
+            console.log("🔗 UTM Source:", adData.utm_source || "N/A");
+            console.log("📋 UTM Campaign:", adData.utm_campaign || "N/A");
+            console.log("📄 UTM Content:", adData.utm_content || "N/A");
+            console.log("🆔 FBCLID:", adData.fbclid || "N/A");
+            console.log("🌐 Fonte de tráfego:", adData.traffic_source);
+            console.log("🔗 Referrer:", adData.referrer || "N/A");
+            
             renderBrands();
             setupNavigation();
             setupBackNavigation();
@@ -2277,6 +2411,7 @@
             console.log(`🏷️ ${Object.keys(vehiclesData).length} marcas disponíveis`);
             console.log(`📊 Facebook Pixel ID: ${FACEBOOK_PIXEL_ID}`);
             console.log(`🔘 Botões de seleção iniciados em estado neutro`);
+            console.log(`📢 Trackeamento de anúncios ATIVADO!`);
             
             if (typeof fbq !== 'undefined') {
                 console.log("✅ Facebook Pixel carregado com sucesso!");
