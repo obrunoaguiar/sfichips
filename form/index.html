@@ -1407,11 +1407,11 @@
             "Baic": ["X25", "Senova"]
         };
 
-        const years = Array.from({ length: 11 }, (_, i) => (2013 + i).toString());
+        const years = Array.from({ length: 11 }, (_, i) => (2015 + i).toString());
 
         const engineOptions = [
             "1.0", "1.3", "1.4", "1.5", "1.6", "1.8", 
-            "2.0", "2.5", "2.8" "3.0", "V6", "V8"
+            "2.0", "2.5", "3.0", "V6", "V8"
         ];
 
         const fuelOptions = [
@@ -1525,7 +1525,7 @@
             if (year >= 2020) {
                 return { type: TIPOS_MOTOR.TURBO, confidence: "Baixa", reason: `Veículo moderno (${year}), provável tecnologia turbo` };
             }
-            if (year <= 2013) {
+            if (year <= 2015) {
                 return { type: TIPOS_MOTOR.ASPIRADO, confidence: "Baixa", reason: `Veículo mais antigo (${year}), provavelmente aspirado` };
             }
 
@@ -2119,8 +2119,8 @@
                 "clearYearSearchBtn",
                 (year) => `<div class="option-btn" data-item="${year}">${year}</div>`,
                 (value) => {
-                    if (parseInt(value) < 2013) {
-                        showToast("⚠️ Trabalhamos com veículos a partir de 2013", true);
+                    if (parseInt(value) < 2015) {
+                        showToast("⚠️ Trabalhamos com veículos a partir de 2015", true);
                         return;
                     }
                     selectedYear = value;
